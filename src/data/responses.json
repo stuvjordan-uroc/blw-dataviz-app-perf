@@ -1,0 +1,22 @@
+[
+  {
+    "full": "The U.S. does not meet this standard.",
+    "short": "Does not meet.",
+    "id": "does-not-meet"
+  },
+  {
+    "full": "The U.S. partly meets this standard.",
+    "short": "Partly meets.",
+    "id": "partly-meets"
+  },
+  {
+    "full": "The U.S. mostly meets this standard.",
+    "short": "Mostly meets.",
+    "id": "mostly-meets"
+  },
+  {
+    "full": "The U.S. fully meets this standard.",
+    "short": "Fully meets.",
+    "id": "fully-meets"
+  }
+]
