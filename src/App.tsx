@@ -3,12 +3,11 @@ import * as _ from "lodash";
 import * as questions from "./data/questions.json";
 import { useCurrentPage } from "./hooks/useCurrentPage";
 import { useUserResponses } from "./hooks/useUserResponses";
-
-interface CurrentPage {
-  currentPage: number;
-  nextPage: () => void;
-  prevPage: () => void;
-}
+import {
+  CurrentPageStoreContext,
+  UserResponsesStoreContext,
+  SelectedQuestionsContext,
+} from "./Contexts";
 
 function App() {
   //get the question prefix and select the questions
@@ -19,10 +18,19 @@ function App() {
     shortText: q.short_text,
   }));
   //set up the currentPage and userResponses states
-  const currentPage = useCurrentPage();
-  const userResponses = useUserResponses(selectedQuestions);
+  const currentPageStore = useCurrentPage();
+  const userResponsesStore = useUserResponses(selectedQuestions);
   //next step: set up the main app flex column
-  return <></>;
+
+  return (
+    <CurrentPageStoreContext value={currentPageStore}>
+      <UserResponsesStoreContext value={userResponsesStore}>
+        <SelectedQuestionsContext
+          value={selectedQuestions}
+        ></SelectedQuestionsContext>
+      </UserResponsesStoreContext>
+    </CurrentPageStoreContext>
+  );
 }
 
 export default App;
