@@ -8,6 +8,7 @@ import {
   UserResponsesStoreContext,
   SelectedQuestionsContext,
 } from "./Contexts";
+import Header from "./components/Header";
 
 function App() {
   //get the question prefix and select the questions
@@ -25,9 +26,11 @@ function App() {
   return (
     <CurrentPageStoreContext value={currentPageStore}>
       <UserResponsesStoreContext value={userResponsesStore}>
-        <SelectedQuestionsContext
-          value={selectedQuestions}
-        ></SelectedQuestionsContext>
+        <SelectedQuestionsContext value={selectedQuestions}>
+          <div className="app">
+            <Header />
+          </div>
+        </SelectedQuestionsContext>
       </UserResponsesStoreContext>
     </CurrentPageStoreContext>
   );

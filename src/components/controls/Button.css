@@ -1,0 +1,22 @@
+.button {
+  padding: 0.25rem 1rem 0.25rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  background: var(--color-brand);
+  color: var(--color-text);
+  border: 2px solid var(--color-text);
+  opacity: 0;
+  transition: opacity 1s;
+}
+
+.back {
+  margin-left: 0.25rem;
+}
+
+.next {
+  margin-right: 0.25rem;
+}
+
+.available {
+  opacity: 1;
+}

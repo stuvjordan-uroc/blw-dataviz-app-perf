@@ -1,0 +1,15 @@
+.app-controls {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--blw-gray500);
+  overflow: clip;
+  height: 0rem;
+  transition: height 1s;
+}
+
+.show {
+  height: 3rem;
+}
