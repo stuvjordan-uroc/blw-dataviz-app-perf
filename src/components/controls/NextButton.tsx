@@ -11,9 +11,7 @@ export default function NextButton() {
         available: CurrentPageStore ? CurrentPageStore.currentPage >= 1 : false,
       })}
       disabled={CurrentPageStore ? CurrentPageStore.currentPage < 1 : true}
-      onClick={() => {
-        CurrentPageStore?.nextPage();
-      }}
+      onClick={CurrentPageStore?.nextPage}
     >
       Next
     </button>

@@ -1,0 +1,40 @@
+.user-poll {
+  overflow: auto;
+  font-size: 0.9rem;
+  max-height: 90vh;
+  flex: 1 0 auto;
+}
+
+.user-poll.aside {
+  overflow: clip;
+  flex: 0 0 auto;
+}
+
+.poll-item {
+  background-color: var(--blw-gray100);
+  border-radius: 1rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.2rem;
+  margin-top: 0.5rem;
+  transition: height 2s;
+}
+
+.poll-item p {
+  width: 60%;
+  font-style: italic;
+}
+
+.poll-item fieldset {
+  border-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  justify-content: start;
+}
+
+.poll-item fieldset input {
+  margin-right: 0.25rem;
+}

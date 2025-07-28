@@ -1,12 +1,16 @@
 #root {
   max-width: 1280px;
   margin: 0 auto;
+  overflow: clip;
 }
 
 .app {
-  background-color: var(--blw-gray800);
-  display: flex;
-  flex-direction: column;
+  background-color: var(--blw-gray700);
   height: 100vh;
   overflow: clip;
+  padding: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: start;
 }

@@ -1,8 +1,9 @@
 .app-header {
   text-align: center;
   font-size: 1.7rem;
+  font-weight: 500;
   color: var(--blw-gray100);
-  background: linear-gradient(0deg, var(--blw-gray500) 5%, var(--color-brand), var(--blw-gray100) 30%, var(--blw-gray500) 50%);
+  background: linear-gradient(0deg, var(--blw-gray700) 5%, var(--color-brand), var(--blw-gray100) 28%, var(--blw-gray700) 50%);
   width: 100%;
-  height: 3rem
+  flex: 0 0 3rem;
 }

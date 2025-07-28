@@ -4,9 +4,10 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  background-color: var(--blw-gray500);
+  background-color: var(--blw-gray700);
   overflow: clip;
   height: 0rem;
+  flex: 0 0 auto;
   transition: height 1s;
 }
 
