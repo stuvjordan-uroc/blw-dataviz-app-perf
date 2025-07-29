@@ -6,13 +6,13 @@ import { CurrentPageStoreContext, UserResponsesStoreContext } from "./Contexts";
 import Header from "./components/Header";
 import Controls from "./components/controls/Controls";
 import UserPoll from "./components/questions/UserPoll";
+import { useEffect } from "react";
+import IntroParagraph from "./components/IntroParagraph";
 
 function App() {
   //set up the currentPage and userResponses states
   const currentPageStore = useCurrentPage();
   const userResponsesStore = useUserResponses();
-  //next step: set up the main app flex column
-
   return (
     <CurrentPageStoreContext value={currentPageStore}>
       <UserResponsesStoreContext value={userResponsesStore}>
@@ -20,7 +20,9 @@ function App() {
           <Header />
           <UserPoll question="imp" />
           <UserPoll question="perf" />
-          <Controls />
+          {currentPageStore.currentPage === 1 && <IntroParagraph />}
+          {userResponsesStore.numUserResponses.perf >= 3 &&
+            userResponsesStore.numUserResponses.imp >= 3 && <Controls />}
         </div>
       </UserResponsesStoreContext>
     </CurrentPageStoreContext>

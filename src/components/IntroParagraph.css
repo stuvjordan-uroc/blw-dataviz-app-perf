@@ -1,8 +1,18 @@
 .intro-paragraph {
-  overflow: "auto";
-  margin-top: "0.5rem";
-  border-radius: "1rem";
-  padding: "0.5rem";
-  background-color: "var(--blw-gray100)";
+  overflow: auto;
+  margin-top: 0.5rem;
+  border-radius: 1rem;
+  padding: 0.5rem;
+  background-color: var(--blw-gray100);
   flex: 1 1 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: start;
+}
+
+.intro-paragraph p {
+  margin-bottom: 1rem;
+  max-width: 60ch;
 }

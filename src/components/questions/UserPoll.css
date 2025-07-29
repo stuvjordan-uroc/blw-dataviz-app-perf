@@ -1,13 +1,12 @@
 .poll-display {
-  flex: 0 0 auto;
   overflow: clip;
   position: relative;
   top: 0;
   background-color: var(--blw-gray300);
+  width: 100%;
 }
 
 .poll-display.open {
-  flex: 1 1 auto;
   overflow: auto;
 }
 
@@ -27,6 +26,7 @@
   padding: 0.3rem;
   margin-top: 0.5rem;
   transition: height 2s;
+  width: 100%;
 }
 
 .poll-item p {

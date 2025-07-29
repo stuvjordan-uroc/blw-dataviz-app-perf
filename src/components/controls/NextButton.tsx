@@ -7,11 +7,8 @@ export default function NextButton() {
   return (
     <button
       type="button"
-      className={classNames("button", "next", {
-        available: CurrentPageStore ? CurrentPageStore.currentPage >= 1 : false,
-      })}
-      disabled={CurrentPageStore ? CurrentPageStore.currentPage < 1 : true}
-      onClick={CurrentPageStore?.nextPage}
+      className={classNames("button", "next", "available")}
+      onClick={CurrentPageStore.nextPage}
     >
       Next
     </button>

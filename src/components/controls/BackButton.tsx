@@ -8,12 +8,12 @@ export default function BackButton() {
     <button
       type="button"
       className={classNames("button", "back", {
-        available: CurrentPageStore ? CurrentPageStore.currentPage >= 2 : false,
+        available: CurrentPageStore.currentPage >= 1,
       })}
-      disabled={CurrentPageStore ? CurrentPageStore.currentPage < 2 : true}
       onClick={() => {
-        CurrentPageStore?.prevPage();
+        CurrentPageStore.prevPage();
       }}
+      disabled={CurrentPageStore.currentPage < 1}
     >
       Back
     </button>
