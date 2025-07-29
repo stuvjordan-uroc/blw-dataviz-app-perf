@@ -7,11 +7,7 @@ import classNames from "classnames";
 export default function Controls() {
   const CurrentPageStore = use(CurrentPageStoreContext);
   return (
-    <div
-      className={classNames("app-controls", {
-        show: true,
-      })}
-    >
+    <div className={classNames("app-controls")}>
       <BackButton />
       <NextButton />
     </div>

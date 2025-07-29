@@ -24,7 +24,8 @@ export default function Question({
       <ChevronRightIcon
         style={{
           flex: "0 0 auto",
-          transform: `rotate(${isOpen ? "90deg" : "0deg"})`,
+          transform: `scale(2.0) rotate(${isOpen ? "90deg" : "0deg"})`,
+          marginRight: "1rem",
         }}
       />
     </div>

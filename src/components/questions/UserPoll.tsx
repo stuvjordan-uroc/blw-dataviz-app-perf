@@ -1,12 +1,13 @@
+import "./UserPoll.css";
 import {
   CurrentPageStoreContext,
   UserResponsesStoreContext,
 } from "../../Contexts";
-import "./UserPoll.css";
 import responses from "../../data/responses.json";
 import questions from "../../data/questions.json";
 import { use, useState } from "react";
 import Question from "./Question";
+import classNames from "classnames";
 
 export default function UserPoll({ question }: { question: "imp" | "perf" }) {
   const UserResponsesStore = use(UserResponsesStoreContext);
@@ -36,7 +37,7 @@ export default function UserPoll({ question }: { question: "imp" | "perf" }) {
     setIsOpen((isOpen) => !isOpen);
   }
   return (
-    <div className="poll-display">
+    <div className={classNames("poll-display", { open: isOpen })}>
       <Question question={question} isOpen={isOpen} toggleOpen={toggleOpen} />
       {isOpen && (
         <div className="user-poll">

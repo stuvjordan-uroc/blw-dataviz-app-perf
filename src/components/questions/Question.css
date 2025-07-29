@@ -1,12 +1,15 @@
 .question-header {
   background-color: var(--blw-gray300);
-  border-radius: 1rem;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
+  position: sticky;
+  top: 0;
+  padding: 0.5rem;
 }
 
 .question-header h3 {
-  flex: 1 1 auto
+  flex: 1 1 auto;
+  font-size: 1.1rem;
 }

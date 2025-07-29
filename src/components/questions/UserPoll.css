@@ -1,29 +1,35 @@
-poll-display {
-  flex: 1 1 auto;
+.poll-display {
+  flex: 0 0 auto;
   overflow: clip;
+  position: relative;
+  top: 0;
+  background-color: var(--blw-gray300);
+}
+
+.poll-display.open {
+  flex: 1 1 auto;
+  overflow: auto;
 }
 
 
 .user-poll {
   overflow: auto;
   font-size: 0.9rem;
-  flex: 1 1 auto;
 }
 
 .poll-item {
   background-color: var(--blw-gray100);
   border-radius: 1rem;
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.2rem;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: start;
+  padding: 0.3rem;
   margin-top: 0.5rem;
   transition: height 2s;
 }
 
 .poll-item p {
-  width: 60%;
   font-style: italic;
 }
 
@@ -31,7 +37,7 @@ poll-display {
   border-width: 0;
   display: flex;
   flex-direction: column;
-  align-items: start;
+  align-items: stretch;
   justify-content: start;
 }
 

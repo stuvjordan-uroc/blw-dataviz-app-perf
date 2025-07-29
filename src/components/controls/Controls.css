@@ -6,11 +6,7 @@
   justify-content: space-between;
   background-color: var(--blw-gray700);
   overflow: clip;
-  height: 0rem;
+  height: 3rem;
   flex: 0 0 auto;
   transition: height 1s;
-}
-
-.show {
-  height: 3rem;
 }
