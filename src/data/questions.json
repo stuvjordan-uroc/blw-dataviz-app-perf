@@ -1,5 +1,6 @@
 {
-  "prefix": "How well do the following statements describe the United States as of today?",
+  "prefix_performance": "How well do the following statements describe the United States as of today?",
+  "prefix_importance": "How important are these characteristics for democratic government?",
   "prompts": [
     {
       "variable_name": "perf_ban_ideology",

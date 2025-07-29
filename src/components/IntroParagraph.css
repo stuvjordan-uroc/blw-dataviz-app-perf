@@ -1,0 +1,8 @@
+.intro-paragraph {
+  overflow: "auto";
+  margin-top: "0.5rem";
+  border-radius: "1rem";
+  padding: "0.5rem";
+  background-color: "var(--blw-gray100)";
+  flex: 1 1 auto;
+}

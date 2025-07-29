@@ -9,7 +9,7 @@ export default function Controls() {
   return (
     <div
       className={classNames("app-controls", {
-        show: CurrentPageStore ? CurrentPageStore.currentPage > 0 : false,
+        show: true,
       })}
     >
       <BackButton />

@@ -5,11 +5,16 @@ interface CurrentPageStore {
   nextPage: () => void,
   prevPage: () => void,
 }
-type UserResponses = Record<string, number | null>;
 interface UserResponsesStore {
-  userResponses: UserResponses,
-  updateUserResponse: (variableName: string, newValue: number | null) => void,
-  numUserResponses: number
+  userResponses: Record<string, {
+    perf: null;
+    imp: null;
+  }>,
+  updateUserResponse: (variableName: string, responseType: 'perf' | 'imp', newValue: number | null) => void,
+  numUserResponses: {
+    perf: number;
+    imp: number;
+  }
 }
 
 

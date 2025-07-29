@@ -2,7 +2,7 @@ import { useState } from "react";
 import questions from "../data/questions.json"
 import * as _ from "lodash";
 
-type UserResponses = Record<string, number | null>
+
 
 
 export function useUserResponses() {
@@ -11,19 +11,32 @@ export function useUserResponses() {
     questionText: q.question_text,
     shortText: q.short_text,
   }));
-  const [userResponses, setUserResponses] = useState<UserResponses>(
-    Object.fromEntries(
-      selectedQuestions.map(q => ([q.variableName, null]))
-    )
+  const [userResponses, setUserResponses] = useState<Record<string, {
+    perf: null;
+    imp: null;
+  }>>(
+    Object.fromEntries(selectedQuestions.map((question) => ([
+      question.variableName,
+      {
+        perf: null,
+        imp: null
+      }
+    ])))
   )
-  const numUserResponses = Object.values(userResponses).filter(v => !_.isNull(v)).length
-  function updateUserResponse(variableName: string, newValue: number | null) {
+  const numUserResponses = {
+    perf: Object.values(userResponses).filter(v => !_.isNull(v.perf)).length,
+    imp: Object.values(userResponses).filter(v => !_.isNull(v.imp)).length
+  }
+  function updateUserResponse(variableName: string, responseType: 'perf' | 'imp', newValue: number | null) {
     if (!Object.keys(userResponses).includes(variableName)) {
       throw new Error(`State userResponses has no key ${variableName}.`)
     }
     setUserResponses({
       ...userResponses,
-      [variableName]: newValue
+      [variableName]: {
+        ...userResponses[variableName],
+        [responseType]: newValue
+      }
     })
   }
   return ({

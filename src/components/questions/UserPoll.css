@@ -1,13 +1,13 @@
+poll-display {
+  flex: 1 1 auto;
+  overflow: clip;
+}
+
+
 .user-poll {
   overflow: auto;
   font-size: 0.9rem;
-  max-height: 90vh;
-  flex: 1 0 auto;
-}
-
-.user-poll.aside {
-  overflow: clip;
-  flex: 0 0 auto;
+  flex: 1 1 auto;
 }
 
 .poll-item {

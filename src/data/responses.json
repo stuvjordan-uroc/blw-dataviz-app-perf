@@ -1,22 +1,46 @@
-[
-  {
-    "full": "The U.S. does not meet this standard.",
-    "short": "Does not meet.",
-    "id": "does-not-meet"
-  },
-  {
-    "full": "The U.S. partly meets this standard.",
-    "short": "Partly meets.",
-    "id": "partly-meets"
-  },
-  {
-    "full": "The U.S. mostly meets this standard.",
-    "short": "Mostly meets.",
-    "id": "mostly-meets"
-  },
-  {
-    "full": "The U.S. fully meets this standard.",
-    "short": "Fully meets.",
-    "id": "fully-meets"
-  }
-]
+{
+  "performance": [
+    {
+      "full": "The U.S. does not meet this standard.",
+      "short": "Does not meet.",
+      "id": "does-not-meet"
+    },
+    {
+      "full": "The U.S. partly meets this standard.",
+      "short": "Partly meets.",
+      "id": "partly-meets"
+    },
+    {
+      "full": "The U.S. mostly meets this standard.",
+      "short": "Mostly meets.",
+      "id": "mostly-meets"
+    },
+    {
+      "full": "The U.S. fully meets this standard.",
+      "short": "Fully meets.",
+      "id": "fully-meets"
+    }
+  ],
+  "importance": [
+    {
+      "full": "Not relevant. This has no impact on democracy.",
+      "short": "Not relevant.",
+      "id": "not-relevant"
+    },
+    {
+      "full": "Beneficial. This enhances democracy, but is not required for democracy.",
+      "short": "Beneficial.",
+      "id": "beneficial"
+    },
+    {
+      "full": "Important. If this is absent, democracy is compromised",
+      "short": "Important.",
+      "id": "important"
+    },
+    {
+      "full": "Essential. A country cannot be considered a democracy without this.",
+      "short": "Essential.",
+      "id": "essential"
+    }
+  ]
+}

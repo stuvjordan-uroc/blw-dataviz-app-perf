@@ -1,0 +1,12 @@
+.question-header {
+  background-color: var(--blw-gray300);
+  border-radius: 1rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.question-header h3 {
+  flex: 1 1 auto
+}
