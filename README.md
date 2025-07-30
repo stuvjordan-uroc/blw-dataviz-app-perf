@@ -1,6 +1,5 @@
 ## To Do
 
-- Add close button and click-outside-to-close on AllPrinciplesDialog https://www.youtube.com/watch?v=YwHJMlvZRCc
 - FIX: On tablet sized screens and above, width of app jumps when poll questions are open/closed.
 - FIX: Layout transition from page 0 to page 1 are abrupt and confusing. Find a way to smooth them.
 
