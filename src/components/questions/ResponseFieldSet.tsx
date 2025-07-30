@@ -1,7 +1,7 @@
 import responses from "../../data/responses.json";
 import * as _ from "lodash";
 import { UserResponsesStoreContext } from "../../Contexts";
-import { use } from "react";
+import React, { use } from "react";
 export default function ResponseFieldSet({
   prompt,
   question,
@@ -13,7 +13,24 @@ export default function ResponseFieldSet({
   };
   question: "imp" | "perf";
 }) {
-  const UserResponseStore = use(UserResponsesStoreContext);
+  const UserResponseStore = use(UserResponsesStoreContext) as {
+    userResponses: Record<
+      string,
+      {
+        perf: number | null;
+        imp: number | null;
+      }
+    >;
+    updateUserResponse: (
+      variableName: string,
+      responseType: "perf" | "imp",
+      newValue: number | null
+    ) => void;
+    numUserResponses: {
+      perf: number;
+      imp: number;
+    };
+  };
   function handleChange(event: Event) {
     const target = event.target as HTMLInputElement;
     UserResponseStore.updateUserResponse(
@@ -31,6 +48,16 @@ export default function ResponseFieldSet({
               type="radio"
               value={ridx.toString()}
               name={`${question}_${prompt.variable_name}`}
+              defaultChecked={
+                !_.isNull(
+                  UserResponseStore.userResponses[prompt.variable_name][
+                    question
+                  ]
+                ) &&
+                UserResponseStore.userResponses[prompt.variable_name][
+                  question
+                ] === ridx
+              }
             />
             {response.full}
           </label>

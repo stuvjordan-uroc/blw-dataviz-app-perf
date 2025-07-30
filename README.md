@@ -1,8 +1,8 @@
 ## To Do
 
-- Fix this: directive to close question toggles when page transitions from 0 to 1 prevents ability to re-open question toggles on subsequent pages.
-- Animation of closing/collapsing of question toggles on transition from page 0 to page 1 looks like total garbage. Drop it.
-- Build modal to show full list of democratic principles, link from intro paragraph.
+- Add close button and click-outside-to-close on AllPrinciplesDialog https://www.youtube.com/watch?v=YwHJMlvZRCc
+- FIX: On tablet sized screens and above, width of app jumps when poll questions are open/closed.
+- FIX: Layout transition from page 0 to page 1 are abrupt and confusing. Find a way to smooth them.
 
 ## Pages
 
@@ -18,6 +18,6 @@
 ### Page 1
 
 - Both polls in closed state, not disabled
-- Controls visible, both Back and Next visible and active
+- Controls visible, Next visible and active, Back hidden and disabled
 - IntroParagraph visible with flex set to 1 1 auto and overflow set to auto
 - Transition to Page 2 when user clicks Next

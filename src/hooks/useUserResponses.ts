@@ -12,8 +12,8 @@ export function useUserResponses() {
     shortText: q.short_text,
   }));
   const [userResponses, setUserResponses] = useState<Record<string, {
-    perf: null;
-    imp: null;
+    perf: number | null;
+    imp: number | null;
   }>>(
     Object.fromEntries(selectedQuestions.map((question) => ([
       question.variableName,

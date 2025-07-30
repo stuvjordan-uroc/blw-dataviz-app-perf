@@ -1,5 +1,6 @@
 .poll-display {
   overflow: clip;
+  flex: 0 0 auto;
   position: relative;
   top: 0;
   background-color: var(--blw-gray300);
@@ -7,6 +8,7 @@
 }
 
 .poll-display.open {
+  flex: 1 1 auto;
   overflow: auto;
 }
 

@@ -30,23 +30,10 @@ export default function UserPoll({ question }: { question: "imp" | "perf" }) {
   );
 
   return (
-    <motion.div
-      layout
-      animate={{
-        flex: isOpen ? "1 1 auto" : "0 0 auto",
-        height: isOpen ? "auto" : "4rem",
-        visibility: "visible",
-      }}
-      className={classNames("poll-display", { open: isOpen })}
-    >
+    <div className={classNames("poll-display", { open: isOpen })}>
       <Question question={question} isOpen={isOpen} toggleOpen={toggleOpen} />
       {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 2 }}
-          className="user-poll"
-        >
+        <div className="user-poll">
           {selectedPrompts.map((prompt) => (
             <div
               className="poll-item"
@@ -56,8 +43,8 @@ export default function UserPoll({ question }: { question: "imp" | "perf" }) {
               <ResponseFieldSet prompt={prompt} question={question} />
             </div>
           ))}
-        </motion.div>
+        </div>
       )}
-    </motion.div>
+    </div>
   );
 }

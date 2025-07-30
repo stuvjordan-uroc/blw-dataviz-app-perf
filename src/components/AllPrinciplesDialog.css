@@ -1,0 +1,44 @@
+.all-principles {
+  overflow: auto;
+  max-height: 85vh;
+  width: min(90vw, 900px);
+  background-color: var(--blw-gray200);
+  color: var(--color-text);
+  padding: 0;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border: 2px solid var(--color-text);
+  border-radius: 1rem;
+}
+
+.all-principles:focus-visible {
+  outline: 2px solid var(--color-brand);
+  border-radius: 1rem;
+}
+
+.all-principles::backdrop {
+  background: linear-gradient(0deg, var(--blw-gray700) 1%, var(--color-brand), var(--blw-gray100) 15%, var(--blw-gray700) 50%);
+  opacity: 0.75;
+}
+
+.all-principles h3 {
+  text-align: center;
+  width: 100%;
+  background-color: var(--blw-gray500);
+  color: var(--color-text);
+  position: sticky;
+  top: 0;
+  padding: 0.5rem;
+}
+
+.all-principles ul {
+  list-style: none;
+  font-style: italic;
+  padding: 1rem;
+}
+
+.all-principles ul li {
+  margin-bottom: 1rem;
+  color: var(--color-text)
+}
