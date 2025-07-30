@@ -36,8 +36,8 @@ export default function IntroParagraph() {
       <p>
         Starting in 2017, Bright Line Watch began asking large samples of
         Americans to share their assessments of the U.S. on each of the 31
-        principles. In this app, you'll explore the results, based on survey
-        responses by over 50,000 Americans.{" "}
+        principles. In this app, you'll explore explore visualizations of the
+        results, based on survey responses by over 50,000 Americans.{" "}
       </p>
       <AllPrinciplesDialog ref={principlesDialogRef} />
     </div>

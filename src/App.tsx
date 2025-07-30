@@ -6,8 +6,9 @@ import { CurrentPageStoreContext, UserResponsesStoreContext } from "./Contexts";
 import Header from "./components/Header";
 import Controls from "./components/controls/Controls";
 import UserPoll from "./components/questions/UserPoll";
-import { useEffect } from "react";
 import IntroParagraph from "./components/IntroParagraph";
+import VizGuidance from "./components/viz/VizGuidance";
+import VizTabs from "./components/viz/VizTabs";
 
 function App() {
   //set up the currentPage and userResponses states
@@ -21,6 +22,8 @@ function App() {
           <UserPoll question="imp" />
           <UserPoll question="perf" />
           {currentPageStore.currentPage === 1 && <IntroParagraph />}
+          {currentPageStore.currentPage >= 2 && <VizGuidance />}
+          {currentPageStore.currentPage >= 2 && <VizTabs />}
           {userResponsesStore.numUserResponses.perf >= 3 &&
             userResponsesStore.numUserResponses.imp >= 3 && <Controls />}
         </div>

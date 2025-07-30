@@ -1,0 +1,27 @@
+.viz-guidance {
+  flex: 0 0 auto;
+  height: auto;
+  max-height: 7rem;
+  overflow: auto;
+  border-radius: 1rem;
+  padding: 0.5rem;
+  background-color: var(--blw-gray100);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: start;
+}
+
+@media(height > 700px) {
+  .viz-guidance {
+    max-height: 15rem;
+  }
+}
+
+.viz-guidance p {
+  margin-bottom: 1rem;
+  max-width: 60ch;
+  font-size: 1rem;
+  color: var(--color-text);
+  text-indent: 0;
+}

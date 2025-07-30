@@ -14,9 +14,17 @@
 - Only Next button should be visible in Controls
 - Transition to Page 1 when user clicks Next
 
-### Page 1
+### Page 1 (DONE)
 
 - Both polls in closed state, not disabled
 - Controls visible, Next visible and active, Back hidden and disabled
 - IntroParagraph visible with flex set to 1 1 auto and overflow set to auto
 - Transition to Page 2 when user clicks Next
+
+### Page 2
+
+- Both polls in closed state, not disabled
+- Controls visible, Next visible and active, Back visible and active
+- VizInstructions just below polls. flex 0 0 auto, overflow auto, height 12rem (or something like that...maybe vary this with screen width)
+- VisTabs just below VizInstructions and above Controls. flex 1 1 auto, overflow auto
+- (STILL TO DO) Importance tab in active state.
