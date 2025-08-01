@@ -17,7 +17,7 @@
 
   /* colors */
   --blw-goldenrod: hsl(55, 74%, 48%);
-  --blw-whale: hsl(194, 97%, 12%);
+
 
   --blw-gray000: hsl(0, 0%, 98%);
   --blw-gray100: hsl(192, 7%, 94%);
@@ -38,11 +38,12 @@
   --blw-whale500: hsl(194, 97%, 50%);
   --blw-whale600: hsl(194, 97%, 40%);
   --blw-whale700: hsl(194, 97%, 30%);
-  --blw-whale800: hsl(194, 97%, 20%);
+  --blw-whale800: hsl(194, 97%, 18%);
   --blw-whale900: hsl(194, 97%, 6%);
   /* semantic color vars */
   --color-brand: var(--blw-goldenrod);
-  --color-text: var(--blw-whale);
+  --blw-whale: var(--blw-whale800);
+  --color-text: var(--blw-whale900);
 }
 
 *,

@@ -5,7 +5,7 @@
 }
 
 .app {
-  background-color: var(--blw-gray700);
+  background-color: var(--blw-whale);
   height: 100vh;
   max-height: 100vh;
   overflow: clip;

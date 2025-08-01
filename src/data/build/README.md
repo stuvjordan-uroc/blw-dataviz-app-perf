@@ -8,7 +8,7 @@ Each section in this files focuses on one visualization tool in the app, describ
 
 ## Visual Design and Structure
 
-Everthing in this tool is a horizontal segment viz -- i.e. it's nothing but (segmented) rows of points.
+Everthing in this tool is a horizontal segment viz -- i.e. it's nothing but (segmented-by-imp-response) rows of points.
 
 We'll build the tool as a stacked column of svgs, ONE svg for each democratic principle. (The runtime can then filter and sort the principles by filtering and sorting the svgs.)
 
