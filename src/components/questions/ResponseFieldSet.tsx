@@ -1,7 +1,8 @@
+import "./ResponseFieldSet.css";
 import responses from "../../data/responses.json";
 import * as _ from "lodash";
 import { UserResponsesStoreContext } from "../../Contexts";
-import React, { use } from "react";
+import { use } from "react";
 export default function ResponseFieldSet({
   prompt,
   question,

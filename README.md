@@ -1,3 +1,7 @@
+## Data for vizualizations
+
+Data is built by scripts in src/data/build. See the README.md in that folder to understand how it works.
+
 ## To Do
 
 - FIX: On tablet sized screens and above, width of app jumps when poll questions are open/closed.

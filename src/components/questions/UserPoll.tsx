@@ -8,7 +8,6 @@ import { use, useState, useEffect } from "react";
 import Question from "./Question";
 import ResponseFieldSet from "./ResponseFieldSet";
 import classNames from "classnames";
-import { motion } from "motion/react";
 
 export default function UserPoll({ question }: { question: "imp" | "perf" }) {
   const UserResponsesStore = use(UserResponsesStoreContext);

@@ -19,7 +19,7 @@
   --blw-goldenrod: hsl(55, 74%, 48%);
   --blw-whale: hsl(194, 97%, 12%);
 
-  --blw-gray000: hsl(192, 7%, 98%);
+  --blw-gray000: hsl(0, 0%, 98%);
   --blw-gray100: hsl(192, 7%, 94%);
   --blw-gray200: hsl(192, 7%, 90%);
   --blw-gray300: hsl(192, 7%, 86%);
@@ -30,6 +30,16 @@
   --blw-gray800: hsl(192, 7%, 66%);
   --blw-gray900: hsl(192, 7%, 62%);
 
+  --blw-whale000: hsl(194, 97%, 98%);
+  --blw-whale100: hsl(194, 97%, 90%);
+  --blw-whale200: hsl(194, 97%, 75%);
+  --blw-whale300: hsl(194, 97%, 65%);
+  --blw-whale400: hsl(194, 97%, 60%);
+  --blw-whale500: hsl(194, 97%, 50%);
+  --blw-whale600: hsl(194, 97%, 40%);
+  --blw-whale700: hsl(194, 97%, 30%);
+  --blw-whale800: hsl(194, 97%, 20%);
+  --blw-whale900: hsl(194, 97%, 6%);
   /* semantic color vars */
   --color-brand: var(--blw-goldenrod);
   --color-text: var(--blw-whale);

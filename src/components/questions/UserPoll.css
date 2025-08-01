@@ -10,6 +10,7 @@
 .poll-display.open {
   flex: 1 1 auto;
   overflow: auto;
+  width: 100%;
 }
 
 
@@ -33,16 +34,4 @@
 
 .poll-item p {
   font-style: italic;
-}
-
-.poll-item fieldset {
-  border-width: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: start;
-}
-
-.poll-item fieldset input {
-  margin-right: 0.25rem;
 }
