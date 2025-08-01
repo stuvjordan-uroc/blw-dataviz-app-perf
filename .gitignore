@@ -1,3 +1,7 @@
+#python .venv (needed for data building script)
+
+.venv/
+
 # Logs
 logs
 *.log

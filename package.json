@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "build-data": "python3 ./src/data/build/build.py",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
@@ -14,6 +15,7 @@
     "@radix-ui/react-tabs": "^1.1.12",
     "arquero": "^8.0.3",
     "classnames": "^2.5.1",
+    "fflate": "^0.8.2",
     "lodash": "^4.17.21",
     "motion": "^12.23.11",
     "react": "^19.1.0",
