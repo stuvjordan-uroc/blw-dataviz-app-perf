@@ -77,21 +77,22 @@ Each sample response (i.e. each element of the wave arrays like `"w01": []`) is 
 ```JSON
 {
   "pid3": "Republican",
+  "unSplit": {"r": 1.3, "cx": 452.3, "cy": -60}
   "byResponse": {
-    "unGrouped": {"x": 12.4, "y": 127},
-    "grouped": {"x": 82, "y": 0.072}
+    "unGrouped": {"r": 1.3, "cx": 12.4, "cy": 127},
+    "grouped": {"r": 1.3, "cx": 82, "cy": 0.072}
   },
   "byReponseParty": {
-    "unGrouped": { "x": 1, "y": 84},
-    "grouped": { "x": 2, "y": -673.2}
+    "unGrouped": { "r": 1.3, "cx": 1, "cy": 84},
+    "grouped": { "r": 1.3, "cx": 2, "cy": -673.2}
   },
   "byReponseWave": {
-    "unGrouped": { "x": 1, "y": 84},
-    "grouped": { "x": 2, "y": -673.2}
+    "unGrouped": { "r": 1.3, "cx": 1, "cy": 84},
+    "grouped": { "r": 1.3, "cx": 2, "cy": -673.2}
   },
   "byReponseWaveParty": {
-    "unGrouped": { "x": 1, "y": 84},
-    "grouped": { "x": 2, "y": -673.2}
+    "unGrouped": { "r": 8, "cx": 1, "cy": 84},
+    "grouped": { "r": 4, "cx": 2, "cy": -673.2}
   }
 }
 ```
