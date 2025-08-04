@@ -3,9 +3,7 @@ import path from 'node:path'
 import loadData from "./functions/load-data.ts";
 import getNonEmptyValues from "./functions/get-nonempty-values.ts";
 import getImpCols from './functions/get-imp-cols.ts';
-import getDataAsAq from './functions/get-data-as-aq.ts';
 import getUtilityColumnIndices from './functions/getUtilityColumnIndices.ts';
-import { u } from 'motion/react-m';
 
 const rawData = loadData(path.resolve('build-data', 'raw-data/dem_characteristics_importance.gz'))
 if (rawData) {
