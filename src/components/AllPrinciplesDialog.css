@@ -18,7 +18,7 @@
 }
 
 .all-principles::backdrop {
-  background: linear-gradient(0deg, var(--blw-gray700) 1%, var(--color-brand), var(--blw-gray100) 15%, var(--blw-gray700) 50%);
+  background: linear-gradient(0deg, var(--color-brand), var(--blw-gray100) 28%, var(--blw-whale) 50%);
   opacity: 0.75;
 }
 
