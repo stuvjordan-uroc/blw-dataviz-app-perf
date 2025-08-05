@@ -53,7 +53,7 @@ The structure of the JSON containing the generated sample is like this:
 ```JSON
 {
   "imp_votes_impact": {
-    "w01": null, //this is what we put for a principle not included in the given wave
+    "w01": [], //this is what we put for a principle not included in the given wave
     "w02": [
       // ...sample of responses to imp_votes_impact from wave 02 here...
     ],
