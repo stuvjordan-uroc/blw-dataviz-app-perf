@@ -82,15 +82,12 @@ export default class Data {
       );
     }
     //initialize the nonempty wave values
-    this.nonemptyWaveValues = this.data
-      .map((row) => {
-        if (this.utilityColumns.wave && row[this.utilityColumns.wave]) {
-          return row[this.utilityColumns.wave];
-        } else {
-          return null;
-        }
-      })
-      .filter((val) => !this.emptyValues.includes(val)) as number[];
+    this.nonemptyWaveValues = getNonEmptyVals(
+      ["wave"],
+      this.columns,
+      this.data,
+      this.emptyValues
+    ) as number[];
     //warn if there are not enough waves
     if (this.nonemptyWaveValues.length < 2) {
       console.log(
