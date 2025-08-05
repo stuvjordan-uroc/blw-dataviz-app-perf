@@ -107,25 +107,6 @@ export default class Data {
       );
     }
   }
-  setEmptyValues(emptyVals: (string | number | null | undefined)[]) {
-    this.emptyValues = emptyVals;
-  }
-  setUtilityColumns(utilityColNames: string[]) {
-    this.utilityColumnNames = utilityColNames;
-    this.utilityColumns = Object.fromEntries(
-      utilityColNames
-        .map((cn) => [cn, this.columns.findIndex((c) => c === cn)]) // this is an array of arrays like this: [['weight', 42], ['noncolumn', -1]]
-        .map((el) => [el[0], el[1] === -1 ? null : el[1]]) //now like this [['weight', 42], ['noncolumn', null]]
-    ) as Record<string, number | null>;
-    Object.keys(this.utilityColumns).forEach((ucKey) => {
-      if (lodash.isNull(this.utilityColumns[ucKey])) {
-        console.log(
-          "WARNING: The following column is not in the raw data: ",
-          ucKey
-        );
-      }
-    });
-  }
   sample(
     impVarColIndex: number,
     nonEmptyImpResponses: string[],
@@ -175,7 +156,7 @@ export default class Data {
         }
       });
       //construct the sample
-      const sample = [] as (string | number | null)[][];
+      const sample = [] as { response: string | number | null, pid3: string | number | null }[];
       // eslint-disable-next-line @typescript-eslint/non-nullable-type-assertion-style
       const weightsTotal = cumulativeWeights[
         cumulativeWeights.length - 1
@@ -187,7 +168,11 @@ export default class Data {
         );
         const selectedRow = subset[firstMatchIdx];
         if (selectedRow) {
-          sample.push(selectedRow);
+          sample.push({
+            response: selectedRow[impVarColIndex] as string | number | null,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            pid3: selectedRow[this.utilityColumns.pid3!] as string | number | null
+          });
         }
       }
       if (sample.length === sampleSize) {

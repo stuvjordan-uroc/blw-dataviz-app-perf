@@ -76,6 +76,7 @@ Each sample response (i.e. each element of the wave arrays like `"w01": []`) is 
 
 ```JSON
 {
+  "response": "Beneficial",
   "pid3": "Republican",
   "unSplit": {"r": 1.3, "cx": 452.3, "cy": -60}
   "byResponse": {
