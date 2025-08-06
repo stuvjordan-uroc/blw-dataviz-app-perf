@@ -1,4 +1,3 @@
-import { pre } from "motion/react-client";
 import apartmentWindows from "./apartment-windows.ts";
 import getProportions from "./proportions.ts";
 
@@ -41,7 +40,8 @@ export default class ImpCoordinates {
   responseGroupsCollapsed = [['Not relevant', 'Beneficial'], ['Important', 'Essential']];
   partyGroups = [['Democrat'], ['Independent', 'Other'], ['Republican']];
   segmentGap = 1;
-  rowGap = 5;
+  partyRowGap = 5;
+  waveVizGap = 5;
   rowHeight = 30;
   vizWidth = 100;
   //constructor
@@ -50,7 +50,8 @@ export default class ImpCoordinates {
     responseGroupsCollapsed: string[][],
     partyGroups: string[][],
     segmentGap: number,
-    rowGap: number,
+    partyRowGap: number,
+    waveVizGap: number,
     rowHeight: number,
     vizWidth: number
   ) {
@@ -58,7 +59,8 @@ export default class ImpCoordinates {
     this.responseGroupsCollapsed = responseGroupsCollapsed;
     this.partyGroups = partyGroups;
     this.segmentGap = segmentGap;
-    this.rowGap = rowGap;
+    this.partyRowGap = partyRowGap;
+    this.waveVizGap = waveVizGap;
     this.rowHeight = rowHeight;
     this.vizWidth = vizWidth;
   }
@@ -142,7 +144,7 @@ export default class ImpCoordinates {
       const proportionsMapCollapsed = getProportions(singleArrayOfPoints, this.responseGroupsCollapsed, "response", this.partyGroups, 'pid3') as Map<string[], Map<string[], number>>;
       //compute the total width of each party's row of segments, not including the gaps between rows
       //this width is the same for all party groups
-      const partyRowTotalWidth = (this.vizWidth - this.rowGap * (this.partyGroups.length - 1)) / this.partyGroups.length;
+      const partyRowTotalWidth = (this.vizWidth - this.partyRowGap * (this.partyGroups.length - 1)) / this.partyGroups.length;
       //compute the total width of the segments within each party's row, not including gaps between the segments, both expanded and collapsed
       //since the segmentgap is set at the app level, this width is the same for all party groups
       const totalSegmentWidthMinusGapsExpanded = partyRowTotalWidth - this.segmentGap * (this.responseGroupsExpanded.length - 1);
@@ -157,7 +159,7 @@ export default class ImpCoordinates {
         const topLeftYParty = 0;
         //compute the X coordinate of the top left of the row of points for the current party
         //This is the total width of party rows (constant across parties) plus row gaps for party groups (constant across parties) to the left of the current party group 
-        const topLeftXParty = 0 + partyGroupIdx * (partyRowTotalWidth + this.rowGap)
+        const topLeftXParty = 0 + partyGroupIdx * (partyRowTotalWidth + this.partyRowGap)
         //now we can get the coordinates for the segments for the current party
         //coordinates for the expanded view
         const currentPartyArrayOfBuildingsExpanded = arrayOfApartmentWindows(
@@ -216,6 +218,106 @@ export default class ImpCoordinates {
               collapsed: rowsOfCoordinates[partyIdx]!.collapsed[responseCollapsedIdx]!.shift()
             }
           }
+        })
+      })
+    })
+  }
+  addByResponseAndWave(sample: Record<string, Record<string, Record<string, unknown>[]>>) {
+    Object.keys(sample).forEach(impVar => {
+      Object.keys(sample[impVar]!).forEach((waveString, waveStringIdx) => {
+        const coordinatesExpanded = arrayOfApartmentWindows(
+          this.responseGroupsExpanded,
+          sample[impVar]![waveString]! as { [key: string]: string; response: string; }[],
+          getProportions(
+            sample[impVar]![waveString]! as Record<string, string>[],
+            this.responseGroupsExpanded,
+            "response",
+            undefined,
+            undefined
+          ) as Map<string[], number>,
+          this.vizWidth - this.segmentGap * (this.responseGroupsExpanded.length - 1),
+          this.segmentGap,
+          0,
+          0 + (this.rowHeight + this.waveVizGap) * waveStringIdx,
+          this.rowHeight
+        )
+        const coordinatesCollapsed = arrayOfApartmentWindows(
+          this.responseGroupsCollapsed,
+          sample[impVar]![waveString]! as { [key: string]: string; response: string; }[],
+          getProportions(
+            sample[impVar]![waveString]! as Record<string, string>[],
+            this.responseGroupsCollapsed,
+            "response",
+            undefined,
+            undefined
+          ) as Map<string[], number>,
+          this.vizWidth - this.segmentGap * (this.responseGroupsCollapsed.length - 1),
+          this.segmentGap,
+          0,
+          0 + (this.rowHeight + this.waveVizGap) * waveStringIdx,
+          this.rowHeight
+        )
+        sample[impVar]![waveString]!.forEach((point, pointIdx) => {
+          const expandedResponseGroupIdx = this.responseGroupsExpanded.findIndex(rg => rg.includes(point.response as string))
+          const collapsedResponseGroupIdx = this.responseGroupsCollapsed.findIndex(rg => rg.includes(point.response as string))
+          sample[impVar]![waveString]![pointIdx] = {
+            ...sample[impVar]![waveString]![pointIdx]!,
+            byResponseWave: {
+              expanded: coordinatesExpanded[expandedResponseGroupIdx]!.shift(),
+              collapsed: coordinatesCollapsed[collapsedResponseGroupIdx]!.shift()
+            }
+          }
+        })
+      })
+    })
+  }
+  addByResponseAndWaveAndParty(sample: Record<string, Record<string, Record<string, unknown>[]>>) {
+    Object.keys(sample).forEach(impVar => {
+      Object.keys(sample[impVar]!).forEach((waveString, waveStringIdx) => {
+        this.partyGroups.forEach((partyGroup, partyGroupIdx) => {
+          const coordinatesExpanded = arrayOfApartmentWindows(
+            this.responseGroupsExpanded,
+            sample[impVar]![waveString]!.filter(point => partyGroup.includes(point.pid3 as string)) as { [key: string]: string; response: string; }[],
+            getProportions(
+              sample[impVar]![waveString]!.filter(point => partyGroup.includes(point.pid3 as string)) as Record<string, string>[],
+              this.responseGroupsExpanded,
+              "response",
+              undefined,
+              undefined
+            ) as Map<string[], number>,
+            (this.vizWidth - this.partyRowGap * (this.partyGroups.length - 1)) / 3 - this.segmentGap * (this.responseGroupsExpanded.length - 1),
+            this.segmentGap,
+            0 + partyGroupIdx * ((this.vizWidth - this.partyRowGap * (this.partyGroups.length - 1)) / 3 + this.partyRowGap),
+            0 + waveStringIdx * (this.rowHeight + this.waveVizGap),
+            this.rowHeight
+          )
+          const coordinatesCollapsed = arrayOfApartmentWindows(
+            this.responseGroupsCollapsed,
+            sample[impVar]![waveString]!.filter(point => partyGroup.includes(point.pid3 as string)) as { [key: string]: string; response: string; }[],
+            getProportions(
+              sample[impVar]![waveString]!.filter(point => partyGroup.includes(point.pid3 as string)) as Record<string, string>[],
+              this.responseGroupsCollapsed,
+              "response",
+              undefined,
+              undefined
+            ) as Map<string[], number>,
+            (this.vizWidth - this.partyRowGap * (this.partyGroups.length - 1)) / 3 - this.segmentGap * (this.responseGroupsCollapsed.length - 1),
+            this.segmentGap,
+            0 + partyGroupIdx * ((this.vizWidth - this.partyRowGap * (this.partyGroups.length - 1)) / 3 + this.partyRowGap),
+            0 + waveStringIdx * (this.rowHeight + this.waveVizGap),
+            this.rowHeight
+          )
+          sample[impVar]![waveString]!.forEach((point, pointIdx) => {
+            const expandedResponseGroupIdx = this.responseGroupsExpanded.findIndex(rg => rg.includes(point.response as string))
+            const collapsedResponseGroupIdx = this.responseGroupsCollapsed.findIndex(rg => rg.includes(point.response as string))
+            sample[impVar]![waveString]![pointIdx] = {
+              ...sample[impVar]![waveString]![pointIdx]!,
+              byResponseWaveParty: {
+                expanded: coordinatesExpanded[expandedResponseGroupIdx]!.shift(),
+                collapsed: coordinatesCollapsed[collapsedResponseGroupIdx]!.shift()
+              }
+            }
+          })
         })
       })
     })

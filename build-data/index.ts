@@ -55,16 +55,19 @@ export function makeImpSample(sampleSize: number, partyGroups: string[][]) {
   const ORDEREDRESPONSES_COLLAPSED = [['Not relevant', 'Beneficial'], ['Important', 'Essential']]
   const PARTYGROUPS = [['Democrat'], ['Independent', 'Other'], ['Republican']];
   const VIZWIDTH = 100;
-  const ROWGAP = 5; //in the split-by-party views, this leaves 90% of the space for rows of segments split by party
+  const PARTYROWGAP = 5; //in the split-by-party views, this leaves 90% of the space for rows of segments split by party
   const SEGMENTGAP = 1; //with VIZWIDTH = 100 and ROWGAP = 5, each party's row is 30 units long.  So setting SEGMENTGAP to 1 leaves 90% of space in expanded view for segments.  
   const ROWHEIGHT = 30;
+  const WAVEVIZGAP = 5;
+
 
   const coordinateMaker = new ImpCoordinates(
     ORDEREDRESPONSES_EXPANDED,
     ORDEREDRESPONSES_COLLAPSED,
     PARTYGROUPS,
     SEGMENTGAP,
-    ROWGAP,
+    PARTYROWGAP,
+    WAVEVIZGAP,
     ROWHEIGHT,
     VIZWIDTH
   )
@@ -83,10 +86,33 @@ export function makeImpSample(sampleSize: number, partyGroups: string[][]) {
   /*
   in this view, we take all sampled persons from each imp item and create three rows
   of horizontal segments -- one row for Dems, one row for Inds+Others, one row for Reps.
-  Obviously, each of these rows is segmented by response 
+  These rows are laid out side-by-side, so total vizHeight is just ROWHEIGHT.
+  Each of these rows is segmented by response.
   */
   coordinateMaker.addByResponseAndParty(outSample)
 
+  //BY RESPONSE AND WAVE
+  /*
+  This view takes all sampled persons from each imp item, and creates on row of
+  segments for each wave, segmented by response.
+  These rows are laid out vertically.  Each has height ROWHEIGHT, and there is a 
+  gap between each row of WAVEVIZGAP.
+  So total heigh of this viz is expanded from ROWHEIGHT to
+  ROWHEIGHT * (number of waves) + WAVEVIZGAP * (number of waves - 1)
+  */
+  coordinateMaker.addByResponseAndWave(outSample)
+
+
+  //BY RESPONSE AND WAVE AND PARTY
+  /*
+  All sampled persons from each imp item...
+  Three rows of segments -- laid out side-by-side -- for each party group...
+  One of these rows of segments for each wave, laid out vertically
+  total heigh of this viz is expanded from ROWHEIGHT to
+  ROWHEIGHT * (number of waves) + WAVEVIZGAP * (number of waves - 1)
+  */
+
+  coordinateMaker.addByResponseAndWaveAndParty(outSample)
 
   //TODO...
   /*
@@ -97,8 +123,16 @@ export function makeImpSample(sampleSize: number, partyGroups: string[][]) {
   3. Remove the radius property from every point.
 
   Then, change the return statement below so it returns BOTH the sample 
-  (with the radius properties removed from all the points) AND the radius object
-  created in 2.
+  (with the radius properties removed from all the points) AND an object that gives 
+  (1) the radius for each view and (2) the total viz height for each view.
+  Clearly, this object will have a property for each view.
+  */
+
+  //TODO...
+  /*
+  After all the samples are built, scale everything up so that radii come out to
+  values that are order-of-magnitude 10 or more, then 
+  round off all coordinates to whole numbers s(sub-pixel units slows browser performance)
   */
 
 
