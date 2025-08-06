@@ -2,19 +2,55 @@ import { pre } from "motion/react-client";
 import apartmentWindows from "./apartment-windows.ts";
 import getProportions from "./proportions.ts";
 
+function arrayOfApartmentWindows(
+  responseGroups: string[][],
+  arrayOfPoints: { response: string, [key: string]: string }[],
+  proportionsMap: Map<string[], number>,
+  totalSegmentWidthMinusGaps: number,
+  segmentGap: number,
+  rowTopLeftX: number,
+  rowTopLeftY: number,
+  rowHeight: number
+) {
+  return responseGroups.map((responseGroup, responseGroupIdx) => {
+    //get the points that are in the current responseGroup
+    const pointSubset = arrayOfPoints.filter(point => responseGroup.includes(point.response))
+    //set the Y coordinate of the top left of the segment for the current responseGroup
+    const topLeftY = rowTopLeftY;
+    //set the X coordinate of the top left of the segment for the current responseGroup
+    const topLeftX = rowTopLeftX + responseGroups
+      .slice(0, responseGroupIdx)  //array of the response groups before the current responseGroup
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      .map(prevResponseGroup => proportionsMap.get(prevResponseGroup)! * totalSegmentWidthMinusGaps + segmentGap) //take each of these response groups.  Get the group proportion, multiply by the totalSegmentWidthMinusGaps, add one gap for the next segment.  The result is an array of widths -- each width is the width of the relevant segment, plus the width of the gap that comes after it.
+      .reduce((acc, curr) => acc + curr, 0) //sum the resulting widths to get the total
+    return apartmentWindows(
+      topLeftX,
+      topLeftY,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      proportionsMap.get(responseGroup)! * totalSegmentWidthMinusGaps,
+      rowHeight,
+      pointSubset.length
+    )
+  })
+}
+
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 export default class ImpCoordinates {
   //declare members
   responseGroupsExpanded = [['Not relevant'], ['Beneficial'], ['Important'], ['Essential']];
-  responseGroupsCollapsed = [['Not relevant', 'Beneficial'], ['Important', 'Essential']]
+  responseGroupsCollapsed = [['Not relevant', 'Beneficial'], ['Important', 'Essential']];
+  partyGroups = [['Democrat'], ['Independent', 'Other'], ['Republican']];
   segmentGap = 10;
+  rowGap = 20;
   rowHeight = 30;
   vizWidth = 100;
   //constructor
-  constructor(responseGroupsExpanded: string[][], responseGroupsCollapsed: string[][], segmentGap: number, rowHeight: number, vizWidth: number) {
+  constructor(responseGroupsExpanded: string[][], responseGroupsCollapsed: string[][], partyGroups: string[][], segmentGap: number, rowGap: number, rowHeight: number, vizWidth: number) {
     this.responseGroupsExpanded = responseGroupsExpanded;
     this.responseGroupsCollapsed = responseGroupsCollapsed;
+    this.partyGroups = partyGroups;
     this.segmentGap = segmentGap;
+    this.rowGap = rowGap;
     this.rowHeight = rowHeight;
     this.vizWidth = vizWidth;
   }
@@ -52,37 +88,26 @@ export default class ImpCoordinates {
       const totalSegmentWidthMinusGapsCollapsed = this.vizWidth - this.segmentGap * (this.responseGroupsCollapsed.length - 1)
       //make an arrays of the same length as the arrays of response groups expanded/collapsed, in the same order as the arrays of response groups.
       //each entry in the array is the array of coordinates for the points in the relevant response group
-      const arrayOfBuildingsExpanded = this.responseGroupsExpanded.map((responseGroup, responseGroupIdx) => {
-        const pointSubset = singleArrayOfPoints.filter(point => responseGroup.includes(point.response))
-        const topLeftY = 0;
-        const topLeftX = 0 + this.responseGroupsExpanded
-          .slice(0, responseGroupIdx)  //array of the response groups before the current responseGroup
-          .map(prevResponseGroup => proportionsMapExpanded.get(prevResponseGroup)! * totalSegmentWidthMinusGapsExpanded + this.segmentGap) //take each of these response groups.  Get the group proportion, multiply by the totalSegmentWidthMinusGaps, add one gap for the next segment.  The result is an array of widths -- each width is the width of the relevant segment, plus the width of the gap that comes after it.
-          .reduce((acc, curr) => acc + curr, 0) //sum the resulting widths to get the total
-        return apartmentWindows(
-          topLeftX,
-          topLeftY,
-          proportionsMapExpanded.get(responseGroup)! * totalSegmentWidthMinusGapsExpanded,
-          this.rowHeight,
-          pointSubset.length
-        )
-      })
-      const arrayOfBuildingsCollapsed = this.responseGroupsCollapsed.map((responseGroup, responseGroupIdx) => {
-        const pointSubset = singleArrayOfPoints.filter(point => responseGroup.includes(point.response))
-        const topLeftY = 0;
-        const topLeftX = 0 + this.responseGroupsCollapsed
-          .slice(0, responseGroupIdx)  //array of the response groups before the current responseGroup
-          .map(prevResponseGroup => proportionsMapCollapsed.get(prevResponseGroup)! * totalSegmentWidthMinusGapsCollapsed + this.segmentGap) //take each of these response groups.  Get the group proportion, multiply by the totalSegmentWidthMinusGaps, add one gap for the next segment.  The result is an array of widths -- each width is the width of the relevant segment, plus the width of the gap that comes after it.
-          .reduce((acc, curr) => acc + curr, 0) //sum the resulting widths to get the total
-        return apartmentWindows(
-          topLeftX,
-          topLeftY,
-          proportionsMapCollapsed.get(responseGroup)! * totalSegmentWidthMinusGapsCollapsed,
-          this.rowHeight,
-          pointSubset.length
-        )
-      })
-      //now add those coordinates to the points in the sample at the current impVar in this loop
+      const arrayOfBuildingsExpanded = arrayOfApartmentWindows(
+        this.responseGroupsExpanded,
+        singleArrayOfPoints,
+        proportionsMapExpanded,
+        totalSegmentWidthMinusGapsExpanded,
+        this.segmentGap,
+        0,
+        0,
+        this.rowHeight
+      )
+      const arrayOfBuildingsCollapsed = arrayOfApartmentWindows(
+        this.responseGroupsCollapsed,
+        singleArrayOfPoints,
+        proportionsMapCollapsed,
+        totalSegmentWidthMinusGapsCollapsed,
+        this.segmentGap,
+        0,
+        0,
+        this.rowHeight
+      )
       Object.keys(sample[impVar]!).forEach(waveString => {
         sample[impVar]![waveString]!.forEach((el, idx) => {
           //get the building for the response of the current point
@@ -99,5 +124,77 @@ export default class ImpCoordinates {
       })
     })
   }
-
+  addByResponseAndParty(sample: Record<string, Record<string, Record<string, unknown>[]>>) {
+    Object.keys(sample).forEach(impVar => {
+      //consolidate the sampled points across waves into a single array of points
+      const singleArrayOfPoints = Object.values(sample[impVar]!).flat() as { response: string, pid3: string }[]
+      //make the proportions maps that return the proportion for each response group both expanded and collapsed
+      //note that these are 2-layer maps that return proportions by party AND response
+      const proportionsMapExpanded = getProportions(singleArrayOfPoints, this.responseGroupsExpanded, "response", this.partyGroups, 'pid3') as Map<string[], Map<string[], number>>;
+      const proportionsMapCollapsed = getProportions(singleArrayOfPoints, this.responseGroupsCollapsed, "response", this.partyGroups, 'pid3') as Map<string[], Map<string[], number>>;
+      //compute the total width of each party's row of segments, not including the gaps between rows
+      //this width is the same for all party groups
+      const partyRowTotalWidth = this.vizWidth - this.rowGap * (this.partyGroups.length - 1);
+      //compute the total width of the segments within each party's row, not including gaps between the segments, both expanded and collapsed
+      //since the segmentgap is set at the app level, this width is the same for all party groups
+      const totalSegmentWidthMinusGapsExpanded = partyRowTotalWidth - this.segmentGap * (this.responseGroupsExpanded.length - 1);
+      const totalSegmentWidthMinusGapsCollapsed = partyRowTotalWidth - this.segmentGap * (this.responseGroupsCollapsed.length - 1);
+      //for each of the Expanded and Collapsed views, make an array of arrays of coordinates.
+      //the outer array is for the party groups, inner arrays are for the response groups
+      const rowsOfCoordinates = this.partyGroups.map((partyGroup, partyGroupIdx) => {
+        //get the subset of points in the current partyGroup
+        const pointSubsetParty = singleArrayOfPoints.filter(point => partyGroup.includes(point.pid3));
+        //compute the Y coordinate of the top left of the row of points for the current party
+        const topLeftYParty = 0;
+        //compute the X coordinate of the top left of the row of points for the current party
+        //This is the total width of party rows (constant across parties) plus row gaps for party groups (constant across parties) to the left of the current party group 
+        const topLeftXParty = 0 + partyGroupIdx * (partyRowTotalWidth + this.rowGap)
+        //now we can get the coordinates for the segments for the current party
+        //coordinates for the expanded view
+        const currentPartyArrayOfBuildingsExpanded = arrayOfApartmentWindows(
+          this.responseGroupsExpanded,
+          pointSubsetParty,
+          proportionsMapExpanded.get(partyGroup)!,
+          totalSegmentWidthMinusGapsExpanded,
+          this.segmentGap,
+          topLeftXParty,
+          topLeftYParty,
+          this.rowHeight
+        )
+        //coordinate for the collapsed view
+        const currentPartyArrayOfBuildingsCollapsed = arrayOfApartmentWindows(
+          this.responseGroupsCollapsed,
+          pointSubsetParty,
+          proportionsMapCollapsed.get(partyGroup)!,
+          totalSegmentWidthMinusGapsCollapsed,
+          this.segmentGap,
+          topLeftXParty,
+          topLeftYParty,
+          this.rowHeight
+        )
+        //each of currentPartyArrayOfBuildings (Expanded/Collapse) is an array of arrays of coordinates
+        //the outer array is of segments for for the current party 
+        //each segment contains an array of point coordinates.
+        //the number of elements in an inner array is equal
+        //to the number of points in the sample at the given impvar with the 
+        //party id in the current partyGroup and response in the relevant segment.
+        return ({
+          expanded: currentPartyArrayOfBuildingsExpanded,
+          collapse: currentPartyArrayOfBuildingsCollapsed
+        })
+      })
+      //we now have rowsOfCoordinates
+      //for each partyGroup in this.partyGroups, rowsOfCoordinates has one element, 
+      // with its elemnts in the same order as the
+      //elements in this.partyGroups.
+      //Each of these elements is an object with properties 'expanded' and 'collapsed'.
+      //'expanded' is an array.
+      //For each responseGroup in this.responseGroupsExpanded, 'expanded' has one element
+      //with its elements in the same order as the elements in this.responseGroups
+      //the elements in this array are the coordinates for the points in the
+      //current impVar with parties in the partyGroup and responses in the responseGroup.
+      //The structure of 'collapsed' is parrallel, with one element for each responseGroup
+      //in this.responseGroupsCollapsed
+    })
+  }
 }

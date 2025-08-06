@@ -53,11 +53,20 @@ export function makeImpSample(sampleSize: number, partyGroups: string[][]) {
   //now assign the coordinates
   const ORDEREDRESPONSES_EXPANDED = [['Not relevant'], ['Beneficial'], ['Important'], ['Essential']]
   const ORDEREDRESPONSES_COLLAPSED = [['Not relevant', 'Beneficial'], ['Important', 'Essential']]
+  const PARTYGROUPS = [['Democrat'], ['Independent', 'Other'], ['Republican']];
   const SEGMENTGAP = 10;
+  const ROWGAP = 20; //gap between rows when we have one row for each party
   const ROWHEIGHT = 30;
-  const ROWWIDTH = 100;
   const VIZWIDTH = 100;
-  const coordinateMaker = new ImpCoordinates(ORDEREDRESPONSES_EXPANDED, ORDEREDRESPONSES_COLLAPSED, SEGMENTGAP, ROWHEIGHT, VIZWIDTH)
+  const coordinateMaker = new ImpCoordinates(
+    ORDEREDRESPONSES_EXPANDED,
+    ORDEREDRESPONSES_COLLAPSED,
+    PARTYGROUPS,
+    SEGMENTGAP,
+    ROWGAP,
+    ROWHEIGHT,
+    VIZWIDTH
+  )
   //UNSPLIT VIEW
   //in this view, all waves and party ids are combined into a single rectangle.
   coordinateMaker.addUnsplit(outSample)
@@ -69,7 +78,25 @@ export function makeImpSample(sampleSize: number, partyGroups: string[][]) {
   //that response.
   coordinateMaker.addByResponse(outSample)
 
+  //BY RESPONSE AND PARTY
+  /*
+  in this view, we take all sampled persons from each imp item and create three rows
+  of horizontal segments -- one row for Dems, one row for Inds+Others, one row for Reps.
+  Obviously, each of these rows is segmented by response 
+  */
 
+  //TODO...
+  /*
+  after all the views are built, pass through the sample to...
+  1. Set the radius on every point to the minimum of the radius for the view
+  that point belongs to.
+  2. Create an additional object that stores the point radius for each view
+  3. Remove the radius property from every point.
+
+  Then, change the return statement below so it returns BOTH the sample 
+  (with the radius properties removed from all the points) AND the radius object
+  created in 2.
+  */
 
 
   return outSample;
