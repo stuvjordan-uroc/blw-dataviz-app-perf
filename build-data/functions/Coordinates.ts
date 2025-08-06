@@ -161,7 +161,7 @@ export default class ImpCoordinates {
           topLeftYParty,
           this.rowHeight
         )
-        //coordinate for the collapsed view
+        //coordinates for the collapsed view
         const currentPartyArrayOfBuildingsCollapsed = arrayOfApartmentWindows(
           this.responseGroupsCollapsed,
           pointSubsetParty,
@@ -195,6 +195,13 @@ export default class ImpCoordinates {
       //current impVar with parties in the partyGroup and responses in the responseGroup.
       //The structure of 'collapsed' is parrallel, with one element for each responseGroup
       //in this.responseGroupsCollapsed
+      Object.keys(sample[impVar]!).forEach(waveString => {
+        sample[impVar]![waveString]!.forEach((point, pointIdx) => {
+          //get the index in the party arry that matches the pid3 of the current point
+          const partyIdx = this.partyGroups.findIndex(partyGroup => partyGroup.includes(point.pid3 as string))
+          rowsOfCoordinates[partyIdx]
+        })
+      })
     })
   }
 }
