@@ -40,12 +40,20 @@ export default class ImpCoordinates {
   responseGroupsExpanded = [['Not relevant'], ['Beneficial'], ['Important'], ['Essential']];
   responseGroupsCollapsed = [['Not relevant', 'Beneficial'], ['Important', 'Essential']];
   partyGroups = [['Democrat'], ['Independent', 'Other'], ['Republican']];
-  segmentGap = 10;
-  rowGap = 20;
+  segmentGap = 1;
+  rowGap = 5;
   rowHeight = 30;
   vizWidth = 100;
   //constructor
-  constructor(responseGroupsExpanded: string[][], responseGroupsCollapsed: string[][], partyGroups: string[][], segmentGap: number, rowGap: number, rowHeight: number, vizWidth: number) {
+  constructor(
+    responseGroupsExpanded: string[][],
+    responseGroupsCollapsed: string[][],
+    partyGroups: string[][],
+    segmentGap: number,
+    rowGap: number,
+    rowHeight: number,
+    vizWidth: number
+  ) {
     this.responseGroupsExpanded = responseGroupsExpanded;
     this.responseGroupsCollapsed = responseGroupsCollapsed;
     this.partyGroups = partyGroups;
@@ -134,7 +142,7 @@ export default class ImpCoordinates {
       const proportionsMapCollapsed = getProportions(singleArrayOfPoints, this.responseGroupsCollapsed, "response", this.partyGroups, 'pid3') as Map<string[], Map<string[], number>>;
       //compute the total width of each party's row of segments, not including the gaps between rows
       //this width is the same for all party groups
-      const partyRowTotalWidth = this.vizWidth - this.rowGap * (this.partyGroups.length - 1);
+      const partyRowTotalWidth = (this.vizWidth - this.rowGap * (this.partyGroups.length - 1)) / this.partyGroups.length;
       //compute the total width of the segments within each party's row, not including gaps between the segments, both expanded and collapsed
       //since the segmentgap is set at the app level, this width is the same for all party groups
       const totalSegmentWidthMinusGapsExpanded = partyRowTotalWidth - this.segmentGap * (this.responseGroupsExpanded.length - 1);
@@ -142,6 +150,7 @@ export default class ImpCoordinates {
       //for each of the Expanded and Collapsed views, make an array of arrays of coordinates.
       //the outer array is for the party groups, inner arrays are for the response groups
       const rowsOfCoordinates = this.partyGroups.map((partyGroup, partyGroupIdx) => {
+        //now building the row of coordinates for points from the current impVar with pid3 in the current party group
         //get the subset of points in the current partyGroup
         const pointSubsetParty = singleArrayOfPoints.filter(point => partyGroup.includes(point.pid3));
         //compute the Y coordinate of the top left of the row of points for the current party
@@ -173,33 +182,40 @@ export default class ImpCoordinates {
           this.rowHeight
         )
         //each of currentPartyArrayOfBuildings (Expanded/Collapse) is an array of arrays of coordinates
-        //the outer array is of segments for for the current party 
+        //the outer array is of segments for  the current party
+        //--one segment for each imp response -- 
         //each segment contains an array of point coordinates.
         //the number of elements in an inner array is equal
         //to the number of points in the sample at the given impvar with the 
         //party id in the current partyGroup and response in the relevant segment.
         return ({
           expanded: currentPartyArrayOfBuildingsExpanded,
-          collapse: currentPartyArrayOfBuildingsCollapsed
+          collapsed: currentPartyArrayOfBuildingsCollapsed
         })
       })
-      //we now have rowsOfCoordinates
-      //for each partyGroup in this.partyGroups, rowsOfCoordinates has one element, 
-      // with its elemnts in the same order as the
-      //elements in this.partyGroups.
-      //Each of these elements is an object with properties 'expanded' and 'collapsed'.
-      //'expanded' is an array.
-      //For each responseGroup in this.responseGroupsExpanded, 'expanded' has one element
-      //with its elements in the same order as the elements in this.responseGroups
-      //the elements in this array are the coordinates for the points in the
-      //current impVar with parties in the partyGroup and responses in the responseGroup.
-      //The structure of 'collapsed' is parrallel, with one element for each responseGroup
-      //in this.responseGroupsCollapsed
+      //we now have rowsOfCoordinates.
+      //rowsOfCoordinates is an array
+      //There is one element in this array for each partyGroup in this.partyGroups, in that order.
+      //Each elemeent is an object with properties expanded and collapsed.
+      //each of these properties points to an array.
+      //There is one element in each array for this.responseGroupsExpanded and this.responseGroupsCollapsed,
+      //respectively.
+      //Each of these elements is an array of coordinates.
       Object.keys(sample[impVar]!).forEach(waveString => {
         sample[impVar]![waveString]!.forEach((point, pointIdx) => {
-          //get the index in the party arry that matches the pid3 of the current point
+          //get the index in the partyGroups array that matches the pid3 of the current point
           const partyIdx = this.partyGroups.findIndex(partyGroup => partyGroup.includes(point.pid3 as string))
-          rowsOfCoordinates[partyIdx]
+          //get the index in the responseGroupsExpanded array that matches the response of the current point
+          const responseExpandedIdx = this.responseGroupsExpanded.findIndex(responseGroup => responseGroup.includes(point.response as string))
+          //and same thing fro the responseGroupsCollapsed array...
+          const responseCollapsedIdx = this.responseGroupsCollapsed.findIndex(responseGroup => responseGroup.includes(point.response as string))
+          sample[impVar]![waveString]![pointIdx] = {
+            ...sample[impVar]![waveString]![pointIdx],
+            byResponseParty: {
+              expanded: rowsOfCoordinates[partyIdx]!.expanded[responseExpandedIdx]!.shift(),
+              collapsed: rowsOfCoordinates[partyIdx]!.collapsed[responseCollapsedIdx]!.shift()
+            }
+          }
         })
       })
     })

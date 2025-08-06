@@ -54,10 +54,11 @@ export function makeImpSample(sampleSize: number, partyGroups: string[][]) {
   const ORDEREDRESPONSES_EXPANDED = [['Not relevant'], ['Beneficial'], ['Important'], ['Essential']]
   const ORDEREDRESPONSES_COLLAPSED = [['Not relevant', 'Beneficial'], ['Important', 'Essential']]
   const PARTYGROUPS = [['Democrat'], ['Independent', 'Other'], ['Republican']];
-  const SEGMENTGAP = 10;
-  const ROWGAP = 20; //gap between rows when we have one row for each party
-  const ROWHEIGHT = 30;
   const VIZWIDTH = 100;
+  const ROWGAP = 5; //in the split-by-party views, this leaves 90% of the space for rows of segments split by party
+  const SEGMENTGAP = 1; //with VIZWIDTH = 100 and ROWGAP = 5, each party's row is 30 units long.  So setting SEGMENTGAP to 1 leaves 90% of space in expanded view for segments.  
+  const ROWHEIGHT = 30;
+
   const coordinateMaker = new ImpCoordinates(
     ORDEREDRESPONSES_EXPANDED,
     ORDEREDRESPONSES_COLLAPSED,
@@ -84,6 +85,8 @@ export function makeImpSample(sampleSize: number, partyGroups: string[][]) {
   of horizontal segments -- one row for Dems, one row for Inds+Others, one row for Reps.
   Obviously, each of these rows is segmented by response 
   */
+  coordinateMaker.addByResponseAndParty(outSample)
+
 
   //TODO...
   /*
