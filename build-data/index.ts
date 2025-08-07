@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import path from "node:path";
 import Data from "./functions/Data.ts";
-import apartmentWindows from "./functions/apartment-windows.ts";
-import { getProportions, unGroupedProportions } from "./functions/proportions.ts";
 import ImpCoordinates from "./functions/Coordinates.ts";
 
 export function makeImpSample(sampleSize: number, partyGroups: string[][]) {
@@ -51,15 +49,22 @@ export function makeImpSample(sampleSize: number, partyGroups: string[][]) {
   });
 
   //now assign the coordinates
-  const ORDEREDRESPONSES_EXPANDED = [['Not relevant'], ['Beneficial'], ['Important'], ['Essential']]
-  const ORDEREDRESPONSES_COLLAPSED = [['Not relevant', 'Beneficial'], ['Important', 'Essential']]
-  const PARTYGROUPS = [['Democrat'], ['Independent', 'Other'], ['Republican']];
+  const ORDEREDRESPONSES_EXPANDED = [
+    ["Not relevant"],
+    ["Beneficial"],
+    ["Important"],
+    ["Essential"],
+  ];
+  const ORDEREDRESPONSES_COLLAPSED = [
+    ["Not relevant", "Beneficial"],
+    ["Important", "Essential"],
+  ];
+  const PARTYGROUPS = [["Democrat"], ["Independent", "Other"], ["Republican"]];
   const VIZWIDTH = 100;
   const PARTYROWGAP = 5; //in the split-by-party views, this leaves 90% of the space for rows of segments split by party
-  const SEGMENTGAP = 1; //with VIZWIDTH = 100 and ROWGAP = 5, each party's row is 30 units long.  So setting SEGMENTGAP to 1 leaves 90% of space in expanded view for segments.  
+  const SEGMENTGAP = 1; //with VIZWIDTH = 100 and ROWGAP = 5, each party's row is 30 units long.  So setting SEGMENTGAP to 1 leaves 90% of space in expanded view for segments.
   const ROWHEIGHT = 30;
   const WAVEVIZGAP = 5;
-
 
   const coordinateMaker = new ImpCoordinates(
     ORDEREDRESPONSES_EXPANDED,
@@ -70,17 +75,17 @@ export function makeImpSample(sampleSize: number, partyGroups: string[][]) {
     WAVEVIZGAP,
     ROWHEIGHT,
     VIZWIDTH
-  )
+  );
   //UNSPLIT VIEW
   //in this view, all waves and party ids are combined into a single rectangle.
-  coordinateMaker.addUnsplit(outSample)
+  coordinateMaker.addUnsplit(outSample);
 
-  //BY RESPONSE 
+  //BY RESPONSE
   //in this view, we take all sampled persons from each imp item (regardless of pid3), and group
   //them by response into horizontal segments, with separate coordinates for each of the collapsed and expanded views
   //the lengths of the segment for a given response depends on the proportions of the group giving
   //that response.
-  coordinateMaker.addByResponse(outSample)
+  coordinateMaker.addByResponse(outSample);
 
   //BY RESPONSE AND PARTY
   /*
@@ -89,7 +94,7 @@ export function makeImpSample(sampleSize: number, partyGroups: string[][]) {
   These rows are laid out side-by-side, so total vizHeight is just ROWHEIGHT.
   Each of these rows is segmented by response.
   */
-  coordinateMaker.addByResponseAndParty(outSample)
+  coordinateMaker.addByResponseAndParty(outSample);
 
   //BY RESPONSE AND WAVE
   /*
@@ -100,8 +105,7 @@ export function makeImpSample(sampleSize: number, partyGroups: string[][]) {
   So total heigh of this viz is expanded from ROWHEIGHT to
   ROWHEIGHT * (number of waves) + WAVEVIZGAP * (number of waves - 1)
   */
-  coordinateMaker.addByResponseAndWave(outSample)
-
+  coordinateMaker.addByResponseAndWave(outSample);
 
   //BY RESPONSE AND WAVE AND PARTY
   /*
@@ -112,7 +116,7 @@ export function makeImpSample(sampleSize: number, partyGroups: string[][]) {
   ROWHEIGHT * (number of waves) + WAVEVIZGAP * (number of waves - 1)
   */
 
-  coordinateMaker.addByResponseAndWaveAndParty(outSample)
+  coordinateMaker.addByResponseAndWaveAndParty(outSample);
 
   //TODO...
   /*
@@ -135,7 +139,5 @@ export function makeImpSample(sampleSize: number, partyGroups: string[][]) {
   round off all coordinates to whole numbers s(sub-pixel units slows browser performance)
   */
 
-
   return outSample;
 }
-
