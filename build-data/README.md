@@ -1,6 +1,6 @@
 # Overview
 
-Scripts in this folder take the raw data from the .gz files and build synthetic samples for use in the app. Generally, the synthetic samples will assign coordinates to each datapoint, so that less code needs to run on the client to calculate these coordinates. (Caveat...client side code will have to scale the coordinates in response to window size.)
+Scripts in this folder take the raw data from the .gz files and build synthetic samples for use in the app. The synthetic samples will assign coordinates to each datapoint, so that less code needs to run on the client to calculate these coordinates.
 
 Each section in this files focuses on one visualization tool in the app, describing the sample used in the tool, the views the tool supplies, the coordinates needed for each point in each view, how those coordinates are calculated by the script, and how the runtime code can use those coordinates to build the views.
 
@@ -16,17 +16,41 @@ The sample will be organized by principle. (See the Sample section below.) In ef
 
 Given this design, everything we write in the following is written about the canvas/sample/coordinates _for any given single principle_.
 
-The most basic view, which below we call _all principles, unsplit_, has one canvas for each principle, with the canvases stacked vertically. Within each canvas, there is one un-segmented row showing all points in the sample.
+The most basic view, which below we call _unsplit_, has one canvas for each principle, with the canvases stacked vertically. Within each canvas, there is one un-segmented row showing all points in the sample.
 
-The extention of this very basic view, _all principles, split by response_, has one canvas for each principle, with the canvases stacked vertically. Within each canvas, there is one _segmented_ row, with one segment for each response, with sampled points grouped into segments by their responses.
+The extention of this very basic view, _split by response_, has one canvas for each principle, with the canvases stacked vertically. Within each canvas, there is one _segmented_ row, with one segment for each response, with sampled points grouped into segments by their responses.
 
-The _all principles, split by response_ view can be split by party, to make the _all principles, split by response AND party_ view. In the canvas for any one principle in this view, there will be THREE rows of segments, laid out horizontally within the canvas. -- democrat row on the left, independent+other row in the middle, republican row on the right.
+The _split by response_ view can be split by party, to make the _split by response AND party_ view. In the canvas for any one principle in this view, there will be THREE rows of segments, laid out horizontally within the canvas. -- democrat row on the left, independent+other row in the middle, republican row on the right.
 
 (add option to "compare party" on a given principle -- rotating the rows to columns???)
 
-Each of the _all principles, split by response_ view and the _all principles, split by response AND party_ view can be "split by wave". In any "split by wave" view, there is (like all the other views), one canvas for each principle, with the canvass stacked vertically. Within each canvas, there are multiple segmented rows of points, one row for each wave. (Null waves on any one principle have space allocated for a row of points, but no row of points rendered in that space.) At each wave, there is one row of points in the case of the _all principles, split by response AND wave_ view, and three horizontally-laid-out rows points in the ase of the _all principles, split by response AND wave AND party_ view.
+Each of the _split by response_ view and the _all principles, split by response AND party_ view can be "split by wave". In any "split by wave" view, there is (like all the other views), one canvas for each principle, with the canvases stacked vertically. Within each canvas, there are multiple segmented rows of points, one row for each wave. (Null waves on any one principle have space allocated for a row of points, but no row of points rendered in that space.) At each wave, there is one row of points in the case of the _split by response AND wave_ view, and three horizontally-laid-out rows points in the case of the _split by response AND wave AND party_ view.
 
 Finally, each view that is _split by response_, is further split into two sub-views: _expanded_ and _collapsed_. It the _expanded_ view, each row of points is split into 4 segments -- one for each response to the imp questions. In the _collapsed_ view, each row of points is split into 2 segments -- one for the bottom two responses, one for the top two responses.
+
+## Element sizes
+
+We will build for four screen-width ranges, assigning a fixed width to the canvas on which points will be arrayed for each range. In addition to fixing the width of the canvas at each range, we also need to fix two other parameters -- point radius, window width, and window height. What these mean will be explained later.
+
+- **SMALL SCREENS**, defined as width < 768px. (The narrowest ipad is 760px wide.).
+  - **canvas width** 360px.
+  - **point radius** 3px.
+  - **window width and height** 9px.
+
+- **MEDIUM SCREENS**, defined as 768px <= width < 1024px (ipads are in this range in portrait mode. The largest ipad hits 1024 in landscape mode)
+  - **canvas width** 760px.
+  - **point radius** 4px.
+  - **window width and height** 12px.
+
+- **LARGE SCREENS**, defined as 1024px <= width < 1200px (laptops tend to be 1024+. We put a max width on our app of 1200px)
+  - **canvas width** 1020px.
+  - **point radius** 4px.
+  - **window width and height** 12px.
+
+- **XL SCREENS**, defined as 1200px <= width. (We put a max width on our app of 1200px).
+  - **canvas width** 1180px.
+  - **point radius** 4px.
+  - **window width and height** 12px.
 
 ## Coordinate system
 
