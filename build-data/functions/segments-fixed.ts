@@ -1,71 +1,132 @@
-function discretizeWidths(smoothWidths: number[], windowWidth: number) {
-  //assume that the rawWidths sum to the total width available.
-  const totalWidth = smoothWidths.reduce((acc, curr) => acc + curr, 0);
-  if (totalWidth < windowWidth * smoothWidths.length) {
-    console.log("WARNING: Not enough space to discretize these widths.");
-    return undefined;
-  }
-  //get the order of the smoothWidths from from narrowest to widest
-  const widthOrder = new Array(smoothWidths.length)
-    .fill(1)
-    .map((el, idx) => idx)
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    .sort(
-      (firstEl, secondEl) => smoothWidths[firstEl]! - smoothWidths[secondEl]!
-    );
-  //create a "stock" of windows to allocate among the smoothwidths:
-  let stockOfWindows = Math.floor(totalWidth / windowWidth);
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import lodash from "lodash";
 
-  //allocate one window to each width.  This works because we failed the totalWidth < windowWidth * smoothWidths.length test
-  const outWidths = new Array(smoothWidths.length).fill(1);
-  stockOfWindows = stockOfWindows - smoothWidths.length;
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  widthOrder.filter(
-    (smoothWidthIndex) =>
-      outWidths[smoothWidthIndex] * windowWidth <
-      smoothWidths[smoothWidthIndex]!
+interface Grid {
+  count: number;
+  width: number;
+  height: number;
+  numColumns: number;
+  numRows: number;
+  colWidth: number;
+  rowHeight: number;
+}
+
+function makeCoordinates(
+  pointCount: number,
+  topLeftX: number,
+  topLeftY: number,
+  grid: Grid,
+  pointRadius: number
+) {
+  const coordinates = [] as { index: number; x: number; y: number }[];
+  for (let row = 0; row < grid.numRows; row++) {
+    for (let column = 0; column < grid.numColumns; column++) {
+      const windowTopLeftX = topLeftX + row * grid.colWidth;
+      const windowTopLeftY = topLeftY + column * grid.rowHeight;
+      coordinates.push({
+        index: row * (grid.numColumns - 1) + column,
+        x:
+          windowTopLeftX +
+          pointRadius +
+          Math.random() * (grid.colWidth - 2 * pointRadius),
+        y:
+          windowTopLeftY +
+          pointRadius +
+          Math.random() * (grid.rowHeight - 2 * pointRadius),
+      });
+    }
+  }
+  const emptyWindowIndices = lodash.sampleSize(
+    coordinates.map((c) => c.index),
+    coordinates.length - pointCount
   );
-  //the indices left in widthOrder refer to elements of smoothWidths that still have some width remainig.
+  return coordinates
+    .filter((c) => emptyWindowIndices.includes(c.index))
+    .map((c) => ({
+      x: c.x,
+      y: c.y,
+    }));
 }
 
 export default function segmentsFixed(
+  topLeftX: number,
+  topLeftY: number,
   pointRadius: number,
-  windowWidth: number,
-  segmentGap: number,
+  counts: number[],
   vizWidth: number,
-  counts: number[]
+  segmentGap: number
 ) {
   /*
   Return an array of arrays of coordinates at which circles will be placed to form a segment viz.
 
-  Segments will be rectangular blocks of square "windows", each window with width and height windowWidth.
-
-  Widths of these rectangles of windows will be set to approximate the proportions implied by `counts`  -- which is an
-  array of numbers assumed to be between non-negative integers.
-
-  However, each rectangle is constrained to be at least one window wide, and of course to be some whole number of
-  windows across.
   */
-  const horizontalSpaceAfterGaps = vizWidth - segmentGap * (counts.length - 1);
-  //hozontalSpaceAfterGaps is the amount of space in which to build the segments.
-  //There will be counts.length segments, and each must be at least 1 window wide.
-  //So we need horizontalSpaceAfterGaps to be at least counts.length*windowWidth
-  //for this to work
-  if (horizontalSpaceAfterGaps < counts.length * windowWidth) {
-    console.log(
-      "WARNING: There is not enough horiztonal space in the parameters you passed to segementsFixed."
-    );
+  //if there's not enough space to give each segment a width of pointRadius, return undefined
+  if (
+    vizWidth -
+      2 * pointRadius * count.length -
+      segmentGap * (counts.length - 1) <
+    0
+  ) {
     return undefined;
   }
+  //first compute the widths of the segments.
+  //start by allocating enough space to each segment to accommodate exactly 1 column of points
+  //note that we will allocate that space even to elements of the count are 0.
+  const segmentWidths = new Array(counts.length).fill(
+    2 * pointRadius
+  ) as number[];
+  //now allocate remaining space proportionally
+  const totalCount = counts.reduce((acc, curr) => acc + curr, 0);
+  counts
+    .map((c) => c / totalCount) //get the proportion for each count
+    .map(
+      (p) =>
+        p *
+        (vizWidth -
+          2 * pointRadius * count.length -
+          segmentGap * (counts.length - 1))
+    ) //proportionally allocate the space remaining after taking out the segment gaps and the already-allocated space
+    .forEach((additionalWidth, idx) => {
+      segmentWidths[idx] = segmentWidths[idx]! + additionalWidth;
+    });
+  //now compute the number of columns and rows of points for each segment, packing the points as tightly as possible.
 
-  /* 
-  Now compute the number of windows across the horizontal axis for each segment.
-  */
-  const total = counts.reduce((acc, curr) => acc + curr, 0);
-  const segmentWidthsSmooth = counts.map(
-    (count) => (horizontalSpaceAfterGaps * count) / total
-  );
-  //segmentWidthsSmooth is a "smooth" depiction of how wide each segment should be
-  //but we need a "discrete" version that allows for the fact that a whole number of windows of fixed width
-  //need to be placed in each segment.
+  const grids = segmentWidths.map((width, idx) => ({
+    count: counts[idx]!,
+    width: width,
+    height: 0,
+    numColumns: Math.floor(width / (2 * pointRadius)),
+    numRows: Math.ceil(counts[idx] / Math.floor(width / (2 * pointRadius))),
+    colWidth: 0,
+    rowHeight: 0,
+  })) as Grid[];
+  //compute the maximum number of rows across all the segments
+  const maxRows = grids
+    .map((g) => g.numRows)
+    .reduce((acc, curr) => (curr > acc ? curr : acc));
+  //and set a uniform segment height that allows the segment with the most rows and just accommodate all its points.
+  const segmentHeight = maxRows * 2 * pointRadius;
+  //now set the column widths and heights (windows!)
+  grids.forEach((grid) => {
+    grid.height = segmentHeight;
+    grid.colWidth = grid.width / grid.numColumns;
+    grid.rowHeight = segmentHeight / grid.numRows;
+  });
+  //now assign coordinates.
+  return counts.map((count, countIdx) => {
+    const segmentTopLeftX =
+      topLeftX +
+      counts
+        .filter((c, i) => i < countIdx)
+        .map((c, i) => grids[i]!.width)
+        .reduce((acc, curr) => acc + curr, 0) +
+      countIdx * segmentGap;
+    return makeCoordinates(
+      count,
+      segmentTopLeftX,
+      topLeftY,
+      grids[countIdx]!,
+      pointRadius
+    );
+  });
 }
