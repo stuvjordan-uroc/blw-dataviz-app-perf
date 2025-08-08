@@ -23,6 +23,15 @@ export default function windows(numPoints: number, pointRadius: number, topLeftX
     return undefined
   }
 
+  /* 
+  It seems like this will look best if the number of windows is as close as possible to the number of points.
+
+  So set numRows = Math.ceiling(numPoints/numColumns).  Then numColumns has to satisfy
+
+  2*numPoints*pointRadius/buildingWidth <= numColumns <= buildingHeight/2*pointRadius
+  
+  */
+
 
   /*
   then we need to return an array of numPoints Coordinate types, with each cx and cy jittered inside its own unique window.
