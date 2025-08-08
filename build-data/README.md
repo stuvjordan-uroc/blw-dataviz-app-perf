@@ -28,14 +28,22 @@ Each of the _split by response_ view and the _all principles, split by response 
 
 Finally, each view that is _split by response_, is further split into two sub-views: _expanded_ and _collapsed_. It the _expanded_ view, each row of points is split into 4 segments -- one for each response to the imp questions. In the _collapsed_ view, each row of points is split into 2 segments -- one for the bottom two responses, one for the top two responses.
 
-## Element sizes
+## Element dimensions
 
-We will build for four screen-width ranges, assigning a fixed width to the canvas on which points will be arrayed for each range. In addition to fixing the width of the canvas at each range, we also need to fix two other parameters -- point radius, window width, and window height. What these mean will be explained later.
+![Element dimensions diagram](./dimensionsDiagram.png)
+
+The diagram above shows dimensions for a split-by-party view. Split-by-party (while not split by wave) is the most difficult view to fit, since it requires the largest amount of horizontal space for points, and the largest amount of points fit within that space. The inequality in the diagram specifies a tight upper bound on the point diameter, given the 'vizWidth', sample size (total number of points in the viz), and aspect ratio (width-to-height) of the row of segments.
+
+The tightest width we will design for is 360 pixels. This allows for an iPhone SE in portrait orientation, with about 7.5 px of padding/margin on each side of the viz. We'll want to have 100 points per party per wave, which comes to 1200 points total in the unsplit, split-by-response, and split-by-response-and-party views. Finally, we'd like ratio of vizWidth to vizHeight (as those lengths are defined in the diagram above) of 16:9. Applying the formula above, one finds that this can work with a point diameter of about 7.5 or less.
+
+We will build for four screen-width ranges, assigning a fixed width to the canvas on which points will be arrayed for each range. In addition to fixing the width of the canvas at each range, we also need to fix the other free parameters described in the diagram above.
 
 - **SMALL SCREENS**, defined as width < 768px. (The narrowest ipad is 760px wide.).
-  - **canvas width** 360px.
-  - **point radius** 3px.
-  - **window width and height** 9px.
+  - **vizWidth** 360px.
+  - **A** 16/9.
+  - **pointRadius** 3px. (0.5\*pointDiameter, of course)
+  - **segmentGap** (3/2)\*pointRadius
+  - **rowGap** (9/4)\*pointRadius
 
 - **MEDIUM SCREENS**, defined as 768px <= width < 1024px (ipads are in this range in portrait mode. The largest ipad hits 1024 in landscape mode)
   - **canvas width** 760px.
