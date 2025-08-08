@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import { decompressSync, strFromU8 } from "fflate";
-import type { RawData } from "./types.ts";
+import type { RawData, Point } from "./types.ts";
 import lodash from "lodash";
 function getNonEmptyVals(
   columnNameStrings: string[],
@@ -156,7 +156,7 @@ export default class Data {
         }
       });
       //construct the sample
-      const sample = [] as { response: string | number | null, pid3: string | number | null }[];
+      const sample = [] as Point[];
       // eslint-disable-next-line @typescript-eslint/non-nullable-type-assertion-style
       const weightsTotal = cumulativeWeights[
         cumulativeWeights.length - 1

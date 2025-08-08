@@ -12,12 +12,8 @@ export default defineConfig({
     {
       name: "make-imp-data",
       buildStart() {
-        const impSample = makeImpSample(1000, [
-          ["Democrat"],
-          ["Republican"],
-          ["Independent", "Other"],
-        ]);
-        writeFileSync("src/data/imp.json", JSON.stringify(impSample));
+        const impSample = makeImpSample('small');
+        writeFileSync("src/data/imp-small.json", JSON.stringify(impSample));
         //console.log to see covered waves
         //console.log(Object.keys(impSample[Object.keys(impSample)[0]]));
         //console.log random selection to audit

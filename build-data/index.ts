@@ -1,15 +1,75 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import path from "node:path";
 import Data from "./functions/Data.ts";
-import ImpCoordinates from "./functions/Coordinates.ts";
+import ImpCoordinates from "./functions/NewCoordinates.ts";
+import type { Config, Sample, ScreenSize } from "./functions/types.ts"
 
-export function makeImpSample(sampleSize: number, partyGroups: string[][]) {
+
+
+const config: Config = {
+  sampleSize: 100, //so total of 1200 per imp-question
+  responsesExpanded: [
+    ["Not relevant"],
+    ["Beneficial"],
+    ["Important"],
+    ["Essential"],
+  ],
+  responsesCollapsed: [
+    ["Not relevant", "Beneficial"],
+    ["Important", "Essential"]
+  ],
+  partyGroups: [['Democrat'], ['Independent', 'Other'], ['Republican']],
+  small: {
+    screenWidthRange: [0, 768],
+    vizWidth: 360,
+    A: 16 / 9,
+    pointRadius: 3,
+    segmentGap: (3 / 2) * 3,
+    rowGap: (3 / 2) * (3 / 2) * 3,
+    labelHeightTop: 30,
+    labelHeightBottom: 30
+  },
+  medium: {
+    screenWidthRange: [768, 1024],
+    vizWidth: 760,
+    A: 16 / 9,
+    pointRadius: 4,
+    segmentGap: (3 / 2) * 3,
+    rowGap: (3 / 2) * (3 / 2) * 3,
+    labelHeightTop: 30,
+    labelHeightBottom: 30
+  },
+  large: {
+    screenWidthRange: [1024, 1200],
+    vizWidth: 1020,
+    A: 16 / 9,
+    pointRadius: 4,
+    segmentGap: (3 / 2) * 3,
+    rowGap: (3 / 2) * (3 / 2) * 3,
+    labelHeightTop: 30,
+    labelHeightBottom: 30
+  },
+  xLarge: {
+    screenWidthRange: [1200, Infinity],
+    vizWidth: 1180,
+    A: 16 / 9,
+    pointRadius: 4,
+    segmentGap: (3 / 2) * 3,
+    rowGap: (3 / 2) * (3 / 2) * 3,
+    labelHeightTop: 30,
+    labelHeightBottom: 30
+  },
+}
+
+
+
+
+export function makeImpSample(screenSize: ScreenSize) {
   const rawDataPathString = path.resolve(
     "build-data",
     "raw-data/dem_characteristics_importance.gz"
   );
   const data = new Data(rawDataPathString);
-  const SAMPLESIZE = sampleSize;
   //get array of non-empty values of the wave column
   const nonEmptyWaveValues = data.nonemptyWaveValues;
   //get imp columns
@@ -17,7 +77,7 @@ export function makeImpSample(sampleSize: number, partyGroups: string[][]) {
   //get nonempty imp values
   const nonEmptyImpResponses = data.nonemptyImpResponses;
   //array of party values for sample
-  const partyValues = partyGroups;
+  const partyValues = config.partyGroups;
   //construct the sample
   const outSample = Object.fromEntries(
     impColumns.map((impCol) => [
@@ -26,52 +86,36 @@ export function makeImpSample(sampleSize: number, partyGroups: string[][]) {
         nonEmptyWaveValues.map((waveValue) => [Data.waveString(waveValue), []])
       ),
     ])
-  ) as Record<string, Record<string, Record<string, unknown>[]>>;
+  ) as Sample;
+  //outSample as constructed on the previous lines has empty arrays of responses
+  //So now sample points from the data to fill in those arrays
   impColumns.forEach((impCol) => {
     nonEmptyWaveValues.forEach((waveNum) => {
       partyValues.forEach((partiesArray) => {
-        //console.log("building sample for", impCol.colName, waveNum, partiesArray);
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        outSample[impCol.colName]![Data.waveString(waveNum)]!.splice(
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          outSample[impCol.colName]![Data.waveString(waveNum)]!.length - 1,
-          0,
-          ...data.sample(
-            impCol.colIdx,
-            nonEmptyImpResponses,
-            waveNum,
-            partiesArray,
-            SAMPLESIZE
-          )
-        );
+        outSample[impCol.colName]![Data.waveString(waveNum)]!
+          .splice(
+            outSample[impCol.colName]![Data.waveString(waveNum)]!.length - 1,
+            0,
+            ...data.sample(
+              impCol.colIdx,
+              nonEmptyImpResponses,
+              waveNum,
+              partiesArray,
+              config.sampleSize
+            )
+          );
       });
     });
   });
 
   //now assign the coordinates
-  const ORDEREDRESPONSES_EXPANDED = [
-    ["Not relevant"],
-    ["Beneficial"],
-    ["Important"],
-    ["Essential"],
-  ];
-  const ORDEREDRESPONSES_COLLAPSED = [
-    ["Not relevant", "Beneficial"],
-    ["Important", "Essential"],
-  ];
-  const PARTYGROUPS = [["Democrat"], ["Independent", "Other"], ["Republican"]];
-  const VIZWIDTH = 100;
-  const PARTYROWGAP = 5; //in the split-by-party views, this leaves 90% of the space for rows of segments split by party
-  const SEGMENTGAP = 1; //with VIZWIDTH = 100 and ROWGAP = 5, each party's row is 30 units long.  So setting SEGMENTGAP to 1 leaves 90% of space in expanded view for segments.
-  const ROWHEIGHT = 30;
-  const WAVEVIZGAP = 5;
 
   const coordinateMaker = new ImpCoordinates(
-    ORDEREDRESPONSES_EXPANDED,
-    ORDEREDRESPONSES_COLLAPSED,
-    PARTYGROUPS,
-    SEGMENTGAP,
-    PARTYROWGAP,
+    config.responsesExpanded,
+    config.responsesCollapsed,
+    config.partyGroups,
+    config[screenSize].segmentGap,
+    config[screenSize].rowGap,
     WAVEVIZGAP,
     ROWHEIGHT,
     VIZWIDTH

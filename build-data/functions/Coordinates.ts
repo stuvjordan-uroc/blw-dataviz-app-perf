@@ -3,7 +3,7 @@ import getProportions from "./proportions.ts";
 
 function arrayOfApartmentWindows(
   responseGroups: string[][],
-  arrayOfPoints: { response: string; [key: string]: string }[],
+  arrayOfPoints: { response: string;[key: string]: string }[],
   proportionsMap: Map<string[], number>,
   totalSegmentWidthMinusGaps: number,
   segmentGap: number,
@@ -27,7 +27,7 @@ function arrayOfApartmentWindows(
         .map(
           (prevResponseGroup) =>
             proportionsMap.get(prevResponseGroup)! *
-              totalSegmentWidthMinusGaps +
+            totalSegmentWidthMinusGaps +
             segmentGap
         ) //take each of these response groups.  Get the group proportion, multiply by the totalSegmentWidthMinusGaps, add one gap for the next segment.  The result is an array of widths -- each width is the width of the relevant segment, plus the width of the gap that comes after it.
         .reduce((acc, curr) => acc + curr, 0); //sum the resulting widths to get the total
@@ -338,7 +338,7 @@ export default class ImpCoordinates {
             undefined
           ) as Map<string[], number>,
           this.vizWidth -
-            this.segmentGap * (this.responseGroupsExpanded.length - 1),
+          this.segmentGap * (this.responseGroupsExpanded.length - 1),
           this.segmentGap,
           0,
           0 + (this.rowHeight + this.waveVizGap) * waveStringIdx,
@@ -358,7 +358,7 @@ export default class ImpCoordinates {
             undefined
           ) as Map<string[], number>,
           this.vizWidth -
-            this.segmentGap * (this.responseGroupsCollapsed.length - 1),
+          this.segmentGap * (this.responseGroupsCollapsed.length - 1),
           this.segmentGap,
           0,
           0 + (this.rowHeight + this.waveVizGap) * waveStringIdx,
@@ -406,15 +406,15 @@ export default class ImpCoordinates {
               undefined
             ) as Map<string[], number>,
             (this.vizWidth - this.partyRowGap * (this.partyGroups.length - 1)) /
-              3 -
-              this.segmentGap * (this.responseGroupsExpanded.length - 1),
+            3 -
+            this.segmentGap * (this.responseGroupsExpanded.length - 1),
             this.segmentGap,
             0 +
-              partyGroupIdx *
-                ((this.vizWidth -
-                  this.partyRowGap * (this.partyGroups.length - 1)) /
-                  3 +
-                  this.partyRowGap),
+            partyGroupIdx *
+            ((this.vizWidth -
+              this.partyRowGap * (this.partyGroups.length - 1)) /
+              3 +
+              this.partyRowGap),
             0 + waveStringIdx * (this.rowHeight + this.waveVizGap),
             this.rowHeight
           );
@@ -433,15 +433,15 @@ export default class ImpCoordinates {
               undefined
             ) as Map<string[], number>,
             (this.vizWidth - this.partyRowGap * (this.partyGroups.length - 1)) /
-              3 -
-              this.segmentGap * (this.responseGroupsCollapsed.length - 1),
+            3 -
+            this.segmentGap * (this.responseGroupsCollapsed.length - 1),
             this.segmentGap,
             0 +
-              partyGroupIdx *
-                ((this.vizWidth -
-                  this.partyRowGap * (this.partyGroups.length - 1)) /
-                  3 +
-                  this.partyRowGap),
+            partyGroupIdx *
+            ((this.vizWidth -
+              this.partyRowGap * (this.partyGroups.length - 1)) /
+              3 +
+              this.partyRowGap),
             0 + waveStringIdx * (this.rowHeight + this.waveVizGap),
             this.rowHeight
           );

@@ -32,9 +32,9 @@ Finally, each view that is _split by response_, is further split into two sub-vi
 
 ![Element dimensions diagram](./dimensionsDiagram.png)
 
-The diagram above shows dimensions for a split-by-party view. Split-by-party (while not split by wave) is the most difficult view to fit, since it requires the largest amount of horizontal space for points, and the largest amount of points fit within that space. The inequality in the diagram specifies a tight upper bound on the point diameter, given the 'vizWidth', sample size (total number of points in the viz), and aspect ratio (width-to-height) of the row of segments.
+The diagram above shows dimensions for a split-by-party view. Split-by-party (while not split by wave) is the most difficult view to fit, since it affords the least amount of horizontal space for points, while requiring the largest amount of points fit within that space. The inequality in the diagram specifies a tight upper bound on the point diameter, given the 'vizWidth', sample size (total number of points in the viz), and aspect ratio (width-to-height) of the row of segments.
 
-The tightest width we will design for is 360 pixels. This allows for an iPhone SE in portrait orientation, with about 7.5 px of padding/margin on each side of the viz. We'll want to have 100 points per party per wave, which comes to 1200 points total in the unsplit, split-by-response, and split-by-response-and-party views. Finally, we'd like ratio of vizWidth to vizHeight (as those lengths are defined in the diagram above) of 16:9. Applying the formula above, one finds that this can work with a point diameter of about 7.5 or less.
+The tightest canvas width we will design for is 360 pixels. This allows for an iPhone SE in portrait orientation, with about 7.5 px of padding/margin on each side of the viz. We'll want to have 100 points per party per wave, which comes to 1200 points total. Finally, we'd like ratio of vizWidth to vizHeight (as those lengths are defined in the diagram above) of 16:9. Applying the formula above, one finds that this can work with a point diameter of about 7.5 or less.
 
 We will build for four screen-width ranges, assigning a fixed width to the canvas on which points will be arrayed for each range. In addition to fixing the width of the canvas at each range, we also need to fix the other free parameters described in the diagram above.
 
@@ -44,37 +44,51 @@ We will build for four screen-width ranges, assigning a fixed width to the canva
   - **pointRadius** 3px. (0.5\*pointDiameter, of course)
   - **segmentGap** (3/2)\*pointRadius
   - **rowGap** (9/4)\*pointRadius
+  - **labelHeightTop** 30px
+  - **labelHeightBottom** 30px
 
 - **MEDIUM SCREENS**, defined as 768px <= width < 1024px (ipads are in this range in portrait mode. The largest ipad hits 1024 in landscape mode)
-  - **canvas width** 760px.
+  - **vizWidth** 760px.
+  - **A** 16/9
   - **point radius** 4px.
-  - **window width and height** 12px.
+  - **segmentGap** (3/2)\*pointRadius
+  - **rowGap** (9/4)\*pointRadius
+  - **labelHeightTop** 30px
+  - **labelHeightBottom** 30px
 
 - **LARGE SCREENS**, defined as 1024px <= width < 1200px (laptops tend to be 1024+. We put a max width on our app of 1200px)
-  - **canvas width** 1020px.
+  - **vizWidth** 1020px.
+  - **A** 16/9
   - **point radius** 4px.
-  - **window width and height** 12px.
+  - **segmentGap** (3/2)\*pointRadius
+  - **rowGap** (9/4)\*pointRadius
+  - **labelHeightTop** 30px
+  - **labelHeightBottom** 30px
 
 - **XL SCREENS**, defined as 1200px <= width. (We put a max width on our app of 1200px).
-  - **canvas width** 1180px.
+  - **vizWidth** 1180px.
+  - **A** 16/9
   - **point radius** 4px.
-  - **window width and height** 12px.
+  - **segmentGap** (3/2)\*pointRadius
+  - **rowGap** (9/4)\*pointRadius
+  - **labelHeightTop** 30px
+  - **labelHeightBottom** 30px
 
 ## Coordinate system
 
 As mentioned above, in every view, each principle will have it's own canvas, so the coordinates for any given point will be relative to the canvas it belongs to.
 
-To pin down the location of a point in any one canvas, we'll use x coordinates that range from 0 to 100. In effect, this will be the complete plotting area for the points -- There WILL be points with x coordinate aribtrarily close to 0 and there WILL be points with x coordinate arbitrarily close to 100, and all points will have x between 0 and 100. It will be up to runtime to translate these points into the coordinate system of whatever canvas it actually renders.
+To pin down the location of a point in any one canvas, we'll use x coordinates that range from 0 to vizWidth.
 
 The y coordinate system will depend on whether we are working with a _split by wave_ view.
 
-For a view that is NOT split-by-wave, y coordinates will range from 0 to 30. In effect, this means that the row height will be about 1/3 the total width of the row or rows (split-by-party has 3 rows laid out side-by-side) of points. As with the x coordinates, there WILL be points with y coordinate aribtrarily close to 0 and there WILL be points with y coordinate aribtrarily close to 30, and all points will have y coordinates between these values.
+For a view that is NOT split-by-wave, y coordinates will range from 0 to labelHeightTop + A/vizWidth + labelHeightBottom.
 
-For a view that IS split-by-wave...let W be the number of waves (not sure right now what that is)...Then y coordinates will range from 0 to W*30 + (W - 1)*10. The idea is that each row of points will have a height of 30 in this coordinate system, and then there will be a 10-coordinate gap between each row of points. As usual, there WILL be points with y coordinates aribtrariliy close to 0, AND there will be points with y coordinates arbitrarily close to W*30 + (W - 1)*10.
+For a view that IS split-by-wave...let W be the number of waves (it happens to be that W=4). Then Y coordinates range from 0 to W\*(labelHeightTop + A/vizWidth + labelHeightBottom).
 
 ## Sample
 
-For a given postive integer constant `SAMPLESIZE` (e.g. `const SAMPLESIZE = 1000`), we construct ONE sample FOR EACH of the 31 democratic principles as follows:
+For a given postive integer constant `SAMPLESIZE` (e.g. `const SAMPLESIZE = 100`), we construct ONE sample FOR EACH of the 31 democratic principles as follows:
 
 For each survey wave in which the principle was included, we sample:
 
@@ -82,9 +96,9 @@ For each survey wave in which the principle was included, we sample:
 - `SAMPLESIZE` persons from the set of persons who responded to principle's imp question AND responded `pid3 === 'Democrat'`
 - `SAMPLESIZE` persons from the set of persons who responded to principle's imp question AND responded `pid3 === 'Independent' || pid3 === 'Other'`
 
-Notice that this means that for each principle-wave, the sample size is `3*SAMPLESIZE`.
+Notice that this means that for each principle-wave, the sample size is `3*SAMPLESIZE`, and for each principle, the total samplesize is `12*sampleSize`.
 
-The structure of the JSON containing the generated sample is like this:
+The structure of the JSON containing the generated sample for any given screensize is like this:
 
 ```JSON
 {
