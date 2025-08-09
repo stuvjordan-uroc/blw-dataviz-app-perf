@@ -29,8 +29,8 @@ interface Coordinate {
   cy: number
 }
 interface ExpCollCoordinates {
-  expanded: Coordinate;
-  collapsed: Coordinate;
+  expanded?: Coordinate;
+  collapsed?: Coordinate;
 }
 
 export interface Point {

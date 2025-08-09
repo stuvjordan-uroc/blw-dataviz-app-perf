@@ -8,6 +8,10 @@ export function segment(
   segmentWidth: number,
   segmentHeight: number
 ) {
+  //If we're asked to give a segment with zero points, return an empty array of points.
+  if (numPoints === 0) {
+    return [] as { cx: number, cy: number }[]
+  }
   /*
   We first need to set some number of rows (numRows) and columns (numColumns) of windows.
   
@@ -25,8 +29,8 @@ export function segment(
   This works, so long as floor(segmentWidth/(2*pointRadius))*floor(segmentHeight/(2*pointRadius)) >= numPoints.
 
   But it may not be great.  If this last constraint is far from binding, the points will be sparsely and irregularly
-  distributed in the building -- potentially leaving a lot of blank space between any point and some or all of the outer
-  edges of the building.
+  distributed in the segment -- potentially leaving a lot of blank space between any point and some or all of the outer
+  edges of the segment.
 
   So we're going to use a strategy of searching for lower integer values for numRows and numColumns that still leave enough windows for all the points.
   */
@@ -98,6 +102,7 @@ export function rowOfSegments(
       pointRadius,
       topLeftX + segIdx * segmentGap,
       topLeftY,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       arrayOfSegmentWidths[segIdx]!,
       rowHeight
     )

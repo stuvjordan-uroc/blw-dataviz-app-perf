@@ -116,11 +116,11 @@ export function makeImpSample(screenSize: ScreenSize) {
   coordinateMaker.addUnsplit(outSample);
 
   //BY RESPONSE
-  //in this view, we take all sampled persons from each imp item (regardless of pid3), and group
-  //them by response into horizontal segments, with separate coordinates for each of the collapsed and expanded views
-  //the lengths of the segment for a given response depends on the proportions of the group giving
+  //In this view, there is a single horizontal row of segments, with one segment for each
+  // response, with one for for the responses collapsed, and one view for the responses expanded 
+  //The lengths of the segment for a given response depends on the proportions of the group giving
   //that response.
-  //coordinateMaker.addByResponse(outSample);
+  coordinateMaker.addByResponse(outSample);
 
   //BY RESPONSE AND PARTY
   /*
