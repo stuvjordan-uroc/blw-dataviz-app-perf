@@ -156,7 +156,7 @@ export default class Data {
         }
       });
       //construct the sample
-      const sample = [] as Point[];
+      const sample = [] as Partial<Point>[];
       // eslint-disable-next-line @typescript-eslint/non-nullable-type-assertion-style
       const weightsTotal = cumulativeWeights[
         cumulativeWeights.length - 1
@@ -169,9 +169,9 @@ export default class Data {
         const selectedRow = subset[firstMatchIdx];
         if (selectedRow) {
           sample.push({
-            response: selectedRow[impVarColIndex] as string | number | null,
+            response: selectedRow[impVarColIndex] as string,
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            pid3: selectedRow[this.utilityColumns.pid3!] as string | number | null
+            pid3: selectedRow[this.utilityColumns.pid3!] as string
           });
         }
       }

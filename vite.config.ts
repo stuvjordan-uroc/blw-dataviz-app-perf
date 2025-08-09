@@ -15,16 +15,15 @@ export default defineConfig({
         const impSample = makeImpSample('small');
         writeFileSync("src/data/imp-small.json", JSON.stringify(impSample));
         //console.log to see covered waves
-        //console.log(Object.keys(impSample[Object.keys(impSample)[0]]));
         //console.log random selection to audit
-        // const sampleOfImpVars = lodash.sampleSize(Object.keys(impSample), 3)
-        // sampleOfImpVars.forEach(sampledImpVar => {
-        //   const sampledWaveString = lodash.sample(Object.keys(impSample[sampledImpVar]))
-        //   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        //   const sampleOfPoints = lodash.sampleSize(impSample[sampledImpVar][sampledWaveString!], 3)
-        //   console.log('sample from', sampledImpVar, sampledWaveString)
-        //   console.log(formatWithOptions({ depth: Infinity }, '%O', sampleOfPoints))
-        // })
+        const sampleOfImpVars = lodash.sampleSize(Object.keys(impSample), 3)
+        sampleOfImpVars.forEach(sampledImpVar => {
+          const sampledWaveString = lodash.sample(Object.keys(impSample[sampledImpVar]))
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          const sampleOfPoints = lodash.sampleSize(impSample[sampledImpVar][sampledWaveString!], 3)
+          console.log('sample from', sampledImpVar, sampledWaveString)
+          console.log(formatWithOptions({ depth: Infinity }, '%O', sampleOfPoints))
+        })
       },
     },
   ],

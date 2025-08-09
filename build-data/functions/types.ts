@@ -43,4 +43,4 @@ export interface Point {
   byResponseWaveParty: ExpCollCoordinates
 }
 
-export type Sample = Record<string, Record<string, Point[]>>
+export type Sample = Record<string, Record<string, Partial<Point>[]>>

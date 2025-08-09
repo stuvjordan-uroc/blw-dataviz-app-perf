@@ -23,7 +23,7 @@ const config: Config = {
     screenWidthRange: [0, 768],
     vizWidth: 360,
     A: 16 / 9,
-    pointRadius: 3,
+    pointRadius: 0.001,
     segmentGap: (3 / 2) * 3,
     rowGap: (3 / 2) * (3 / 2) * 3,
     labelHeightTop: 30,
@@ -110,16 +110,7 @@ export function makeImpSample(screenSize: ScreenSize) {
 
   //now assign the coordinates
 
-  const coordinateMaker = new ImpCoordinates(
-    config.responsesExpanded,
-    config.responsesCollapsed,
-    config.partyGroups,
-    config[screenSize].segmentGap,
-    config[screenSize].rowGap,
-    WAVEVIZGAP,
-    ROWHEIGHT,
-    VIZWIDTH
-  );
+  const coordinateMaker = new ImpCoordinates(config, screenSize);
   //UNSPLIT VIEW
   //in this view, all waves and party ids are combined into a single rectangle.
   coordinateMaker.addUnsplit(outSample);
@@ -129,7 +120,7 @@ export function makeImpSample(screenSize: ScreenSize) {
   //them by response into horizontal segments, with separate coordinates for each of the collapsed and expanded views
   //the lengths of the segment for a given response depends on the proportions of the group giving
   //that response.
-  coordinateMaker.addByResponse(outSample);
+  //coordinateMaker.addByResponse(outSample);
 
   //BY RESPONSE AND PARTY
   /*
@@ -138,7 +129,7 @@ export function makeImpSample(screenSize: ScreenSize) {
   These rows are laid out side-by-side, so total vizHeight is just ROWHEIGHT.
   Each of these rows is segmented by response.
   */
-  coordinateMaker.addByResponseAndParty(outSample);
+  //coordinateMaker.addByResponseAndParty(outSample);
 
   //BY RESPONSE AND WAVE
   /*
@@ -149,7 +140,7 @@ export function makeImpSample(screenSize: ScreenSize) {
   So total heigh of this viz is expanded from ROWHEIGHT to
   ROWHEIGHT * (number of waves) + WAVEVIZGAP * (number of waves - 1)
   */
-  coordinateMaker.addByResponseAndWave(outSample);
+  //coordinateMaker.addByResponseAndWave(outSample);
 
   //BY RESPONSE AND WAVE AND PARTY
   /*
@@ -160,7 +151,7 @@ export function makeImpSample(screenSize: ScreenSize) {
   ROWHEIGHT * (number of waves) + WAVEVIZGAP * (number of waves - 1)
   */
 
-  coordinateMaker.addByResponseAndWaveAndParty(outSample);
+  //coordinateMaker.addByResponseAndWaveAndParty(outSample);
 
   //TODO...
   /*
