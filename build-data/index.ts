@@ -23,7 +23,7 @@ const config: Config = {
     screenWidthRange: [0, 768],
     vizWidth: 360,
     A: 16 / 9,
-    pointRadius: 0.001,
+    pointRadius: 3,
     segmentGap: (3 / 2) * 3,
     rowGap: (3 / 2) * (3 / 2) * 3,
     labelHeightTop: 30,

@@ -27,7 +27,7 @@ export default class ImpCoordinates {
         0,
         this.config[this.screenSize].labelHeightTop,
         this.config[this.screenSize].vizWidth,
-        this.config[this.screenSize].A / this.config[this.screenSize].vizWidth
+        this.config[this.screenSize].vizWidth / this.config[this.screenSize].A
       ) //returns an array of coordinates, of length numPointsAtCurrentImpVar
       if (!coordinates) {
         console.log(`WARNING: Could not set coordinates for the unsplit view on ${impVar}, coordinates(...) returned undefined.  This means there is not enough space for the specified pointSize.`)

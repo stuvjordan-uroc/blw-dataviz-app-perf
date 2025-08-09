@@ -32,9 +32,9 @@ Finally, each view that is _split by response_, is further split into two sub-vi
 
 ![Element dimensions diagram](./dimensionsDiagram.png)
 
-The diagram above shows dimensions for a split-by-party view. Split-by-party (while not split by wave) is the most difficult view to fit, since it affords the least amount of horizontal space for points, while requiring the largest amount of points fit within that space. The inequality in the diagram specifies a tight upper bound on the point diameter, given the 'vizWidth', sample size (total number of points in the viz), and aspect ratio (width-to-height) of the row of segments.
+The diagram above shows dimensions for a split-by-party view. Split-by-party is the most difficult view to fit, since it affords the least amount of horizontal space for points, while requiring the largest amount of points fit within that space. The inequality in the diagram specifies a tight upper bound on the point diameter, given the 'vizWidth', sample size (total number of points in the viz), and aspect ratio (width-to-height) of the row of segments.
 
-The tightest canvas width we will design for is 360 pixels. This allows for an iPhone SE in portrait orientation, with about 7.5 px of padding/margin on each side of the viz. We'll want to have 100 points per party per wave, which comes to 1200 points total. Finally, we'd like ratio of vizWidth to vizHeight (as those lengths are defined in the diagram above) of 16:9. Applying the formula above, one finds that this can work with a point diameter of about 7.5 or less.
+The tightest canvas width we will design for is 360 pixels. This allows for an iPhone SE in portrait orientation, with about 7.5 px of padding/margin on each side of the viz. For sample size, we'll want to have 100 points per party per wave, which comes to 1200 points total. Finally, we'd like ratio of vizWidth to vizHeight (as those lengths are defined in the diagram above) of 16:9. Applying the formula above, one finds that this can work with a point diameter of about 7.5 or less.
 
 We will build for four screen-width ranges, assigning a fixed width to the canvas on which points will be arrayed for each range. In addition to fixing the width of the canvas at each range, we also need to fix the other free parameters described in the diagram above.
 
@@ -82,13 +82,13 @@ To pin down the location of a point in any one canvas, we'll use x coordinates t
 
 The y coordinate system will depend on whether we are working with a _split by wave_ view.
 
-For a view that is NOT split-by-wave, y coordinates will range from 0 to labelHeightTop + A/vizWidth + labelHeightBottom.
+For a view that is NOT split-by-wave, y coordinates will range from 0 to labelHeightTop + vizWidth/A + labelHeightBottom.
 
-For a view that IS split-by-wave...let W be the number of waves (it happens to be that W=4). Then Y coordinates range from 0 to W\*(labelHeightTop + A/vizWidth + labelHeightBottom).
+For a view that IS split-by-wave...let W be the number of waves (it happens to be that W=4). Then Y coordinates range from 0 to W\*(labelHeightTop + vizWidth/A + labelHeightBottom).
 
 ## Sample
 
-For a given postive integer constant `SAMPLESIZE` (e.g. `const SAMPLESIZE = 100`), we construct ONE sample FOR EACH of the 31 democratic principles as follows:
+For a given postive integer constant `SAMPLESIZE` (e.g. `const SAMPLESIZE = 100`), we construct ONE sample FOR EACH of the democratic principles as follows:
 
 For each survey wave in which the principle was included, we sample:
 
@@ -153,10 +153,10 @@ Each sample response (i.e. each element of the wave arrays like `"w01": []`) is 
 Views:
 
 - **DATA GEN CODE DONE** all principles, unsplit
-- **DATA GEN CODE DONE** all principles, split by response, expanded
-- **DATA GEN CODE DONE** all principles, split by response, collapse
-- **DATA GEN CODE DONE** all principles, split by response AND party, expanded
-- **DATA GEN CODE DONE** all principles, split by response AND party, collapsed
+- all principles, split by response, expanded
+- all principles, split by response, collapse
+- all principles, split by response AND party, expanded
+- all principles, split by response AND party, collapsed
 - all principles, split by response AND wave, expanded
 - all principles, split by response AND wave, collapse
 - all principles, split by response AND wave AND party, expanded
