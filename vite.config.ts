@@ -13,7 +13,7 @@ export default defineConfig({
       name: "make-imp-data",
       buildStart() {
         const impSample = makeImpSample('small');
-        writeFileSync("src/data/imp-small.json", JSON.stringify(impSample));
+        writeFileSync("src/data/coordinates/imp-small.json", JSON.stringify(impSample));
         //console.log to see covered waves
         //console.log random selection to audit
         const sampleOfImpVars = lodash.sampleSize(Object.keys(impSample), 3)
