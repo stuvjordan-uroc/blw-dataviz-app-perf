@@ -129,7 +129,7 @@ export function makeImpSample(screenSize: ScreenSize) {
   These rows are laid out side-by-side, so total vizHeight is just ROWHEIGHT.
   Each of these rows is segmented by response.
   */
-  //coordinateMaker.addByResponseAndParty(outSample);
+  coordinateMaker.addByResponseAndParty(outSample);
 
   //BY RESPONSE AND WAVE
   /*

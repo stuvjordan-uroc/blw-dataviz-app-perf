@@ -36,8 +36,8 @@ export function segment(
   */
 
   //first set numRows and numColums to their maximum possible values
-  let numRows = Math.floor(segmentWidth / (2 * pointRadius))
-  let numColumns = Math.floor(segmentHeight / (2 * pointRadius))
+  let numRows = Math.floor(segmentHeight / (2 * pointRadius))
+  let numColumns = Math.floor(segmentWidth / (2 * pointRadius))
   //if this doesn't give us enough points numRows and numColums at these maxima, return undefined
   if (numColumns * numRows < numPoints) {
     return undefined
@@ -113,6 +113,7 @@ export function rowOfSegments(
   )
 }
 
+
 export function rowOfRowsOfSegments(
   arrayOfArraysOfNumPoints: number[][],
   pointRadius: number,
@@ -126,7 +127,7 @@ export function rowOfRowsOfSegments(
   if (arrayOfArraysOfNumPoints.length !== arrayOfArraysOfSegmentWidths.length) {
     return undefined
   }
-  arrayOfArraysOfNumPoints.map((arrayOfNumPoints, aIdx) => {
+  return arrayOfArraysOfNumPoints.map((arrayOfNumPoints, aIdx) => {
     const totalWidthOfPreviousRows = aIdx === 0 ?
       0 :
       arrayOfArraysOfSegmentWidths

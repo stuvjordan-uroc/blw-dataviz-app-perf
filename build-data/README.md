@@ -155,8 +155,8 @@ Each sample response (i.e. each element of the wave arrays like `"w01": []`) is 
 Views:
 
 - **DATA GEN CODE DONE** all principles, unsplit
-- all principles, split by response, expanded
-- all principles, split by response, collapse
+- **DATA GEN CODE DONE** all principles, split by response, expanded
+- **DATA GEN CODE DONE** all principles, split by response, collapse
 - all principles, split by response AND party, expanded
 - all principles, split by response AND party, collapsed
 - all principles, split by response AND wave, expanded
