@@ -10,7 +10,7 @@ export function segment(
 ) {
   //If we're asked to give a segment with zero points, return an empty array of points.
   if (numPoints === 0) {
-    return [] as { cx: number, cy: number }[]
+    return [] as { x: number, y: number, cx: number, cy: number }[]
   }
   /*
   We first need to set some number of rows (numRows) and columns (numColumns) of windows.
@@ -62,17 +62,21 @@ export function segment(
 
   //we now have numRows and numColumns set to the minimum integer values that can fit numPoints, and that have window sizes large enough to fit the points.
 
-  //create an array of all the windows, with each element giving the cx and cy coordinate where a point would be placed within the window.
+  //create an array of all the windows, with each element giving the x, y, cx and cy coordinate where a point would be placed within the window.
   const windowWidth = segmentWidth / numColumns;
   const windowHeight = segmentHeight / numRows;
-  const arrayOfWindows = [] as { cx: number, cy: number }[];
+  const arrayOfWindows = [] as { x: number, y: number, cx: number, cy: number }[];
   for (let row = 1; row <= numRows; row++) {
     for (let col = 1; col <= numColumns; col++) {
       const windowTopLeftX = topLeftX + windowWidth * (col - 1);
       const windowTopLeftY = topLeftY + windowHeight * (row - 1);
+      const cX = windowTopLeftX + pointRadius + Math.random() * (windowWidth - 2 * pointRadius);
+      const cY = windowTopLeftY + pointRadius + Math.random() * (windowHeight - 2 * pointRadius);
       arrayOfWindows.push({
-        cx: windowTopLeftX + pointRadius + Math.random() * (windowWidth - 2 * pointRadius),
-        cy: windowTopLeftY + pointRadius + Math.random() * (windowHeight - 2 * pointRadius)
+        x: cX - pointRadius,
+        y: cY - pointRadius,
+        cx: cX,
+        cy: cY,
       })
     }
   }

@@ -128,25 +128,27 @@ Each sample response (i.e. each element of the wave arrays like `"w01": []`) is 
 {
   "response": "Beneficial",
   "pid3": "Republican",
-  "unSplit": {"r": 1.3, "cx": 452.3, "cy": -60}
+  "unSplit": {"x": 1.3, "y":4.3, "cx": 452.3, "cy": -60}
   "byResponse": {
-    "expanded": {"r": 1.3, "cx": 12.4, "cy": 127},
-    "collapsed": {"r": 1.3, "cx": 82, "cy": 0.072}
+    "expanded": {"x": 1.3, "y":4.3, "cx": 12.4, "cy": 127},
+    "collapsed": {"x": 1.3, "y":4.3, "cx": 82, "cy": 0.072}
   },
   "byReponseParty": {
-    "expanded": { "r": 1.3, "cx": 1, "cy": 84},
-    "collapsed": { "r": 1.3, "cx": 2, "cy": -673.2}
+    "expanded": { "x": 1.3, "y":4.3, "cx": 1, "cy": 84},
+    "collapsed": { "x": 1.3, "y":4.3, "cx": 2, "cy": -673.2}
   },
   "byReponseWave": {
-    "expanded": { "r": 1.3, "cx": 1, "cy": 84},
-    "collapsed": { "r": 1.3, "cx": 2, "cy": -673.2}
+    "expanded": { "x": 1.3, "y":4.3, "cx": 1, "cy": 84},
+    "collapsed": { "x": 1.3, "y":4.3, "cx": 2, "cy": -673.2}
   },
   "byReponseWaveParty": {
-    "expanded": { "r": 8, "cx": 1, "cy": 84},
-    "collapsed": { "r": 4, "cx": 2, "cy": -673.2}
+    "expanded": { "x": 8, "y":4.3, "cx": 1, "cy": 84},
+    "collapsed": { "x": 4, "y":4.3, "cx": 2, "cy": -673.2}
   }
 }
 ```
+
+`cx` and `cy` give the coordinates for the centers of the circles. `x` and `y` offset from the center by `pointRadius` for the given config, so that you can place images that contain circles, instead of using canvas elements.
 
 ## Views
 

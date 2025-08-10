@@ -25,6 +25,8 @@ export interface Config {
 }
 
 interface Coordinate {
+  x: number,
+  y: number,
   cx: number,
   cy: number
 }
