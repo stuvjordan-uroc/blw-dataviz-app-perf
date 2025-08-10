@@ -49,7 +49,7 @@ export default class Data {
     const rawData = JSON.parse(
       strFromU8(decompressSync(fs.readFileSync(filePathString)))
     ) as RawData;
-    //array of column names in this.colums
+    //array of column names in this.columns
     this.columns = rawData.columns;
     //array of data rows in this.data
     this.data = rawData.data;

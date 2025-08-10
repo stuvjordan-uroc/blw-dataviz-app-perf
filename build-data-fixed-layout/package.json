@@ -1,0 +1,24 @@
+{
+  "name": "build-data-fixed-layout",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "run": "node index.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.32.0",
+    "@types/node": "^24.1.0",
+    "eslint": "^9.32.0",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.38.0"
+  },
+  "dependencies": {
+    "fflate": "^0.8.2",
+    "zod": "^4.0.17"
+  }
+}
