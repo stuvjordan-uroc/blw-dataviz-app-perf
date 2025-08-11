@@ -61,7 +61,7 @@ export interface Layout {
   labelHeightBottom: number;
 }
 
-interface PointAtView {
+export interface PointAtView {
   x: number;
   y: number;
   cx: number;
@@ -85,5 +85,6 @@ type Viz = {
   {
     layout: Layout;
     points: Point[];
+    segments: SegmentGroups;
   }
 >;
