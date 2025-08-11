@@ -61,14 +61,14 @@ export interface Layout {
   labelHeightBottom: number;
 }
 
-export interface PointAtView {
+interface PointAtView {
   x: number;
   y: number;
   cx: number;
   cy: number;
 }
 
-interface Point {
+export interface Point {
   unSplit: PointAtView;
   byResponse: PointAtView;
   byResponseAndParty: PointAtView;
