@@ -105,9 +105,36 @@ export default function makeData(rawDataPathString: string) {
         row[perfCol.colIdx]
       ])))
     }));
+    //construct the arrays of waves in which some imp or perf questions are included
+    const allWaves = new Set(outData.map(row => row.wave))
+    //get the rows in which all imp questions are empty
+    const allImpQuestionsEmpty = outData.filter(row => {
+      const arrayOfIsEmpty = Object.keys(row.imp)
+        .map(impKey => row.imp[impKey] === null)
+      return !arrayOfIsEmpty.includes(true)
+    })
+    const setOfWavesWithImp = allWaves.difference(new Set(allImpQuestionsEmpty.map(row => row.wave).filter(wave => wave !== null)))
+    //get the rows in which all perf questions are empty
+    const allPerfQuestionsEmpty = outData.filter(row => {
+      const arrayOfIsEmpty = Object.keys(row.perf)
+        .map(perfKey => row.perf[perfKey] === null)
+      return !arrayOfIsEmpty.includes(true)
+    })
+    const setOfWavesWithPerf = allWaves.difference(new Set(allPerfQuestionsEmpty.map(row => row.wave).filter(wave => wave !== null)))
     return ({
       impCols: impCols.map(impCol => impCol.colName),
       perfCols: perfCols.map(perfCol => perfCol.colName),
+      waves: {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        imp: [...setOfWavesWithImp].sort((a, b) => a! - b!),
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        perf: [...setOfWavesWithPerf].sort((a, b) => a! - b!)
+      },
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      impResponses: new Set(impCols.map(impCol => (outData).map(row => row.imp[impCol.colIdx]!)).flat(Infinity) as string[]),
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      perfResponses: new Set(perfCols.map(perfCol => (outData).map(row => row.perf[perfCol.colIdx]!)).flat(Infinity) as string[]),
+      allPrinciples: new Set(impCols.map(col => col.colName).concat(perfCols.map(col => col.colName))),
       data: outData
     } as Data)
   } catch (error) {
