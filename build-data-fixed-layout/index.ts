@@ -2,7 +2,20 @@ import path from 'node:path'
 import makeData from './functions-and-types/make-data.ts';
 import { makeImpProportions } from './functions-and-types/make-proportions.ts';
 import util from 'node:util'
+import makeSegments from './functions-and-types/make-segments.ts';
+import type { Layout } from './functions-and-types/types.ts';
 
+const layoutSmall: Layout = {
+  screenWidthRange: [0, 768],
+  vizWidth: 360,
+  A: 16 / 9,
+  labelHeightBottom: 30,
+  labelHeightTop: 30,
+  pointRadius: 3,
+  rowGap: 9 * 2 * 3 / 4,
+  sampleSize: 100,
+  segmentGap: 3 * 2 * 3 / 2
+}
 
 const rawDataPathString = path.resolve(
   "build-data-fixed-layout",
@@ -10,58 +23,29 @@ const rawDataPathString = path.resolve(
 );
 const data = makeData(rawDataPathString)
 if (data) {
-  console.log(
-    util.inspect(
-      makeImpProportions(
-        "misconduct",
-        data,
-        {
-          expanded: [["Not relevant"], ["Beneficial"], ["Important"], ["Essential"]],
-          collapsed: [["Not relevant", "Beneficial"], ["Important", "Essential"]]
-        },
-        data.waves.imp,
-        [["Democrat"], ["Independent", "Other"], ["Republican"]]
-      ),
-      false, null, true
-    )
+  const pForGovStats = makeImpProportions(
+    "gov_stats",
+    data,
+    {
+      expanded: [["Not relevant"], ["Beneficial"], ["Important"], ["Essential"]],
+      collapsed: [["Not relevant", "Beneficial"], ["Important", "Essential"]]
+    },
+    data.waves.imp,
+    [["Democrat"], ["Independent", "Other"], ["Republican"]]
   )
-}
-
-interface Layout {
-  screenWidthRange: number[];
-  vizWidth: number;
-  A: number;
-  pointRadius: number;
-  segmentGap: number;
-  rowGap: number;
-  labelHeightTop: number;
-  labelHeightBottom: number;
-}
-
-
-
-interface Coordinates {
-  proportions: ProportionGroups
-  small: {
-    layout: Layout
-  },
-  medium: {
-    layout: Layout
-  },
-  large: {
-    layout: Layout
-  },
-  xLarge: {
-    layout: Layout
+  if (pForGovStats) {
+    console.log(
+      util.inspect(
+        makeSegments(layoutSmall, pForGovStats),
+        false, null, true
+      )
+    )
   }
+
 }
 
 
-// if (data) {
-//   const principleNames = [...data.allPrinciples] as const;  //as const causes typescript to interpret the type of principle names in the narrowest possible sense
-//   type PrincipleKey = typeof principleNames[number]; //now PrincipleKey is the union of the strings in data.allPrinciples
-//   interface Proportions {
-//     [key in PrincipleKey]: ProportionGroups | null
-//   }
-// }
+
+
+
 

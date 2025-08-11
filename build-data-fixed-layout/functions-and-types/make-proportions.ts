@@ -41,9 +41,9 @@ export function makeImpProportions(
     //in the responseGroup on the principle
     //in the partyGroups on party
     const nonEmptyRows = data.data.filter(row => (
-      (responseGroups[viewType as keyof ResponseGroups]).flat(Infinity).includes(row.imp[principle]!) &&
-      (partyGroups.flat(Infinity).includes(row.pid3!)) &&
-      row.weight !== null
+      (responseGroups[viewType as keyof ResponseGroups]).flat(Infinity).includes(row.imp[principle]!) && //rows that have non-empty responses on the principle
+      (partyGroups.flat(Infinity).includes(row.pid3!)) &&  //rows that have non-empty responses on pid
+      row.weight !== null  //rows that have non-empty responses on weight
     ))
     //byResponse proportions
     const byResponseTotalWeight = nonEmptyRows.reduce((acc, curr) => acc + (curr.weight!), 0)
@@ -75,6 +75,10 @@ export function makeImpProportions(
         const waveTotalWeight = nonEmptyRows
           .filter(row => row.wave === wave)
           .reduce((acc, curr) => acc + curr.weight!, 0)
+        //if the principle was not included in the current wave, waveTotalWeight will be equal to 0.
+        if (waveTotalWeight === 0) {
+          return []
+        }
         return responseGroups[viewType as keyof ResponseGroups].map(responseGroup =>
           weightedImpProportion(
             principle,
@@ -86,8 +90,11 @@ export function makeImpProportions(
       })
     //byResponseAndPartyAndWave
     outProportions[viewType as keyof ResponseGroups].byResponseAndPartyAndWave =
-      waves.map(wave =>
-        partyGroups.map(partyGroup => {
+      waves.map(wave => {
+        if (nonEmptyRows.filter(row => row.wave === wave).length === 0) {
+          return []
+        }
+        return partyGroups.map(partyGroup => {
           //total weight for the current wave and partyGroup
           const wavePartyTotalWeight = nonEmptyRows
             .filter(row => row.wave === wave)
@@ -104,7 +111,7 @@ export function makeImpProportions(
             )
           )
         })
-      )
+      })
   })
   return outProportions
 }
