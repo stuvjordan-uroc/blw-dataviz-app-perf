@@ -30,6 +30,8 @@ export interface ProportionGroups {
   expanded: ProportionViews
 }
 
+
+
 export interface SegmentCoordinates {
   topLeftX: number,
   topLeftY: number,
@@ -49,6 +51,33 @@ export interface SegmentGroups {
   expanded: SegmentViews,
 }
 
+
+
+export interface PointCoordinates {
+  x: number;
+  y: number;
+  cx: number;
+  cy: number;
+}
+
+interface PointViews {
+  byResponse: PointCoordinates[];
+  byResponseAndParty: PointCoordinates[];
+  byResponseAndWave: PointCoordinates[];
+  byResponseAndPartyAndWave: PointCoordinates[];
+}
+
+interface PointGroups {
+  collapsed: PointViews;
+  expanded: PointViews;
+}
+
+interface SampledResponse {
+  pid3: string;
+  response: string;
+  wave: number;
+}
+
 export interface Layout {
   screenWidthRange: number[];
   vizWidth: number;
@@ -61,30 +90,31 @@ export interface Layout {
   labelHeightBottom: number;
 }
 
-interface PointAtView {
-  x: number;
-  y: number;
-  cx: number;
-  cy: number;
-}
-
-export interface Point {
-  unSplit: PointAtView;
-  byResponse: PointAtView;
-  byResponseAndParty: PointAtView;
-  byResponseAndWave: PointAtView;
-  byResponseAndPartyAndWave: PointAtView;
-}
-
 type VizSize = "small" | "medium" | "large" | "xLarge"
 
-type Viz = {
-  proportions: Record<string, ProportionGroups>; //one ProportionGroup for each impvar.
-} & Record<  //one layout and array of points for each vizsize.
+//data to generate file that describes how data is split into groups
+interface Groups {
+  partyGroups: string[][];
+  responseGroups: {
+    expanded: string[][];
+    collapsed: string[][];
+  }
+}
+
+//data to generate file that maps each impvar to computed proportions and synthetic sample.
+//proportions and samples have no information about rendering coordinates.  So they are 
+//unaffected by vizSize or layout configurations
+type ProportionsAndSamples = Record<
+  string,
+  { proportions: ProportionGroups, sampledResponses: SampledResponse[] }
+> //one object with proportions and sampled responses for each impVar
+
+
+//data to generate file that gives layout and coordinates for any given vizSize
+type Coordinates = Record<
   VizSize,
   {
-    layout: Layout;
-    points: Point[];
-    segments: SegmentGroups;
+    layout: Layout, //at any given vizSize, the layout is the same for each principle
+    principles: Record<string, { points: PointGroups, segments: SegmentGroups }> //for each principle, coordinates for points and segments for that principle at each view
   }
->;
+>
