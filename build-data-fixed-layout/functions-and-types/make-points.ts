@@ -138,7 +138,28 @@ function rowOfBuildings(
         segmentCoordinates.topLeftY,
         segmentCoordinates.width,
         segmentCoordinates.height,
-        arrayOfNumbersOfResidents[segmentCoordinatesIdx],
+        arrayOfNumbersOfResidents[segmentCoordinatesIdx]!,
+        pointRadius
+      )
+  );
+}
+
+function rowOfRowOfBuildings(
+  arrayOfArraysOfSegmentCoordinates: SegmentCoordinates[][],
+  arrayOfArraysOfNumbersOfPoints: number[][],
+  pointRadius: number
+) {
+  if (
+    arrayOfArraysOfNumbersOfPoints.length !==
+    arrayOfArraysOfSegmentCoordinates.length
+  ) {
+    return undefined;
+  }
+  return arrayOfArraysOfSegmentCoordinates.map(
+    (arrayOfSegmentCoordinates, arrayOfArraysOfSegmentCoordinatesIdx) =>
+      rowOfBuildings(
+        arrayOfSegmentCoordinates,
+        arrayOfArraysOfNumbersOfPoints[arrayOfArraysOfSegmentCoordinatesIdx]!,
         pointRadius
       )
   );
@@ -205,57 +226,44 @@ export default function makePoints(
   Object.keys(vizData.responseGroups).forEach((viewType) => {
     const typedViewType = viewType as keyof VizData["responseGroups"];
     //byResponse view
-    const byResponseCoordinates = vizData.responseGroups[typedViewType].map(
-      (responseGroup, responseGroupIdx) => {
-        const segmentCoordinates =
-          segmentGroups[typedViewType].byResponse[responseGroupIdx];
-        const numResidents = outPoints.filter((point) =>
-          responseGroup.includes(point.response)
-        ).length;
-        if (!segmentCoordinates) {
-          console.log(
-            "WARNING: Failed to add byResponse coordinates for principle",
-            principle,
-            "at responseGroup",
-            responseGroup,
-            "cardinality of the segmentGroups you passed does not match."
-          );
-          return new Array(numResidents).fill(1).map((el) => emptyCoordinate());
-        }
-        return apartmentWindows(
-          segmentCoordinates.topLeftX,
-          segmentCoordinates.topLeftY,
-          segmentCoordinates.width,
-          segmentCoordinates.height,
-          numResidents,
-          layout.pointRadius
-        );
-      }
+    const arrayOfSegmentCoordinates = segmentGroups[typedViewType].byResponse;
+    const arrayOfCounts = vizData.responseGroups[typedViewType].map(
+      (responseGroup) =>
+        outPoints.filter((r) => responseGroup.includes(r.response)).length
     );
-    outPoints.forEach((point) => {
-      const responseGroupIdx = vizData.responseGroups[typedViewType].findIndex(
-        (group) => group.includes(point.response)
+    const coordinatesByResponseGroup = rowOfBuildings(
+      arrayOfSegmentCoordinates,
+      arrayOfCounts,
+      layout.pointRadius
+    );
+    if (!coordinatesByResponseGroup) {
+      console.log(
+        "WARNING: You tried to compute coordinates for principle",
+        principle,
+        "But the lengths of your segment arrays do not match the lengths of your response arrays.  So the coordinates generated are meaningless garbage."
       );
-      if (responseGroupIdx === -1) {
-        console.log(
-          "WARNING: In trying to assign coordinates, we are hitting points with responses that do not seem to be included in any of your response groups.  This means the generated points coordinates are meaningless garbage."
-        );
-      } else {
-        point[typedViewType].byResponse =
-          byResponseCoordinates[responseGroupIdx]!.shift()!;
-      }
-    });
+    } else {
+      //if we reach here, we know that the indices of responseGroups[typedViewType] and segmentGroups[typedViewType] line up
+      //so now we can assign coordinates.
+      vizData.responseGroups[typedViewType].forEach(
+        (responseGroup, responseGroupIdx) => {
+          outPoints.forEach((point) => {
+            if (responseGroup.includes(point.response)) {
+              const nextCoordinateForGroupOfPoint =
+                coordinatesByResponseGroup[responseGroupIdx]!.shift();
+              if (!nextCoordinateForGroupOfPoint) {
+                console.log(
+                  "WARNING: The cardinality of your sample points does not line up with the responseGroups and/or segments.  Coordinates produced are meaningless garbage."
+                );
+                //if this happens, leave the coordinate as zero
+              } else {
+                point[typedViewType].byResponse = nextCoordinateForGroupOfPoint;
+              }
+            }
+          });
+        }
+      );
+    }
     //byResponseAndParty view
-    const byResponseAndPartyCoordinates = vizData.partyGroups.map(
-      (partyGroup, partyGroupIdx) =>
-        vizData.responseGroups[typedViewType].map(
-          (responseGroup, responseGroupIdx) => {
-            const segmentCoordinates =
-              segmentGroups[typedViewType].byResponseAndParty[partyGroupIdx][
-                responseGroupIdx
-              ];
-          }
-        )
-    );
   });
 }
