@@ -5,6 +5,7 @@ import util from "node:util";
 import makeSegments from "./functions-and-types/make-segments.ts";
 import type { Layout, VizData } from "./functions-and-types/types.ts";
 import makeImpSample from "./functions-and-types/make-sample.ts";
+import makePoints from "./functions-and-types/make-points.ts";
 
 /* 
 CONFIGURATION
@@ -76,7 +77,31 @@ export default function makeVizDataImp() {
         ])
       ),
     };
-    return impVizData;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const misconSegments = makeSegments(
+      layoutSmall,
+      impVizData.principles["misconduct"]!.proportions
+    );
+    const points = makePoints(
+      "misconduct",
+      impVizData,
+      misconSegments,
+      layoutSmall
+    );
+    return {
+      vizData: impVizData,
+      coordinates: {
+        small: {
+          layout: layoutSmall,
+          principles: {
+            misconduct: {
+              points: points,
+              segments: misconSegments,
+            },
+          },
+        },
+      },
+    };
   }
   return undefined;
 }

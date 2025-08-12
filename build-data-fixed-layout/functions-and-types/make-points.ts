@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { LayoutGroup } from "motion/react";
 import type {
   Layout,
   PointCoordinates,
@@ -8,6 +9,7 @@ import type {
   SegmentCoordinates,
 } from "./types.ts";
 import lodash from "lodash";
+import { p } from "motion/react-client";
 
 function apartmentWindows(
   topLeftX: number,
@@ -165,6 +167,27 @@ function rowOfRowOfBuildings(
   );
 }
 
+function columnOfRowsOfRowsOfBuildings(
+  arrayOfArraysOfArraysOfSegments: SegmentCoordinates[][][],
+  arrayOfArraysOfArraysOfCounts: number[][][],
+  pointRadius: number
+) {
+  if (
+    arrayOfArraysOfArraysOfSegments.length !==
+    arrayOfArraysOfArraysOfCounts.length
+  ) {
+    return undefined;
+  }
+  return arrayOfArraysOfArraysOfSegments.map(
+    (arraysOfArraysOfSegments, arraysOfArraysOfSegmentsIdx) =>
+      rowOfRowOfBuildings(
+        arraysOfArraysOfSegments,
+        arrayOfArraysOfArraysOfCounts[arraysOfArraysOfSegmentsIdx]!,
+        pointRadius
+      )
+  );
+}
+
 export default function makePoints(
   principle: string,
   vizData: VizData,
@@ -265,5 +288,176 @@ export default function makePoints(
       );
     }
     //byResponseAndParty view
+    const segmentCoordinatesByPartyAndResponse =
+      segmentGroups[typedViewType].byResponseAndParty;
+    const countsByPartyAndResponse = vizData.partyGroups.map((partyGroup) =>
+      vizData.responseGroups[typedViewType].map(
+        (responseGroup) =>
+          outPoints.filter(
+            (point) =>
+              partyGroup.includes(point.pid3) &&
+              responseGroup.includes(point.response)
+          ).length
+      )
+    );
+    const coordinatesByPartyAndResponseGroup = rowOfRowOfBuildings(
+      segmentCoordinatesByPartyAndResponse,
+      countsByPartyAndResponse,
+      layout.pointRadius
+    );
+    if (!coordinatesByPartyAndResponseGroup) {
+      console.log(
+        "WARNING: Something does not line up in what you fed to makePoints.  Your coordinates are meaningless garbage"
+      );
+    } else if (
+      coordinatesByPartyAndResponseGroup.filter(
+        (partyGroup) => partyGroup === undefined
+      ).length > 0
+    ) {
+      console.log(
+        "WARNING: Something does not line up in what you fed to makePoints.  Your coordinates are meaningless garbage"
+      );
+    } else {
+      //if we get here, we can safely assign the corrdinates
+      vizData.partyGroups.forEach((partyGroup, partyGroupIdx) => {
+        vizData.responseGroups[typedViewType].forEach(
+          (responseGroup, responseGroupIdx) => {
+            outPoints.forEach((point) => {
+              if (
+                partyGroup.includes(point.pid3) &&
+                responseGroup.includes(point.response)
+              ) {
+                const nextCoordinate =
+                  coordinatesByPartyAndResponseGroup[partyGroupIdx]![
+                    responseGroupIdx
+                  ]!.shift();
+                if (!nextCoordinate) {
+                  console.log(
+                    "WARNING: Your coordinates are meaningless garbage."
+                  );
+                } else {
+                  point[typedViewType].byResponseAndParty = nextCoordinate;
+                }
+              }
+            });
+          }
+        );
+      });
+    }
+    //byResponseAndWave
+    const segmentsByWaveAndResponse =
+      segmentGroups[typedViewType].byResponseAndParty;
+    const countsByWaveAndResponse = vizData.waves.map((wave) =>
+      vizData.responseGroups[typedViewType].map(
+        (responseGroup) =>
+          outPoints.filter(
+            (point) =>
+              point.wave === wave && responseGroup.includes(point.response)
+          ).length
+      )
+    );
+    const coordinatesByWaveAndResponse = rowOfRowOfBuildings(
+      segmentsByWaveAndResponse,
+      countsByWaveAndResponse,
+      layout.pointRadius
+    );
+    if (!coordinatesByWaveAndResponse) {
+      console.log(
+        "WARNING: belly up on byResponseWaveView.  Your coordinates are meaningless garbage."
+      );
+    } else if (
+      coordinatesByWaveAndResponse.filter(
+        (waveGroup) => waveGroup === undefined
+      ).length > 0
+    ) {
+      console.log(
+        "WARNING. Bad things on byResponseAndWave.  Your coordinates are meaningless garbage."
+      );
+    } else {
+      //safe to assign coordinates
+      vizData.waves.forEach((wave, waveIdx) => {
+        vizData.responseGroups[typedViewType].forEach(
+          (responseGroup, responseGroupIdx) => {
+            outPoints.forEach((point) => {
+              if (
+                point.wave === wave &&
+                responseGroup.includes(point.response)
+              ) {
+                const nextCoordinate =
+                  coordinatesByWaveAndResponse[waveIdx]![
+                    responseGroupIdx
+                  ]!.shift();
+                if (!nextCoordinate) {
+                  console.log("WARNINING: Coordinates are meaningless garbage");
+                } else {
+                  point[typedViewType].byResponseAndWave = nextCoordinate;
+                }
+              }
+            });
+          }
+        );
+      });
+    }
+    //byResponseAndPartyAndWave
+    const segementsByRandPandW =
+      segmentGroups[typedViewType].byResponseAndPartyAndWave;
+    const countsByRandPandW = vizData.waves.map((w) =>
+      vizData.partyGroups.map((p) =>
+        vizData.responseGroups[typedViewType].map(
+          (r) =>
+            outPoints.filter(
+              (point) =>
+                point.wave === w &&
+                p.includes(point.pid3) &&
+                r.includes(point.response)
+            ).length
+        )
+      )
+    );
+    const coordinatesByRandPandW = columnOfRowsOfRowsOfBuildings(
+      segementsByRandPandW,
+      countsByRandPandW,
+      layout.pointRadius
+    );
+    if (!coordinatesByRandPandW) {
+      console.log(
+        "WARNING: belly up on byResponseWaveView.  Your coordinates are meaningless garbage."
+      );
+    } else if (coordinatesByRandPandW.flat(Infinity).includes(undefined)) {
+      console.log(
+        "WARNING: belly up on byResponseWaveView.  Your coordinates are meaningless garbage."
+      );
+    } else {
+      //safe to assign coordinates
+      vizData.waves.forEach((wave, waveIdx) => {
+        vizData.partyGroups.forEach((partyGroup, partyGroupIdx) => {
+          vizData.responseGroups[typedViewType].forEach(
+            (responseGroup, responseGroupIdx) => {
+              outPoints.forEach((point) => {
+                if (
+                  point.wave === wave &&
+                  partyGroup.includes(point.pid3) &&
+                  responseGroup.includes(point.response)
+                ) {
+                  const nextCoordinate =
+                    coordinatesByRandPandW[waveIdx]![partyGroupIdx]![
+                      responseGroupIdx
+                    ]!.shift();
+                  if (!nextCoordinate) {
+                    console.log(
+                      "WARNINING: Coordinates are meaningless garbage"
+                    );
+                  } else {
+                    point[typedViewType].byResponseAndPartyAndWave =
+                      nextCoordinate;
+                  }
+                }
+              });
+            }
+          );
+        });
+      });
+    }
   });
+  return outPoints;
 }

@@ -13,7 +13,16 @@ export default defineConfig({
         const vizData = makeVizDataImp();
         fs.writeFile(
           "src/data/viz/imp/viz-data.json",
-          JSON.stringify(vizData),
+          JSON.stringify(vizData?.vizData),
+          (err) => {
+            if (err) {
+              console.error(err);
+            }
+          }
+        );
+        fs.writeFile(
+          "src/data/viz/imp/coordinates.json",
+          JSON.stringify(vizData?.coordinates),
           (err) => {
             if (err) {
               console.error(err);
