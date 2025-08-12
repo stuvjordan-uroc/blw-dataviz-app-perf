@@ -1,5 +1,6 @@
 # generated coordinate data files
-src/data/coordinates/
+src/data/viz/
+src/data/imp.json
 
 # Logs
 logs

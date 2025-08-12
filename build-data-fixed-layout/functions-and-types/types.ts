@@ -1,3 +1,5 @@
+//  This is a row in the raw data
+
 export interface DataRow {
   weight: number | null;
   pid3: string | null;
@@ -5,19 +7,22 @@ export interface DataRow {
   imp: Record<string, string | null>;
   perf: Record<string, string | null>;
 }
+
+// This is a dataset
 export interface Data {
-  impCols: string[],
-  perfCols: string[],
+  impCols: string[];
+  perfCols: string[];
   waves: {
-    imp: number[],
-    perf: number[]
-  }
-  impResponses: Set<string>,
-  perfResponses: Set<string>,
-  allPrinciples: Set<string>
-  data: DataRow[]
+    imp: number[];
+    perf: number[];
+  };
+  impResponses: Set<string>;
+  perfResponses: Set<string>;
+  allPrinciples: Set<string>;
+  data: DataRow[];
 }
 
+//each property in one of these points to arrays of propotions matched to the various views
 interface ProportionViews {
   byResponse: number[];
   byResponseAndParty: number[][];
@@ -25,20 +30,21 @@ interface ProportionViews {
   byResponseAndPartyAndWave: number[][][];
 }
 
+//proportions needed for each view in the collapsed/expanded views
 export interface ProportionGroups {
-  collapsed: ProportionViews,
-  expanded: ProportionViews
+  collapsed: ProportionViews;
+  expanded: ProportionViews;
 }
 
-
-
+//coordinates for a rectangular segment of points
 export interface SegmentCoordinates {
-  topLeftX: number,
-  topLeftY: number,
-  width: number,
-  height: number
+  topLeftX: number;
+  topLeftY: number;
+  width: number;
+  height: number;
 }
 
+//coordinates for rows/columns of segments for the various views
 interface SegmentViews {
   byResponse: SegmentCoordinates[];
   byResponseAndParty: SegmentCoordinates[][];
@@ -46,13 +52,13 @@ interface SegmentViews {
   byResponseAndPartyAndWave: SegmentCoordinates[][][];
 }
 
+//object to split rows/columns of segments according to whether the view is collapsed or expanded
 export interface SegmentGroups {
-  collapsed: SegmentViews,
-  expanded: SegmentViews,
+  collapsed: SegmentViews;
+  expanded: SegmentViews;
 }
 
-
-
+//coordinates for a single circle (representing a sampled response) in any view
 export interface PointCoordinates {
   x: number;
   y: number;
@@ -60,6 +66,11 @@ export interface PointCoordinates {
   cy: number;
 }
 
+//arrays of coordinates for points in the various views
+//note that all of these arrays are flat (unlike the coordinates for segments)
+//the idea is that there will be a single sample of points in one array
+//and each property in a PointViews will point to an array of coordintes
+//with the same length as the array holding the single sample
 interface PointViews {
   byResponse: PointCoordinates[];
   byResponseAndParty: PointCoordinates[];
@@ -67,17 +78,20 @@ interface PointViews {
   byResponseAndPartyAndWave: PointCoordinates[];
 }
 
+//split the PointViews into collapsed and expanded views.
 interface PointGroups {
   collapsed: PointViews;
   expanded: PointViews;
 }
 
-interface SampledResponse {
+//one sampled response from the data
+export interface SampledResponse {
   pid3: string;
   response: string;
   wave: number;
 }
 
+//A viz layout for a given range of screensizes
 export interface Layout {
   screenWidthRange: number[];
   vizWidth: number;
@@ -90,31 +104,35 @@ export interface Layout {
   labelHeightBottom: number;
 }
 
-type VizSize = "small" | "medium" | "large" | "xLarge"
+//types of screen size ranges
+type VizSize = "small" | "medium" | "large" | "xLarge";
 
-//data to generate file that describes how data is split into groups
-interface Groups {
+//data to generate file that describes
+//all data needed for a viz that does
+//include info about positions of anything on the screen
+export interface VizData {
+  waves: number[];
   partyGroups: string[][];
   responseGroups: {
     expanded: string[][];
     collapsed: string[][];
-  }
+  };
+  principles: Record<
+    string,
+    { proportions: ProportionGroups; sampledResponses: SampledResponse[] }
+  >;
+  //for each democratic principle, we have a ProprotionGroups and an array of sampled responses.
 }
 
-//data to generate file that maps each impvar to computed proportions and synthetic sample.
-//proportions and samples have no information about rendering coordinates.  So they are 
-//unaffected by vizSize or layout configurations
-type ProportionsAndSamples = Record<
-  string,
-  { proportions: ProportionGroups, sampledResponses: SampledResponse[] }
-> //one object with proportions and sampled responses for each impVar
-
-
-//data to generate file that gives layout and coordinates for any given vizSize
+//data to generate file that gives layout and coordinates for vizible elements
+//for each screensize
 type Coordinates = Record<
   VizSize,
   {
-    layout: Layout, //at any given vizSize, the layout is the same for each principle
-    principles: Record<string, { points: PointGroups, segments: SegmentGroups }> //for each principle, coordinates for points and segments for that principle at each view
+    layout: Layout; //at any given vizSize, the layout is the same for each principle
+    principles: Record<
+      string,
+      { points: PointGroups; segments: SegmentGroups }
+    >; //for each principle, coordinates for points and segments for that principle at each view
   }
->
+>;
