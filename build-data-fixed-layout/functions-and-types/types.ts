@@ -82,6 +82,7 @@ interface PointViews {
 interface PointGroups {
   collapsed: PointViews;
   expanded: PointViews;
+  unsplit: PointCoordinates[];
 }
 
 //one sampled response from the data
