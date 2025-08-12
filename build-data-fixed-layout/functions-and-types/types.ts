@@ -66,23 +66,18 @@ export interface PointCoordinates {
   cy: number;
 }
 
-//arrays of coordinates for points in the various views
-//note that all of these arrays are flat (unlike the coordinates for segments)
-//the idea is that there will be a single sample of points in one array
-//and each property in a PointViews will point to an array of coordintes
-//with the same length as the array holding the single sample
 interface PointViews {
-  byResponse: PointCoordinates[];
-  byResponseAndParty: PointCoordinates[];
-  byResponseAndWave: PointCoordinates[];
-  byResponseAndPartyAndWave: PointCoordinates[];
+  byResponse: PointCoordinates;
+  byResponseAndParty: PointCoordinates;
+  byResponseAndWave: PointCoordinates;
+  byResponseAndPartyAndWave: PointCoordinates;
 }
 
 //split the PointViews into collapsed and expanded views.
-interface PointGroups {
+export interface PointGroups {
   collapsed: PointViews;
   expanded: PointViews;
-  unsplit: PointCoordinates[];
+  unsplit: PointCoordinates;
 }
 
 //one sampled response from the data
@@ -91,6 +86,8 @@ export interface SampledResponse {
   response: string;
   wave: number;
 }
+
+export type Point = SampledResponse & PointGroups;
 
 //A viz layout for a given range of screensizes
 export interface Layout {
@@ -131,9 +128,6 @@ type Coordinates = Record<
   VizSize,
   {
     layout: Layout; //at any given vizSize, the layout is the same for each principle
-    principles: Record<
-      string,
-      { points: PointGroups; segments: SegmentGroups }
-    >; //for each principle, coordinates for points and segments for that principle at each view
+    principles: Record<string, { points: Point[]; segments: SegmentGroups }>; //for each principle, coordinates for points and segments for that principle at each view
   }
 >;

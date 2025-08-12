@@ -1,8 +1,11 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type {
   Layout,
   PointCoordinates,
-  SampledResponse,
   SegmentGroups,
+  VizData,
+  Point,
+  SegmentCoordinates,
 } from "./types.ts";
 import lodash from "lodash";
 
@@ -112,19 +115,147 @@ function apartmentWindows(
   return allWindows.filter((w, wIdx) => !emptyIndices.includes(wIdx));
 }
 
+function emptyCoordinate() {
+  return Object.create({
+    x: 0,
+    y: 0,
+    cx: 0,
+    cy: 0,
+  }) as PointCoordinates;
+}
+function rowOfBuildings(
+  arrayOfSegmentCoordinates: SegmentCoordinates[],
+  arrayOfNumbersOfResidents: number[],
+  pointRadius: number
+) {
+  if (arrayOfSegmentCoordinates.length !== arrayOfNumbersOfResidents.length) {
+    return undefined;
+  }
+  return arrayOfSegmentCoordinates.map(
+    (segmentCoordinates, segmentCoordinatesIdx) =>
+      apartmentWindows(
+        segmentCoordinates.topLeftX,
+        segmentCoordinates.topLeftY,
+        segmentCoordinates.width,
+        segmentCoordinates.height,
+        arrayOfNumbersOfResidents[segmentCoordinatesIdx],
+        pointRadius
+      )
+  );
+}
+
 export default function makePoints(
-  sample: SampledResponse[],
+  principle: string,
+  vizData: VizData,
   segmentGroups: SegmentGroups,
   layout: Layout
 ) {
+  if (!vizData.principles[principle]) {
+    console.log(
+      "WARNING: You ran makePoints on principle",
+      principle,
+      "but there is no item",
+      "imp_" + principle,
+      "in the data"
+    );
+    return undefined;
+  }
+  //empty return object
+  const outPoints = vizData.principles[principle].sampledResponses.map(
+    (r) =>
+      ({
+        pid3: r.pid3,
+        response: r.response,
+        wave: r.wave,
+        collapsed: {
+          byResponse: emptyCoordinate(),
+          byResponseAndParty: emptyCoordinate(),
+          byResponseAndWave: emptyCoordinate(),
+          byResponseAndPartyAndWave: emptyCoordinate(),
+        },
+        expanded: {
+          byResponse: emptyCoordinate(),
+          byResponseAndParty: emptyCoordinate(),
+          byResponseAndWave: emptyCoordinate(),
+          byResponseAndPartyAndWave: emptyCoordinate(),
+        },
+        unsplit: emptyCoordinate(),
+      }) as Point
+  );
   //first assign coordinates for the unsplit view
   const unsplitTopLeftX = 0;
   const unsplitTopLeftY = layout.labelHeightTop;
   const unsplitWidth = layout.vizWidth;
   const unsplitHeight = layout.vizWidth / layout.A;
-
-  //now assign coordinates for each by*** view
-  // (Object.keys(segmentGroups) as (keyof SegmentGroups)[]).forEach(viewType => {
-  //   segmentGroups[viewType].byResponse
-  // })
+  const unSplitCoordinates = apartmentWindows(
+    unsplitTopLeftX,
+    unsplitTopLeftY,
+    unsplitWidth,
+    unsplitHeight,
+    outPoints.length,
+    layout.pointRadius
+  );
+  outPoints.forEach((point) => {
+    const c = unSplitCoordinates.shift();
+    if (c) {
+      point.unsplit = c;
+    }
+  });
+  //now assign coordinates for each of the views that can be collapsed/expanded
+  Object.keys(vizData.responseGroups).forEach((viewType) => {
+    const typedViewType = viewType as keyof VizData["responseGroups"];
+    //byResponse view
+    const byResponseCoordinates = vizData.responseGroups[typedViewType].map(
+      (responseGroup, responseGroupIdx) => {
+        const segmentCoordinates =
+          segmentGroups[typedViewType].byResponse[responseGroupIdx];
+        const numResidents = outPoints.filter((point) =>
+          responseGroup.includes(point.response)
+        ).length;
+        if (!segmentCoordinates) {
+          console.log(
+            "WARNING: Failed to add byResponse coordinates for principle",
+            principle,
+            "at responseGroup",
+            responseGroup,
+            "cardinality of the segmentGroups you passed does not match."
+          );
+          return new Array(numResidents).fill(1).map((el) => emptyCoordinate());
+        }
+        return apartmentWindows(
+          segmentCoordinates.topLeftX,
+          segmentCoordinates.topLeftY,
+          segmentCoordinates.width,
+          segmentCoordinates.height,
+          numResidents,
+          layout.pointRadius
+        );
+      }
+    );
+    outPoints.forEach((point) => {
+      const responseGroupIdx = vizData.responseGroups[typedViewType].findIndex(
+        (group) => group.includes(point.response)
+      );
+      if (responseGroupIdx === -1) {
+        console.log(
+          "WARNING: In trying to assign coordinates, we are hitting points with responses that do not seem to be included in any of your response groups.  This means the generated points coordinates are meaningless garbage."
+        );
+      } else {
+        point[typedViewType].byResponse =
+          byResponseCoordinates[responseGroupIdx]!.shift()!;
+      }
+    });
+    //byResponseAndParty view
+    const byResponseAndPartyCoordinates = vizData.partyGroups.map(
+      (partyGroup, partyGroupIdx) =>
+        vizData.responseGroups[typedViewType].map(
+          (responseGroup, responseGroupIdx) => {
+            const segmentCoordinates =
+              segmentGroups[typedViewType].byResponseAndParty[partyGroupIdx][
+                responseGroupIdx
+              ];
+          }
+        )
+    );
+  });
 }
