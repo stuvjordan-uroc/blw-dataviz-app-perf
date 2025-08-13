@@ -1,3 +1,4 @@
+import { map } from "lodash";
 import type { Data, ProportionsMap, VizConfig } from "./types-new.ts";
 
 
@@ -7,12 +8,19 @@ import type { Data, ProportionsMap, VizConfig } from "./types-new.ts";
 //we have to somehow pick whole numbers that are close to proportional,
 //but add up to exactly 100
 
-function numberOfPoints(wave: number, partyGroup: string[], responseGroup: string[], vizConfig: VizConfig, proportionsMap: ProportionsMap) {
-  const p = proportionsMap.get(wave)?.get(partyGroup)?.expanded.get(responseGroup)
-  if (!p) {
-    return 0
+function numberOfPoints(wave: number, partyGroup: string[], vizConfig: VizConfig, proportionsMap: ProportionsMap) {
+  //first set the numbers of points to the rounded-down values
+  type Values = { rounded: number, real: number }
+  const values: Values = vizConfig.responseGroups.expanded.map(responseGroup => ({
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    rounded: Math.floor(proportionsMap.get(wave)!.get(partyGroup)!.expanded.get(responseGroup)! * vizConfig.sampleSize),
+    real: proportionsMap.get(wave)!.get(partyGroup)!.expanded.get(responseGroup)! * vizConfig.sampleSize
+  }))
+  while (values.reduce((acc, curr) => acc + curr.rounded, 0) < vizConfig.sampleSize) {
+    //get the value with the greatest distance from its real value
+
   }
-  return p * vizConfig.sampleSize
+
 }
 
 export default function makeNumPointsMap(data: Data, vizConfig: VizConfig, proportionsMap: ProportionsMap) {
@@ -20,10 +28,7 @@ export default function makeNumPointsMap(data: Data, vizConfig: VizConfig, propo
     wave,
     new Map(vizConfig.partyGroups.map(partyGroup => ([
       partyGroup,
-      new Map(vizConfig.responseGroups.expanded.map(responseGroup => ([
-        responseGroup,
-        numberOfPoints(wave, partyGroup, responseGroup, vizConfig, proportionsMap)
-      ])))
+      //make numbers of points here
     ])))
   ])))
 }
