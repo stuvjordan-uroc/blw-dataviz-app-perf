@@ -1,15 +1,64 @@
+//  This is a row in the raw data
+
+export interface DataRow {
+  weight: number | null;
+  pid3: string | null;
+  wave: number | null;
+  imp: Record<string, string | null>;
+  perf: Record<string, string | null>;
+}
+
+// This is a dataset
+export interface Data {
+  impCols: string[];
+  perfCols: string[];
+  waves: {
+    imp: number[];
+    perf: number[];
+  };
+  impResponses: Set<string>;
+  perfResponses: Set<string>;
+  allPrinciples: Set<string>;
+  data: DataRow[];
+}
+
 export type GroupedState = "collapsed" | "expanded"
 export type View = "byResponse" | "byResponseAndParty" | "byResponseAndWave" | "byResponseAndPartyAndWave"
+export type ResponseGroup = string[]
+export type ArrayOfResponseGroups = string[][]
+
+export interface VizConfig {
+  responseGroups: Record<GroupedState, ArrayOfResponseGroups>;
+  partyGroups: string[][];
+  sampleSize: number;
+}
+
+
 
 //proportions
-//map each of a collection of response groups to a proportion
-export type ProportionsByResponseGroup = Map<string[], number>;
+//map each response group in an array of responseGroups to a proportions, one proportion
+//for each responseGroup 
+export type ResponseGroupToProportionMap = Map<ResponseGroup, number>;
 //one such map for each grouped state ("collapsed" or "expanded")
-export type ProportionsByGroupedState = {
-  [key in GroupedState]: Proportions;
-}
+export type ProportionsByGroupedState = Record<GroupedState, ResponseGroupToProportionMap>
 //get the proportions by wave (number) and partygroup (string[])
 export type ProportionsMap = Map<number, Map<string[], ProportionsByGroupedState>>
+
+//map each ...wave...  ...partyGroup...  ...(expanded)responseGroup... to a number of points.
+export type NumPointsMap = Map<number, Map<string[], Map<string[], number>>>
+
+export interface Layout {
+  screenWidthRange: number[];
+  vizWidth: number;
+  A: number;
+  pointRadius: number;
+  sampleSize: number;
+  segmentGap: number;
+  rowGap: number;
+  labelHeightTop: number;
+  labelHeightBottom: number;
+}
+
 
 //point
 export interface PointCoordinates {

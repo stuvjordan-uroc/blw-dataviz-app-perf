@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { LayoutGroup } from "motion/react";
 import type {
   Layout,
   PointCoordinates,
@@ -9,7 +8,7 @@ import type {
   SegmentCoordinates,
 } from "./types.ts";
 import lodash from "lodash";
-import { p } from "motion/react-client";
+
 
 function apartmentWindows(
   topLeftX: number,
