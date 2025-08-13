@@ -58,6 +58,9 @@ export interface SegmentGroups {
   expanded: SegmentViews;
 }
 
+
+
+
 //coordinates for a single circle (representing a sampled response) in any view
 export interface PointCoordinates {
   x: number;
