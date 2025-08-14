@@ -1,34 +1,72 @@
-import { map } from "lodash";
-import type { Data, ProportionsMap, VizConfig } from "./types-new.ts";
+import type { Data, ProportionsMap, ResponseGroupToProportionMap, VizConfig } from "./types-new.ts";
 
-
-//next step:  Fix this so that it returns whole numbers
-//this means that we have to work with the entire array of proportions
-//for any given wave and partyGroup.
-//we have to somehow pick whole numbers that are close to proportional,
-//but add up to exactly 100
-
-function numberOfPoints(wave: number, partyGroup: string[], vizConfig: VizConfig, proportionsMap: ProportionsMap) {
-  //first set the numbers of points to the rounded-down values
-  type Values = { rounded: number, real: number }
-  const values: Values = vizConfig.responseGroups.expanded.map(responseGroup => ({
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    rounded: Math.floor(proportionsMap.get(wave)!.get(partyGroup)!.expanded.get(responseGroup)! * vizConfig.sampleSize),
-    real: proportionsMap.get(wave)!.get(partyGroup)!.expanded.get(responseGroup)! * vizConfig.sampleSize
+function counts(expandedResponseGroupsToProportionsMap: ResponseGroupToProportionMap, vizConfig: VizConfig) {
+  const values = expandedResponseGroupsToProportionsMap.entries().map(([responseGroup, proportion]) => ({
+    responseGroup: responseGroup,
+    rounded: Math.floor(proportion.proportion * vizConfig.sampleSize),
+    real: proportion.proportion * vizConfig.sampleSize
   }))
-  while (values.reduce((acc, curr) => acc + curr.rounded, 0) < vizConfig.sampleSize) {
-    //get the value with the greatest distance from its real value
-
+  const valuesA = values.toArray()
+  if (valuesA.length === 0) {
+    //return an empty version of Map<ResponseGroup, number>
+    console.log('WARNING: We tried to create an array of counts from an expandedResponseGroupsToProporionsMap.')
+    console.log('but we ended up getting an empty array of rounded and real counts')
+    console.log('here is the map we tried to build from:')
+    console.log(expandedResponseGroupsToProportionsMap)
+    return new Map(expandedResponseGroupsToProportionsMap.keys().map((responseGroup => ([
+      responseGroup,
+      NaN
+    ]))))
   }
-
+  //iterate to get the sum of values up to the sampleSize
+  while (
+    valuesA.reduce((acc, curr) => curr.rounded + acc, 0) < vizConfig.sampleSize
+  ) {
+    //find the value that is furthest below its real value
+    const furthestValue =
+      valuesA.reduce((acc, curr) => {
+        if (curr.real - curr.rounded > acc.real - acc.rounded) {
+          return curr
+        }
+        return acc
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      }, valuesA[0]!)
+    //increment that value
+    furthestValue.rounded = furthestValue.rounded + 1;
+  }
+  return new Map(valuesA.map(v => ([
+    v.responseGroup,
+    v.rounded
+  ])))
 }
 
-export default function makeNumPointsMap(data: Data, vizConfig: VizConfig, proportionsMap: ProportionsMap) {
-  return new Map(data.waves.imp.map(wave => ([
-    wave,
-    new Map(vizConfig.partyGroups.map(partyGroup => ([
-      partyGroup,
-      //make numbers of points here
-    ])))
-  ])))
+// export default function makeNumPointsMap(data: Data, vizConfig: VizConfig, proportionsMap: ProportionsMap) {
+//   return new Map(
+//     proportionsMap.entries().map(([wave, valAtWave]) => ([
+//       wave,
+//       new Map(
+//         valAtWave.entries().map(([partyGroup, valAtPartyGroup]) => ([
+//           partyGroup,
+//           counts(valAtPartyGroup.expanded, vizConfig)
+//         ]))
+//       )
+//     ]))
+//   )
+// }
+
+export default function addNumPointsToProportionsMap(data: Data, vizConfig: VizConfig, proportionsMap: ProportionsMap) {
+  return new Map(
+    proportionsMap.entries().map(([wave, valAtWave]) => ([
+      wave,
+      new Map(
+        valAtWave.entries().map(([partyGroup, valAtPartyGroup]) => ([
+          partyGroup,
+          {
+            proportions: valAtPartyGroup,
+            counts: counts(valAtPartyGroup.expanded, vizConfig)
+          }
+        ]))
+      )
+    ]))
+  )
 }

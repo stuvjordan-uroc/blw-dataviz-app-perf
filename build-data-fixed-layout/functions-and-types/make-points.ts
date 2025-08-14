@@ -10,7 +10,7 @@ import type {
 import lodash from "lodash";
 
 
-function apartmentWindows(
+export function apartmentWindows(
   topLeftX: number,
   topLeftY: number,
   buildingWidth: number,

@@ -1,9 +1,11 @@
 //get the pathstring for the data
 import path from "node:path";
-import makeData from "./functions-and-types/make-data.ts";
-import makeImpProportionsMap from "./functions-and-types/make-proportions-map.ts";
-import addNumPointsToProportionsMap from "./functions-and-types/make-num-points-map.ts";
-import type { ProportionsMap } from "./functions-and-types/types-new.ts";
+import util from "node:util";
+import makeData from "../functions-and-types/make-data.ts";
+import makeImpProportionsMap from "../functions-and-types/make-proportions-map.ts";
+import addNumPointsToProportionsMap from "../functions-and-types/make-num-points-map.ts";
+import addUnsplitCoordinates from "../functions-and-types/add-unsplit-coordinates.ts";
+import type { ProportionsMap } from "../functions-and-types/types-new.ts";
 
 //path to raw data
 const rawDataPathString = path.resolve(
@@ -50,4 +52,10 @@ if (data) {
     sampleSize: 100,
     segmentGap: (3 * 2 * 3) / 2,
   };
+  const unsplitAndNumAndPropsMap = Object.fromEntries(Object.entries(numAndPropssMaps).map(([impVar, nAndPMap]) => ([
+    impVar,
+    addUnsplitCoordinates(layoutSmall, nAndPMap, data, vizConfig)
+  ])))
+  console.log("progress so far at =gov_stats=")
+  console.log(util.inspect(unsplitAndNumAndPropsMap.gov_stats?.get(23)?.get(vizConfig.partyGroups[2]), true, 1, true))
 }

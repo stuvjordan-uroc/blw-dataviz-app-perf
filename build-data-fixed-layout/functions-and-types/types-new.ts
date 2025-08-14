@@ -38,7 +38,7 @@ export interface VizConfig {
 //proportions
 //map each response group in an array of responseGroups to a proportions, one proportion
 //for each responseGroup 
-export type ResponseGroupToProportionMap = Map<ResponseGroup, number>;
+export type ResponseGroupToProportionMap = Map<ResponseGroup, { proportion: number, prevCumProportion: number }>;
 //one such map for each grouped state ("collapsed" or "expanded")
 export type ProportionsByGroupedState = Record<GroupedState, ResponseGroupToProportionMap>
 //get the proportions by wave (number) and partygroup (string[])
@@ -83,9 +83,8 @@ export interface SegmentCoordinates {
 export type Segment = Record<
   GroupedState,
   Record<View, SegmentCoordinates>
-> & { unsplit: SegmentCoordinates }
-//at each wave (number) and partyGroup (string[]) there is one segment
-export type SegmentMap = Map<number, Map<string[], Segment>>
-
+> & { unsplit: Map<string[], SegmentCoordinates> }
+//unsplit coordinates map each expanded response group to
+//SegmentCoordinates for that response group.
 
 
