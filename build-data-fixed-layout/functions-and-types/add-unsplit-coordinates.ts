@@ -1,10 +1,12 @@
 import type { Layout, ProportionsByGroupedState, ResponseGroup, Data, VizConfig, PointCoordinates } from "./types-new.ts";
 import segmentPoints from "./segment-points.ts";
 
-type PropsAndCountsMap = Map<number, Map<string[], {
-  proportions: ProportionsByGroupedState;
-  counts: Map<ResponseGroup, number>;
-}>>
+type PropsAndCountsMap = Map<number, {
+  impVarIncluded: boolean, map: Map<string[], {
+    proportions: ProportionsByGroupedState;
+    counts: Map<ResponseGroup, number>;
+  }>
+}>
 
 interface PAndCAtWaveAndPartyGroup {
   proportions: ProportionsByGroupedState;
@@ -19,7 +21,7 @@ function unsplitCoordinatesMap(pAndC: PAndCAtWaveAndPartyGroup, layout: Layout, 
   const partyGroupAvailableHSpace = totalAvailableHSpace / vizConfig.partyGroups.length
   const partyGroupTopLeftX = partyGroupAvailableHSpace * partyIdx;
 
-  return new Map(pAndC.proportions.expanded.entries().map(([responseGroup, proportion],) => ([
+  return new Map(pAndC.proportions.expanded.entries().map(([responseGroup, proportion]) => ([
     responseGroup,
     {
       topLeftY: waveTopLeftY,
@@ -31,7 +33,8 @@ function unsplitCoordinatesMap(pAndC: PAndCAtWaveAndPartyGroup, layout: Layout, 
         waveTopLeftY,
         proportion.proportion * partyGroupAvailableHSpace,
         segmentHeight,
-        vizConfig.sampleSize,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        pAndC.counts.get(responseGroup)!,
         layout.pointRadius
       ) as PointCoordinates[]
     }
@@ -40,17 +43,20 @@ function unsplitCoordinatesMap(pAndC: PAndCAtWaveAndPartyGroup, layout: Layout, 
 
 export default function addUnsplitCoordinates(layout: Layout, propsAndCountsMap: PropsAndCountsMap, data: Data, vizConfig: VizConfig) {
   return new Map(
-    propsAndCountsMap.entries().map(([wave, valAtWave], waveIdx) => ([
+    propsAndCountsMap.entries().filter(([wave, valAtWave]) => valAtWave.map).map(([wave, valAtWave], waveIdx) => ([
       wave,
-      new Map(
-        valAtWave.entries().map(([partyGroup, valAtPartyGroup], pgIdx) => ([
-          partyGroup,
-          {
-            ...valAtPartyGroup,
-            unsplitCoordinates: unsplitCoordinatesMap(valAtPartyGroup, layout, data, waveIdx, vizConfig, pgIdx)
-          }
-        ]))
-      )
+      {
+        impVarIncluded: valAtWave.impVarIncluded,
+        map: new Map(
+          valAtWave.map.entries().map(([partyGroup, valAtPartyGroup], pgIdx) => ([
+            partyGroup,
+            {
+              ...valAtPartyGroup,
+              unsplitCoordinates: unsplitCoordinatesMap(valAtPartyGroup, layout, data, waveIdx, vizConfig, pgIdx)
+            }
+          ]))
+        )
+      }
     ]))
   )
 }
