@@ -62,9 +62,9 @@ export default function addUnsplitCoordinates(layout: Layout, propsAndCountsMap:
               valAtPartyGroup.proportions.expanded.entries().map(([responseGroup, valAtResponseGroup], responseGroupIdx) => ([
                 responseGroup,
                 {
-                  topLeftX: layout.vizWidth / valAtWave.size * partyGroupIdx + layout.pointRadius * responseGroupIdx + valAtResponseGroup.prevCumProportion * (layout.vizWidth / valAtWave.size - layout.pointRadius * valAtPartyGroup.counts.size),
+                  topLeftX: layout.vizWidth / valAtWave.size * partyGroupIdx + 2 * layout.pointRadius * responseGroupIdx + valAtResponseGroup.prevCumProportion * (layout.vizWidth / valAtWave.size - 2 * layout.pointRadius * valAtPartyGroup.counts.size),
                   topLeftY: layout.labelHeightTop + layout.vizWidth / layout.A / propsAndCountsMap.size * waveIdx,
-                  width: layout.pointRadius + valAtResponseGroup.proportion * (layout.vizWidth / valAtWave.size - layout.pointRadius * valAtPartyGroup.counts.size),
+                  width: 2 * layout.pointRadius + valAtResponseGroup.proportion * (layout.vizWidth / valAtWave.size - 2 * layout.pointRadius * valAtPartyGroup.counts.size),
                   height: layout.vizWidth / layout.A / propsAndCountsMap.size,
                   points: [] as PointCoordinates[]
                 }
