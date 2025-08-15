@@ -58,18 +58,15 @@ export default function addNumPointsToProportionsMap(data: Data, vizConfig: VizC
   return new Map(
     proportionsMap.entries().map(([wave, valAtWave]) => ([
       wave,
-      {
-        impVarIncluded: valAtWave.impVarIncluded,
-        map: new Map(
-          valAtWave.map.entries().map(([partyGroup, valAtPartyGroup]) => ([
-            partyGroup,
-            {
-              proportions: valAtPartyGroup,
-              counts: counts(valAtPartyGroup.expanded, vizConfig)
-            }
-          ]))
-        )
-      }
+      new Map(
+        valAtWave.entries().map(([partyGroup, valAtPartyGroup]) => ([
+          partyGroup,
+          {
+            proportions: valAtPartyGroup,
+            counts: counts(valAtPartyGroup.expanded, vizConfig)
+          }
+        ]))
+      )
     ]))
   )
 }
