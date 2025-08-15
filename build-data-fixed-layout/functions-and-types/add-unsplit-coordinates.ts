@@ -1,12 +1,10 @@
-import type { Layout, ProportionsByGroupedState, ResponseGroup, Data, VizConfig, PointCoordinates } from "./types-new.ts";
+import type { Layout, ProportionsByGroupedState, ResponseGroup, Data, VizConfig, SegmentCoordinates, PointCoordinates } from "./types-new.ts";
 import segmentPoints from "./segment-points.ts";
 
-type PropsAndCountsMap = Map<number, {
-  impVarIncluded: boolean, map: Map<string[], {
-    proportions: ProportionsByGroupedState;
-    counts: Map<ResponseGroup, number>;
-  }>
-}>
+type PropsAndCountsMap = Map<number, Map<string[], {
+  proportions: ProportionsByGroupedState;
+  counts: Map<ResponseGroup, number>;
+}>>
 
 interface PAndCAtWaveAndPartyGroup {
   proportions: ProportionsByGroupedState;
@@ -14,49 +12,66 @@ interface PAndCAtWaveAndPartyGroup {
 }
 
 
-function unsplitCoordinatesMap(pAndC: PAndCAtWaveAndPartyGroup, layout: Layout, data: Data, waveIdx: number, vizConfig: VizConfig, partyIdx: number) {
-  const segmentHeight = layout.vizWidth / layout.A / data.waves.imp.length
-  const waveTopLeftY = segmentHeight * waveIdx;
-  const totalAvailableHSpace = layout.vizWidth;
-  const partyGroupAvailableHSpace = totalAvailableHSpace / vizConfig.partyGroups.length
-  const partyGroupTopLeftX = partyGroupAvailableHSpace * partyIdx;
 
-  return new Map(pAndC.proportions.expanded.entries().map(([responseGroup, proportion]) => ([
-    responseGroup,
-    {
-      topLeftY: waveTopLeftY,
-      topLeftX: partyGroupTopLeftX + proportion.prevCumProportion * partyGroupAvailableHSpace,
-      width: proportion.proportion * partyGroupAvailableHSpace,
-      height: segmentHeight,
-      points: segmentPoints(
-        partyGroupTopLeftX + proportion.prevCumProportion * partyGroupAvailableHSpace,
-        waveTopLeftY,
-        proportion.proportion * partyGroupAvailableHSpace,
-        segmentHeight,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        pAndC.counts.get(responseGroup)!,
-        layout.pointRadius
-      ) as PointCoordinates[]
-    }
-  ])))
+
+function unsplitCoordinates(
+  waveIdx: number,
+  numWaves: number,
+  partyGroupIdx: number,
+  numPartyGroups: number,
+  numResponseGroups: number,
+  responseGroupCumPrevProportion: number,
+  responseGroupProportion: number,
+  pointCount: number,
+  layout: Layout,
+) {
+  const height = layout.vizWidth / layout.A / numWaves;
+  const topLeftY = layout.labelHeightTop + height * waveIdx;
+  const totalWidthOfSegmentsAtPartyGroup = layout.vizWidth / numPartyGroups;
+  const partyGroupTopLeftX = totalWidthOfSegmentsAtPartyGroup * partyGroupIdx;
+  const remainingAvailableWidthAfterMinimumWidth = totalWidthOfSegmentsAtPartyGroup - numResponseGroups * layout.pointRadius
+  const topLeftX = partyGroupTopLeftX + availableWidth * responseGroupCumPrevProportion;
+  const width = availableWidth * responseGroupProportion;
+  const points = segmentPoints(
+    topLeftX,
+    topLeftY,
+    width,
+    height,
+    pointCount,
+    layout.pointRadius
+  )
+  return ({
+    topLeftY: topLeftY,
+    height: height,
+    topLeftX: topLeftX,
+    width: width,
+    points: points
+  })
 }
 
-export default function addUnsplitCoordinates(layout: Layout, propsAndCountsMap: PropsAndCountsMap, data: Data, vizConfig: VizConfig) {
+export default function addUnsplitCoordinates(layout: Layout, propsAndCountsMap: PropsAndCountsMap) {
   return new Map(
-    propsAndCountsMap.entries().filter(([wave, valAtWave]) => valAtWave.impVarIncluded).map(([wave, valAtWave], waveIdx) => ([
+    propsAndCountsMap.entries().map(([wave, valAtWave], waveIdx) => ([
       wave,
-      {
-        impVarIncluded: valAtWave.impVarIncluded,
-        map: new Map(
-          valAtWave.map.entries().map(([partyGroup, valAtPartyGroup], pgIdx) => ([
-            partyGroup,
-            {
-              ...valAtPartyGroup,
-              unsplitCoordinates: unsplitCoordinatesMap(valAtPartyGroup, layout, data, waveIdx, vizConfig, pgIdx)
-            }
-          ]))
-        )
-      }
+      new Map(
+        valAtWave.entries().map(([partyGroup, valAtPartyGroup], partyGroupIdx) => ([
+          partyGroup,
+          {
+            ...valAtPartyGroup,
+            unsplit: new Map(
+              valAtPartyGroup.proportions.expanded.entries().map(([responseGroup, valAtResponseGroup], responseGroupIdx) => ([
+                responseGroup,
+                {
+                  topLeftX: layout.vizWidth / valAtWave.size * partyGroupIdx + layout.pointRadius * responseGroupIdx + valAtResponseGroup.prevCumProportion * (layout.vizWidth / valAtWave.size - layout.pointRadius * valAtPartyGroup.counts.size),
+                  topLeftY: layout.labelHeightTop + layout.vizWidth / layout.A / propsAndCountsMap.size * waveIdx,
+                  width: layout.pointRadius + valAtResponseGroup.proportion * (layout.vizWidth / valAtWave.size - layout.pointRadius * valAtPartyGroup.counts.size),
+                  height: layout.vizWidth / layout.A / propsAndCountsMap.size,
+                  points: [] as PointCoordinates[]
+                }
+              ])))
+          }
+        ]))
+      )
     ]))
   )
 }
