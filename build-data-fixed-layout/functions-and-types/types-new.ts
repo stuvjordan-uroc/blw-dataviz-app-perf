@@ -42,9 +42,9 @@ export type ResponseGroupToProportionMap = Map<ResponseGroup, { proportion: numb
 //one such map for each grouped state ("collapsed" or "expanded")
 export type ProportionsByGroupedState = Record<GroupedState, ResponseGroupToProportionMap>
 //get the proportions by wave (number) and partygroup (string[])
-export type ProportionsMap = Map<number, {
-  impVarIncluded: boolean, map: Map<string[], ProportionsByGroupedState>
-}>
+export type ProportionsMap = Map<number,
+  Map<string[], ProportionsByGroupedState>
+>
 
 //map each ...wave...  ...partyGroup...  ...(expanded)responseGroup... to a number of points.
 export type NumPointsMap = Map<number, Map<string[], Map<string[], number>>>

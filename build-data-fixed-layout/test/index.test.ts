@@ -40,7 +40,7 @@ if (data) {
     impVar,
     addNumPointsToProportionsMap(data, vizConfig, pMap)
   ])))
-  //console.log(util.inspect(numAndPropssMaps.gov_stats, true, null, true))
+  console.log(util.inspect(numAndPropssMaps.gov_stats, true, null, true))
   //add unsplit segment coordinates at each wave and partyGroup
   const layoutSmall = {
     screenWidthRange: [0, 768],
@@ -53,10 +53,10 @@ if (data) {
     sampleSize: 10,
     segmentGap: (3 * 2 * 3) / 2,
   };
-  const unsplitAndNumAndPropsMap = Object.fromEntries(Object.entries(numAndPropssMaps).map(([impVar, nAndPMap]) => ([
-    impVar,
-    addUnsplitCoordinates(layoutSmall, nAndPMap, data, vizConfig)
-  ])))
-  console.log("progress so far at =gov_stats=")
-  console.log(util.inspect(unsplitAndNumAndPropsMap.gov_stats, true, 4, true))
+  // const unsplitAndNumAndPropsMap = Object.fromEntries(Object.entries(numAndPropssMaps).map(([impVar, nAndPMap]) => ([
+  //   impVar,
+  //   addUnsplitCoordinates(layoutSmall, nAndPMap, data, vizConfig)
+  // ])))
+  // console.log("progress so far at =gov_stats=")
+  // console.log(util.inspect(unsplitAndNumAndPropsMap.gov_stats, true, 4, true))
 }

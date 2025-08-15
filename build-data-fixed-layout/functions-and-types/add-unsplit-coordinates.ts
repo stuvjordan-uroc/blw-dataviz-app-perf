@@ -43,7 +43,7 @@ function unsplitCoordinatesMap(pAndC: PAndCAtWaveAndPartyGroup, layout: Layout, 
 
 export default function addUnsplitCoordinates(layout: Layout, propsAndCountsMap: PropsAndCountsMap, data: Data, vizConfig: VizConfig) {
   return new Map(
-    propsAndCountsMap.entries().filter(([wave, valAtWave]) => valAtWave.map).map(([wave, valAtWave], waveIdx) => ([
+    propsAndCountsMap.entries().filter(([wave, valAtWave]) => valAtWave.impVarIncluded).map(([wave, valAtWave], waveIdx) => ([
       wave,
       {
         impVarIncluded: valAtWave.impVarIncluded,

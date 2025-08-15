@@ -1,5 +1,4 @@
-import type { ProportionsByGroupedState, ProportionsMap, VizConfig } from "./types-new.ts";
-import type { Data } from "./types.ts";
+import type { Data, VizConfig } from "./types-new.ts";
 
 function proportion(impVar: string, data: Data, wave: number, partyGroup: string[], responseGroup: string[]) {
   //subset the data...all rows within the party group
@@ -43,11 +42,11 @@ function impVarIsIncluded(impVar: string, data: Data, wave: number) {
 }
 
 export default function makeImpProportionsMap(impVar: string, data: Data, vizConfig: VizConfig) {
-  return new Map(data.waves.imp.map(wave => ([
-    wave,
-    {
-      impVarIncluded: impVarIsIncluded(impVar, data, wave),
-      map: new Map(vizConfig.partyGroups.map(partyGroup => ([
+  return new Map(data.waves.imp
+    .filter(wave => impVarIsIncluded(impVar, data, wave))
+    .map(wave => ([
+      wave,
+      new Map(vizConfig.partyGroups.map(partyGroup => ([
         partyGroup,
         Object.fromEntries(Object.entries(vizConfig.responseGroups).map(([groupedState, arrayOfResponseGroups]) => [
           groupedState,
@@ -56,12 +55,13 @@ export default function makeImpProportionsMap(impVar: string, data: Data, vizCon
             {
               proportion: proportion(impVar, data, wave, partyGroup, responseGroup),
               prevCumProportion: rgIdx === 0 ? 0 : aRg.slice(0, rgIdx).reduce((acc, curr) =>
-                acc + proportion(impVar, data, wave, partyGroup, curr)
-                , 0)
+                acc + proportion(impVar, data, wave, partyGroup, curr),
+                0
+              )
             }
           ])))
         ]))
       ])))
-    } as { impVarIncluded: boolean, map: Map<string[], ProportionsByGroupedState> }
-  ])))
+    ]))
+  )
 }
