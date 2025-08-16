@@ -52,9 +52,9 @@ export type NumPointsMap = Map<number, Map<string[], Map<string[], number>>>
 export interface Layout {
   screenWidthRange: number[];
   vizWidth: number;
-  rowHeight: number;
+  waveHeight: number;
   pointRadius: number;
-  segmentGap: number;
+  responseGap: number;
   partyGap: number;
   labelHeight: number;
 }

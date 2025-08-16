@@ -35,23 +35,53 @@ export default function segmentPoints(
   let R = Math.floor(buildingHeight / (2 * pointRadius));
   let C = Math.floor(buildingWidth / (2 * pointRadius));
   if (R * C < numResidents) {
-    /* 
-    What we're going to do here is "widen" the building just enough to fit the points with the 
-    windows set to their smallest dimensions.
-    */
     console.log('WARNING: The point radius is too large to fit in a segment')
-    C = Math.ceil(numResidents / R);
-    const newBuildingWidth = C * 2 * pointRadius;
-    //offset the new building so that its center lines up with the center of the actual building.
-    const newTopLeftX = topLeftX - (newBuildingWidth - buildingWidth) / 2;
-    return segmentPoints(
-      newTopLeftX,
-      topLeftY,
-      newBuildingWidth,
-      buildingHeight,
-      numResidents,
-      pointRadius
+    /* 
+    Here, when we set the rows and columns to the max values that fit the points,
+    There are not enough windows in the building to fit all the points.
+    We need some fallback in this case to assign positions for points.
+
+    What we're going to do is set R = Math.ceil(Math.sqrt(numPoints)) and C = R.
+    This will result in a total number of windows just above numPoints, with aspect
+    ratios close to that of the building.  These windows will not be big 
+    enough to fit the points, so we'll have overlapping of points.
+    */
+    R = Math.ceil(Math.sqrt(numResidents))
+    C = R
+    //now generate the position for each point within each window
+    //for each point too big for the window
+    //on a given dimension, just put it in the middle of the window
+    const windowWidth = buildingWidth / C;
+    const windowHeight = buildingHeight / R;
+    const allWindows = [] // as PointCoordinates[];
+    for (let r = 1; r <= R; r++) {
+      for (let c = 1; c <= C; c++) {
+        const cx = windowWidth <= 2 * pointRadius ?
+          topLeftX + (c - 1) * windowWidth + 0.5 * windowWidth :
+          topLeftX +
+          (c - 1) * windowWidth +
+          pointRadius +
+          Math.random() * (windowWidth - 2 * pointRadius);
+        const cy = windowHeight <= 2 * pointRadius ?
+          topLeftY + (r - 1) * windowHeight + 0.5 * windowHeight :
+          topLeftY +
+          (r - 1) * windowHeight +
+          pointRadius +
+          Math.random() * (windowHeight - 2 * pointRadius);
+        allWindows.push({
+          x: cx - pointRadius,
+          y: cy - pointRadius,
+          cx: cx,
+          cy: cy,
+        });
+      }
+    }
+    //now select the indices of windows that will be empty at random
+    const emptyIndices = lodash.sampleSize(
+      allWindows.map((el, idx) => idx),
+      numResidents - R * C
     );
+    return allWindows.filter((w, wIdx) => !emptyIndices.includes(wIdx));
   }
 
   //Now let's increase the window size so long as we fit all the points.
@@ -64,7 +94,7 @@ export default function segmentPoints(
       //we can decrement R but not C
       R = R - 1;
     } else {
-      //we can decrement either
+      //we can decrement either R or C
       if (stepIsOdd) {
         C = C - 1;
       } else {

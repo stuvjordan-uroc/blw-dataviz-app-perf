@@ -5,7 +5,7 @@ import makeData from "../functions-and-types/make-data.ts";
 import makeImpProportionsMap from "../functions-and-types/make-proportions-map.ts";
 import addNumPointsToProportionsMap from "../functions-and-types/make-num-points-map.ts";
 import addUnsplitCoordinates from "../functions-and-types/add-unsplit-coordinates.ts";
-import type { ProportionsMap } from "../functions-and-types/types-new.ts";
+import type { Layout, ProportionsMap } from "../functions-and-types/types-new.ts";
 
 //path to raw data
 const rawDataPathString = path.resolve(
@@ -40,9 +40,9 @@ if (data) {
     impVar,
     addNumPointsToProportionsMap(data, vizConfig, pMap)
   ])))
-  console.log(util.inspect(numAndPropssMaps.gov_stats, true, null, true))
+  //console.log(util.inspect(numAndPropssMaps.gov_stats, true, null, true))
   //add unsplit segment coordinates at each wave and partyGroup
-  const layoutSmall = {
+  const layoutSmall: Layout = {
     screenWidthRange: [0, 768],
     vizWidth: 360,
     waveHeight: 12,
@@ -51,10 +51,10 @@ if (data) {
     partyGap: 3 * 3,
     responseGap: 2 * 3,
   };
-  // const unsplitAndNumAndPropsMap = Object.fromEntries(Object.entries(numAndPropssMaps).map(([impVar, nAndPMap]) => ([
-  // impVar,
-  // addUnsplitCoordinates(layoutSmall, nAndPMap)
-  // ])))
-  // console.log("progress so far at =gov_stats=")
-  // console.log(util.inspect(unsplitAndNumAndPropsMap.gov_stats, true, 4, true))
+  const unsplitAndNumAndPropsMap = Object.fromEntries(Object.entries(numAndPropssMaps).map(([impVar, nAndPMap]) => ([
+    impVar,
+    impVar === "gov_stats" ? addUnsplitCoordinates(layoutSmall, nAndPMap, vizConfig) : null
+  ])))
+  console.log("progress so far at =gov_stats=")
+  console.log(util.inspect(unsplitAndNumAndPropsMap.gov_stats, true, 4, true))
 }
