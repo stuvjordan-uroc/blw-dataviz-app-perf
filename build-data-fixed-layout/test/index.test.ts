@@ -42,17 +42,15 @@ if (data) {
   ])))
   console.log(util.inspect(numAndPropssMaps.gov_stats, true, null, true))
   //add unsplit segment coordinates at each wave and partyGroup
-  // const layoutSmall = {
-  // screenWidthRange: [0, 768],
-  // vizWidth: 360,
-  // A: 16 / 9,
-  // labelHeightBottom: 30,
-  // labelHeightTop: 30,
-  // pointRadius: 3,
-  // rowGap: (9 * 2 * 3) / 4,
-  // sampleSize: 10,
-  // segmentGap: (3 * 2 * 3) / 2,
-  // };
+  const layoutSmall = {
+    screenWidthRange: [0, 768],
+    vizWidth: 360,
+    waveHeight: 12,
+    labelHeight: 30,
+    pointRadius: 3,
+    partyGap: 3 * 3,
+    responseGap: 2 * 3,
+  };
   // const unsplitAndNumAndPropsMap = Object.fromEntries(Object.entries(numAndPropssMaps).map(([impVar, nAndPMap]) => ([
   // impVar,
   // addUnsplitCoordinates(layoutSmall, nAndPMap)
