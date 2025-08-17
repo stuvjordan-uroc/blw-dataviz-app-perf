@@ -1,19 +1,16 @@
 import type { Layout, ProportionsByGroupedState, ResponseGroup, Data, VizConfig, SegmentCoordinates, PointCoordinates } from "./types-new.ts";
 import segmentPoints from "./segment-points.ts";
+import segmentCoordinatesExpandedMap from "./segmentCoordinatesMap.ts";
 
 type PropsAndCountsMap = Map<number, Map<string[], {
   proportions: ProportionsByGroupedState;
   counts: Map<ResponseGroup, number>;
 }>>
 
-interface PAndCAtWaveAndPartyGroup {
-  proportions: ProportionsByGroupedState;
-  counts: Map<ResponseGroup, number>;
-}
 
 
 
-
+//TO DO: DRAW AN EMPTY WAVE-ROW FOR EACH EMPTY WAVE
 function unsplitCoordinatesMap(
   waveIdx: number,
   partyGroupIdx: number,
@@ -87,7 +84,17 @@ export default function addUnsplitCoordinates(layout: Layout, propsAndCountsMap:
               partyGroup,
               {
                 ...valAtPartyGroup,
-                unsplit: unsplitCoordinatesMap(waveIdx, partyGroupIdx, valAtPartyGroup, layout, vizConfig)
+                //unsplit: unsplitCoordinatesMap(waveIdx, partyGroupIdx, valAtPartyGroup, layout, vizConfig)
+                unsplit: segmentCoordinatesExpandedMap(
+                  waveIdx,
+                  partyGroupIdx,
+                  valAtPartyGroup,
+                  layout,
+                  vizConfig,
+                  0,
+                  0,
+                  0
+                )
               }
             ])
           })

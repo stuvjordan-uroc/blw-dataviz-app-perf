@@ -53,8 +53,8 @@ if (data) {
   };
   const unsplitAndNumAndPropsMap = Object.fromEntries(Object.entries(numAndPropssMaps).map(([impVar, nAndPMap]) => ([
     impVar,
-    impVar === "misconduct" ? addUnsplitCoordinates(layoutSmall, nAndPMap, vizConfig) : null
+    addUnsplitCoordinates(layoutSmall, nAndPMap, vizConfig)
   ])))
-  //console.log("progress so far at =gov_stats=")
-  //console.log(util.inspect(unsplitAndNumAndPropsMap.gov_stats, true, 4, true))
+  console.log("progress so far at =gov_stats=")
+  console.log(util.inspect(unsplitAndNumAndPropsMap.gov_stats, true, 4, true))
 }
