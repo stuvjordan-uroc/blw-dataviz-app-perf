@@ -13,6 +13,11 @@ export default function segmentPoints(
   Then assign coordinates to the circles so that each one is randomly jittered within it's own apartment window.
   */
 
+  //if there are zero points, return an empty array
+  if (numResidents === 0) {
+    return [] as { x: number, y: number, cx: number, cy: number }[]
+  }
+
   /*
   first construct the apartment windows.
 

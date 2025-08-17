@@ -52,41 +52,47 @@ function unsplitCoordinatesMap(
   const widthToBeDistributed = totalWidthWavePartyGroup - 2 * layout.pointRadius * vizConfig.responseGroups.expanded.length
   //now we can map!
   return new Map(
-    pAndCMapAtWaveAndPartyGroup.proportions.expanded.entries().map(([responseGroup, valAtResponseGroup], responseGroupIdx) => ([
-      responseGroup,
-      {
-        topLeftX: rowOfSegmentsTopLeftX + 2 * layout.pointRadius * responseGroupIdx + valAtResponseGroup.prevCumProportion * widthToBeDistributed,
-        topLeftY: rowOfSegmentsTopLeftY,
-        width: 2 * layout.pointRadius + valAtResponseGroup.proportion * widthToBeDistributed,
-        height: layout.waveHeight,
-        points: segmentPoints(
-          rowOfSegmentsTopLeftX + 2 * layout.pointRadius * responseGroupIdx + valAtResponseGroup.prevCumProportion * widthToBeDistributed,
-          rowOfSegmentsTopLeftY,
-          2 * layout.pointRadius + valAtResponseGroup.proportion * widthToBeDistributed,
-          layout.waveHeight,
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          pAndCMapAtWaveAndPartyGroup.counts.get(responseGroup)!,
-          layout.pointRadius
-        )
-      }
-    ]))
+    pAndCMapAtWaveAndPartyGroup.proportions.expanded.entries().map(([responseGroup, valAtResponseGroup], responseGroupIdx) => {
+      return ([
+        responseGroup,
+        {
+          topLeftX: rowOfSegmentsTopLeftX + 2 * layout.pointRadius * responseGroupIdx + valAtResponseGroup.prevCumProportion * widthToBeDistributed,
+          topLeftY: rowOfSegmentsTopLeftY,
+          width: 2 * layout.pointRadius + valAtResponseGroup.proportion * widthToBeDistributed,
+          height: layout.waveHeight,
+          points: segmentPoints(
+            rowOfSegmentsTopLeftX + 2 * layout.pointRadius * responseGroupIdx + valAtResponseGroup.prevCumProportion * widthToBeDistributed,
+            rowOfSegmentsTopLeftY,
+            2 * layout.pointRadius + valAtResponseGroup.proportion * widthToBeDistributed,
+            layout.waveHeight,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            pAndCMapAtWaveAndPartyGroup.counts.get(responseGroup)!,
+            layout.pointRadius
+          )
+        }
+      ])
+    })
   )
 }
 
 
 export default function addUnsplitCoordinates(layout: Layout, propsAndCountsMap: PropsAndCountsMap, vizConfig: VizConfig) {
   return new Map(
-    propsAndCountsMap.entries().map(([wave, valAtWave], waveIdx) => ([
-      wave,
-      new Map(
-        valAtWave.entries().map(([partyGroup, valAtPartyGroup], partyGroupIdx) => ([
-          partyGroup,
-          {
-            ...valAtPartyGroup,
-            unsplit: unsplitCoordinatesMap(waveIdx, partyGroupIdx, valAtPartyGroup, layout, vizConfig)
-          }
-        ]))
-      )
-    ]))
+    propsAndCountsMap.entries().map(([wave, valAtWave], waveIdx) => {
+      return ([
+        wave,
+        new Map(
+          valAtWave.entries().map(([partyGroup, valAtPartyGroup], partyGroupIdx) => {
+            return ([
+              partyGroup,
+              {
+                ...valAtPartyGroup,
+                unsplit: unsplitCoordinatesMap(waveIdx, partyGroupIdx, valAtPartyGroup, layout, vizConfig)
+              }
+            ])
+          })
+        )
+      ])
+    })
   )
 }

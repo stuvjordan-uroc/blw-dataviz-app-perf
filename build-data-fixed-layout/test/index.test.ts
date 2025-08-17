@@ -45,7 +45,7 @@ if (data) {
   const layoutSmall: Layout = {
     screenWidthRange: [0, 768],
     vizWidth: 360,
-    waveHeight: 12,
+    waveHeight: 90,
     labelHeight: 30,
     pointRadius: 3,
     partyGap: 3 * 3,
@@ -53,8 +53,8 @@ if (data) {
   };
   const unsplitAndNumAndPropsMap = Object.fromEntries(Object.entries(numAndPropssMaps).map(([impVar, nAndPMap]) => ([
     impVar,
-    impVar === "gov_stats" ? addUnsplitCoordinates(layoutSmall, nAndPMap, vizConfig) : null
+    impVar === "misconduct" ? addUnsplitCoordinates(layoutSmall, nAndPMap, vizConfig) : null
   ])))
-  console.log("progress so far at =gov_stats=")
-  console.log(util.inspect(unsplitAndNumAndPropsMap.gov_stats, true, 4, true))
+  //console.log("progress so far at =gov_stats=")
+  //console.log(util.inspect(unsplitAndNumAndPropsMap.gov_stats, true, 4, true))
 }
