@@ -36,12 +36,6 @@ export interface Layout {
   partyGap: number;
   labelHeight: number;
 }
-export interface Out {
-  layouts: Record<string, Layout>;
-  vizConfig: VizConfig;
-  viz: Record<string, Viz>;
-}
-
 export type ProportionsMap = Map<number, Map<string[], {
   expanded: Map<string[], {
     proportion: number;
@@ -53,98 +47,115 @@ export type ProportionsMap = Map<number, Map<string[], {
   }>;
 }> | null>
 
-export interface Viz {
-  proportions: ProportionsMap
-  counts: Map<
-    number,
-    null |
+export type CountsMap = Map<
+  number,
+  null |
+  Map<
+    string[],
     Map<
       string[],
-      Map<
-        string[],
-        number
-      >
-    >
-  >,
-  segments: {
-    unsplit: Segment,
-    collapsed: {
-      byResponse: Map<string[], Segment>,
-      byResponseAndParty: Map<string[], Segment>,
-      byResponseAndWave: Map<
-        number,
-        null |
-        Map<
-          string[],
-          Segment
-        >
-      >,
-      byResponseAndPartyAndWave: Map<
-        number,
-        null |
-        Map<
-          string[],
-          Segment
-        >
-      >
-    }
-    expanded: {
-      byResponse: Map<string[], Segment>,
-      byResponseAndParty: Map<string[], Segment>,
-      byResponseAndWave: Map<
-        number,
-        null |
-        Map<
-          string[],
-          Segment
-        >
-      >,
-      byResponseAndPartyAndWave: Map<
-        number,
-        null |
-        Map<
-          string[],
-          Segment
-        >
-      >
-    }
-  },
-  points: Map<number,
-    null |
-    Map<
-      string[],
-      Map<
-        string[],
-        {
-          unsplit: Point[]
-          collapsed: {
-            byResponse: Point[],
-            byResponseAndParty: Point[],
-            byResponseAndWave: Point[],
-            byResponseAndPartyAndWave: Point[]
-          },
-          expanded: {
-            byResponse: Point[],
-            byResponseAndParty: Point[],
-            byResponseAndWave: Point[],
-            byResponseAndPartyAndWave: Point[]
-          }
-        }
-      >
+      number
     >
   >
-}
-
-export type Segment = {
+>
+export interface Segment {
   topLeftX: number,
   topLeftY: number,
   width: number,
   height: number
 }
 
-export type Point = {
+export interface Point {
   x: number,
   y: number,
   cx: number,
   cy: number
+}
+export interface PointsViews {
+  unsplit: Point[]
+  collapsed: {
+    byResponse: Point[],
+    byResponseAndParty: Point[],
+    byResponseAndWave: Point[],
+    byResponseAndPartyAndWave: Point[]
+  },
+  expanded: {
+    byResponse: Point[],
+    byResponseAndParty: Point[],
+    byResponseAndWave: Point[],
+    byResponseAndPartyAndWave: Point[]
+  }
+}
+export type PointsMap = Map<
+  number, //wave
+  null | Map<
+    string[], //partyGroup
+    Map<
+      string[], //responseGroup
+      PointsViews
+    >
+  >
+>
+export interface SegmentViews {
+  unsplit: Segment,
+  collapsed: {
+    byResponse: Map<string[], Segment>,
+    byResponseAndParty: Map<string[], Segment>,
+    byResponseAndWave: Map<
+      number,
+      null |
+      Map<
+        string[],
+        Segment
+      >
+    >,
+    byResponseAndPartyAndWave: Map<
+      number,
+      null |
+      Map<
+        string[],
+        Segment
+      >
+    >
+  }
+  expanded: {
+    byResponse: Map<string[], Segment>,
+    byResponseAndParty: Map<string[], Segment>,
+    byResponseAndWave: Map<
+      number,
+      null |
+      Map<
+        string[],
+        Segment
+      >
+    >,
+    byResponseAndPartyAndWave: Map<
+      number,
+      null |
+      Map<
+        string[],
+        Segment
+      >
+    >
+  }
+}
+
+export interface ImpViz {
+  proportions: ProportionsMap,
+  counts: CountsMap,
+  viz: Record<
+    string, //screen size
+    {
+      layout: Layout,
+      segments: SegmentViews,
+      points: PointsMap
+    }
+  >
+}
+export interface Out {
+  vizConfig: VizConfig;
+  imp: Record<
+    string, //one for each impVar
+    ImpViz
+  >
 }

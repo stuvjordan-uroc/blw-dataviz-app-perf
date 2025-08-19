@@ -1,8 +1,13 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import path from 'node:path'
 import makeData from './functions-and-types/make-data.ts';
-import type { Out, Viz } from './functions-and-types/types.ts';
+import type { ImpViz, Layout, Out, PointsMap, SegmentViews } from './functions-and-types/types.ts';
 import makeImpProportionsMap from './functions-and-types/make-proportions-map.ts';
 import makeCountsMap from './functions-and-types/make-counts-map.ts';
+import makeEmptyPointsMap from './functions-and-types/make-empty-points-map.ts';
+import setPointCoordinatesUnsplit from './functions-and-types/set-point-coordinates/unsplit.ts';
+//for dev/debug
+import util from 'node:util'
 //path to raw data
 const rawDataPathString = path.resolve(
   "build-data-fixed-layout",
@@ -20,25 +25,48 @@ if (data) {
     partyGroups: [["Democrat"], ["Independent", "Other"], ["Republican"]],
     sampleSize: 100
   }
-  out.layouts = {
-    small: {
-      screenWidthRange: [0, 768],
-      vizWidth: 360,
-      waveHeight: 90,
-      labelHeight: 30,
-      pointRadius: 3,
-      partyGap: 3 * 3,
-      responseGap: 2 * 3,
+  out.imp = {} as Record<string, ImpViz>
+  data.impCols.forEach(impVar => {
+    //console.log('setting up the out object for impVar', impVar)
+    out.imp[impVar] = {} as ImpViz
+    //populate the proportions map
+    out.imp[impVar].proportions = makeImpProportionsMap(impVar, data, out.vizConfig)
+    //populate the counts map
+    out.imp[impVar].counts = makeCountsMap(data, out.vizConfig, out.imp[impVar].proportions)
+    out.imp[impVar].viz = {
+      small: {
+        layout: {} as Layout,
+        segments: {} as SegmentViews,
+        points: new Map() as PointsMap
+      }
     }
-  }
-  out.viz = Object.fromEntries(data.impCols.map(impVar => ([
-    impVar,
-    {} as Viz
-  ])))
-  for (const impVar in out.viz) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    out.viz[impVar]!.proportions = makeImpProportionsMap(impVar, data, out.vizConfig)
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    out.viz[impVar]!.counts = makeCountsMap(data, out.vizConfig, out.viz[impVar]!.proportions)
-  }
+    /*  SMALL LAYOUT */
+    out.imp[impVar].viz.small!.layout = {
+      labelHeight: 30,
+      partyGap: 2 * 3 * 3 / 2 * 3 / 2,
+      pointRadius: 3,
+      responseGap: 2 * 3 * 3 / 2,
+      screenWidthRange: [0, 678],
+      vizWidth: 360,
+      waveHeight: 90
+    }
+    //set up the unsplit segment
+    out.imp[impVar].viz.small!.segments.unsplit = {
+      topLeftY: out.imp[impVar].viz.small!.layout.labelHeight,
+      topLeftX: 0,
+      height: out.imp[impVar].proportions.values().filter(valAtWave => valAtWave !== null).toArray().length * out.imp[impVar].viz.small!.layout.waveHeight,
+      width: out.imp[impVar].viz.small!.layout.vizWidth
+    }
+    //initialize the empty points map
+    out.imp[impVar].viz.small!.points = makeEmptyPointsMap(out.imp[impVar].counts)
+    //set the point coordinates for the unsplit view
+    setPointCoordinatesUnsplit(
+      out.imp[impVar].viz.small!.points,
+      out.imp[impVar].viz.small!.segments.unsplit,
+      out.imp[impVar].viz.small!.layout,
+      out.imp[impVar].counts
+    )
+  })
+  console.log('progress so far on =gov_stats=')
+  console.log(util.inspect(out.imp.gov_stats?.viz.small?.points, true, 5, true))
 }
