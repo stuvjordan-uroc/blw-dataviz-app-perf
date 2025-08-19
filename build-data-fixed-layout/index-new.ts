@@ -3,7 +3,7 @@ import path from "node:path";
 import makeData from "./functions-and-types/make-data.ts";
 import makeImpProportionsMap from "./functions-and-types/make-proportions-map.ts";
 import addNumPointsToProportionsMap from "./functions-and-types/make-num-points-map.ts";
-import addUnsplitCoordinates from "./functions-and-types/add-unsplit-coordinates.ts";
+import addUnsplitCoordinates from "./functions-and-types/unsplit-coordinates-map.ts";
 import type { ProportionsMap } from "./functions-and-types/types-new.ts";
 
 //path to raw data

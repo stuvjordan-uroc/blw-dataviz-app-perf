@@ -46,6 +46,12 @@ export type ProportionsMap = Map<number,
   { impVarIsIncluded: boolean, proportions: Map<string[], ProportionsByGroupedState> }
 >
 
+export type PropsAndCountsMap = Map<number, {
+  impVarIsIncluded: boolean;
+  proportions: Map<string[], ProportionsByGroupedState>;
+  counts: Map<string[], Map<ResponseGroup, number>>;
+}>
+
 //map each ...wave...  ...partyGroup...  ...(expanded)responseGroup... to a number of points.
 export type NumPointsMap = Map<number, Map<string[], Map<string[], number>>>
 

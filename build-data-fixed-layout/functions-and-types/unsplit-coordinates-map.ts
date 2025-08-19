@@ -1,18 +1,13 @@
-import type { Layout, ProportionsByGroupedState, ResponseGroup, VizConfig } from "./types-new.ts";
+import type { Layout, VizConfig, PropsAndCountsMap } from "./types-new.ts";
 import segmentCoordinatesExpandedMap from "./segmentCoordinatesMap.ts";
 
-type PropsAndCountsMap = Map<number, {
-  impVarIsIncluded: boolean;
-  proportions: Map<string[], ProportionsByGroupedState>;
-  counts: Map<string[], Map<ResponseGroup, number>>;
-}>
 
 
 
 
 
 
-export default function addUnsplitCoordinates(layout: Layout, propsAndCountsMap: PropsAndCountsMap, vizConfig: VizConfig) {
+export default function unsplitCoordinatesMap(layout: Layout, propsAndCountsMap: PropsAndCountsMap, vizConfig: VizConfig) {
   return new Map(
     propsAndCountsMap.entries().map(([wave, valAtWave], waveIdx) => {
       return ([

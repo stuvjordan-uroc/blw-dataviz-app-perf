@@ -4,8 +4,8 @@ import util from "node:util";
 import makeData from "../functions-and-types/make-data.ts";
 import makeImpProportionsMap from "../functions-and-types/make-proportions-map.ts";
 import addNumPointsToProportionsMap from "../functions-and-types/make-num-points-map.ts";
-import addUnsplitCoordinates from "../functions-and-types/add-unsplit-coordinates.ts";
 import type { Layout, ProportionsMap } from "../functions-and-types/types-new.ts";
+import unsplitCoordinatesMap from "../functions-and-types/unsplit-coordinates-map.ts";
 
 //path to raw data
 const rawDataPathString = path.resolve(
@@ -55,13 +55,28 @@ if (data) {
     impVar,
     {
       countsAndProportions: nAndPMap,
-      unsplit: addUnsplitCoordinates(
+      unsplit: unsplitCoordinatesMap(
         layoutSmall,
         new Map(nAndPMap.entries().filter(([wave, valAtWave]) => valAtWave.impVarIsIncluded)),
-        vizConfig)
+        vizConfig
+      )
     }
-    //addUnsplitCoordinates(layoutSmall, nAndPMap, vizConfig)
   ])))
-  console.log("progress so far at =gov_stats=")
-  console.log(util.inspect(unsplitAndNumAndPropsMap.gov_stats?.unsplit, true, 5, true))
+  //console.log("progress so far at =gov_stats=")
+  //console.log(util.inspect(unsplitAndNumAndPropsMap.gov_stats?.unsplit, true, 5, true))
+  //NEXT TO DO: Add segments for byResponse expanded view
+  const byResponseAdded = Object.fromEntries(Object.entries(unsplitAndNumAndPropsMap).map(([impVar, valAtImpVar]) => ([
+    impVar,
+    {
+      ...valAtImpVar,
+      byResponse: {
+        expanded: byResponseExpandedMap(
+          layoutSmall,
+          new Map(nAndPMap.entries().filter(([wave, valAtWave]) => valAtWave.impVarIsIncluded)),
+          vizConfig
+        ),
+        collapsed: null
+      }
+    }
+  ])))
 }
