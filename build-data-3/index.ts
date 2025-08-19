@@ -8,6 +8,7 @@ import makeEmptyPointsMap from './functions-and-types/make-empty-points-map.ts';
 import setPointCoordinatesUnsplit from './functions-and-types/set-point-coordinates/unsplit.ts';
 //for dev/debug
 import util from 'node:util'
+import segmentViewMapByResponseExpanded from './functions-and-types/make-segment-view-maps/byResponseExpanded.ts';
 //path to raw data
 const rawDataPathString = path.resolve(
   "build-data-fixed-layout",
@@ -41,6 +42,8 @@ if (data) {
       }
     }
     /*  SMALL LAYOUT */
+    //TO DO: how is it possible that typescript thinks out.imp[impVar].viz.small could be undefined
+    //on the following line????
     out.imp[impVar].viz.small!.layout = {
       labelHeight: 30,
       partyGap: 2 * 3 * 3 / 2 * 3 / 2,
@@ -66,7 +69,19 @@ if (data) {
       out.imp[impVar].viz.small!.layout,
       out.imp[impVar].counts
     )
+    //NEXT STEP: Build the segments for the expanded byResponse view
+    //and assign the points for the expanded byResponse view.
+    //make a map from responseGroups to aggregated proportions.
+    out.imp[impVar].viz.small!.segments.expanded.byResponse = segmentViewMapByResponseExpanded(
+      impVar,
+      data,
+      out.vizConfig,
+      out.imp[impVar].viz.small!.layout
+    )
   })
-  console.log('progress so far on =gov_stats=')
-  console.log(util.inspect(out.imp.gov_stats?.viz.small?.points, true, 5, true))
+  //console.log('progress so far on =gov_stats=')
+  //console.log(util.inspect(out.imp.gov_stats?.viz.small?.points, true, 5, true))
+
+
+
 }
