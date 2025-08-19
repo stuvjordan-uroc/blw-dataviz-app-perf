@@ -1,6 +1,11 @@
-import type { Data, ProportionsMap, ResponseGroupToProportionMap, VizConfig } from "./types-new.ts";
+import type { Data, ProportionsMap, VizConfig } from "./types.ts"
 
-function counts(expandedResponseGroupsToProportionsMap: ResponseGroupToProportionMap, vizConfig: VizConfig) {
+type ResponseGroupToP = Map<string[], {
+  proportion: number;
+  prevCumProportion: number;
+}>
+
+function counts(expandedResponseGroupsToProportionsMap: ResponseGroupToP, vizConfig: VizConfig) {
   const values = expandedResponseGroupsToProportionsMap.entries().map(([responseGroup, proportion]) => ({
     responseGroup: responseGroup,
     rounded: Math.floor(proportion.proportion * vizConfig.sampleSize),
@@ -40,23 +45,13 @@ function counts(expandedResponseGroupsToProportionsMap: ResponseGroupToProportio
   ])))
 }
 
-
-
-
-export default function addNumPointsToProportionsMap(data: Data, vizConfig: VizConfig, proportionsMap: ProportionsMap) {
-  return new Map(
-    proportionsMap.entries().map(([wave, valAtWave]) => ([
-      wave,
-      {
-        impVarIsIncluded: valAtWave.impVarIsIncluded,
-        proportions: valAtWave.proportions,
-        counts: new Map(
-          valAtWave.proportions.entries().map(([partyGroup, valAtPartyGroup]) => ([
-            partyGroup,
-            counts(valAtPartyGroup.expanded, vizConfig)
-          ]))
-        )
-      }
-    ]))
-  )
+export default function makeCountsMap(data: Data, vizConfig: VizConfig, proportionsMap: ProportionsMap) {
+  return new Map(proportionsMap.entries().map(([wave, pMapAtWave]) => ([
+    wave,
+    pMapAtWave === null ? null :
+      new Map(pMapAtWave.entries().map(([partyGroup, pMapAtPartyGroup]) => ([
+        partyGroup,
+        counts(pMapAtPartyGroup.expanded, vizConfig)
+      ])))
+  ])))
 }

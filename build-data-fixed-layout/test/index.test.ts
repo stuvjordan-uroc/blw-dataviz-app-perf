@@ -72,7 +72,7 @@ if (data) {
       byResponse: {
         expanded: byResponseExpandedMap(
           layoutSmall,
-          new Map(nAndPMap.entries().filter(([wave, valAtWave]) => valAtWave.impVarIsIncluded)),
+          new Map(valAtImpVar.countsAndProportions.entries().filter(([wave, valAtWave]) => valAtWave.impVarIsIncluded)),
           vizConfig
         ),
         collapsed: null
