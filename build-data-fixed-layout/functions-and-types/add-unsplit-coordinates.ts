@@ -1,5 +1,4 @@
 import type { Layout, ProportionsByGroupedState, ResponseGroup, VizConfig } from "./types-new.ts";
-import segmentPoints from "./segment-points.ts";
 import segmentCoordinatesExpandedMap from "./segmentCoordinatesMap.ts";
 
 type PropsAndCountsMap = Map<number, {

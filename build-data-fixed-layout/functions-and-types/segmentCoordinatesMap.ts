@@ -22,14 +22,14 @@ export default function segmentCoordinatesExpandedMap(
   //first compute the total width (including responseGap) of any one
   //partyGroup row of segments
   //each partyGroup gets an equal share of the vizWidth minus partyGaps between partyGroups
-  const totalWidthPartyGroup = (layout.vizWidth - partyGap * vizConfig.partyGroups.length) / vizConfig.partyGroups.length
+  const totalWidthPartyGroup = (layout.vizWidth - partyGap * (vizConfig.partyGroups.length - 1)) / vizConfig.partyGroups.length
   //now compute the top left X of the requested partyGroup row of segments
   const topLeftXPartyGroup = (totalWidthPartyGroup + partyGap) * partyGroupIdx
   //now compute the top left Y of the requested wave
   const topLeftYWave = layout.labelHeight + (layout.waveHeight + waveGap) * waveIdx
   //now compute the width to be distributed proportionally between the segments
   //each segment will have a basis width of 2*layout.pointRadius.
-  //then will add a proportional amount to that from the available width
+  //Then we will add a proportional amount to that from the available width
   const widthToBeDistributed = totalWidthPartyGroup //start with the total width of the group
     - 2 * layout.pointRadius * vizConfig.responseGroups.expanded.length //subtract the basis widths
     - responseGap * (vizConfig.responseGroups.expanded.length - 1)//subtract the responseGaps
@@ -47,7 +47,7 @@ export default function segmentCoordinatesExpandedMap(
           width: currentSegmentWidth,
           height: layout.waveHeight,
           points: segmentPoints(
-            cumPrevSegmentWidths,
+            topLeftXPartyGroup + cumPrevSegmentWidths,
             topLeftYWave,
             currentSegmentWidth,
             layout.waveHeight,

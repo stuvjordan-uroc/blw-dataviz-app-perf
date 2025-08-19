@@ -63,5 +63,5 @@ if (data) {
     //addUnsplitCoordinates(layoutSmall, nAndPMap, vizConfig)
   ])))
   console.log("progress so far at =gov_stats=")
-  console.log(util.inspect(unsplitAndNumAndPropsMap.misconduct?.unsplit, true, 1, true))
+  console.log(util.inspect(unsplitAndNumAndPropsMap.gov_stats?.unsplit, true, 5, true))
 }
