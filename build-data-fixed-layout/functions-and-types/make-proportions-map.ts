@@ -43,25 +43,28 @@ function impVarIsIncluded(impVar: string, data: Data, wave: number) {
 
 export default function makeImpProportionsMap(impVar: string, data: Data, vizConfig: VizConfig) {
   return new Map(data.waves.imp
-    .filter(wave => impVarIsIncluded(impVar, data, wave))
     .map(wave => ([
       wave,
-      new Map(vizConfig.partyGroups.map(partyGroup => ([
-        partyGroup,
-        Object.fromEntries(Object.entries(vizConfig.responseGroups).map(([groupedState, arrayOfResponseGroups]) => [
-          groupedState,
-          new Map(arrayOfResponseGroups.map((responseGroup, rgIdx, aRg) => ([
-            responseGroup,
-            {
-              proportion: proportion(impVar, data, wave, partyGroup, responseGroup),
-              prevCumProportion: rgIdx === 0 ? 0 : aRg.slice(0, rgIdx).reduce((acc, curr) =>
-                acc + proportion(impVar, data, wave, partyGroup, curr),
-                0
-              )
-            }
+      {
+        impVarIsIncluded: impVarIsIncluded(impVar, data, wave),
+        proportions:
+          new Map(vizConfig.partyGroups.map(partyGroup => ([
+            partyGroup,
+            Object.fromEntries(Object.entries(vizConfig.responseGroups).map(([groupedState, arrayOfResponseGroups]) => [
+              groupedState,
+              new Map(arrayOfResponseGroups.map((responseGroup, rgIdx, aRg) => ([
+                responseGroup,
+                {
+                  proportion: proportion(impVar, data, wave, partyGroup, responseGroup),
+                  prevCumProportion: rgIdx === 0 ? 0 : aRg.slice(0, rgIdx).reduce((acc, curr) =>
+                    acc + proportion(impVar, data, wave, partyGroup, curr),
+                    0
+                  )
+                }
+              ])))
+            ]))
           ])))
-        ]))
-      ])))
+      }
     ]))
   )
 }

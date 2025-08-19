@@ -4,10 +4,8 @@ import type { ProportionsByGroupedState, ResponseGroup, Layout, VizConfig } from
 export default function segmentCoordinatesExpandedMap(
   waveIdx: number,
   partyGroupIdx: number,
-  pAndCMapAtWaveAndPartyGroup: {
-    proportions: ProportionsByGroupedState;
-    counts: Map<ResponseGroup, number>;
-  },
+  proportions: ProportionsByGroupedState,
+  counts: Map<ResponseGroup, number>,
   layout: Layout,
   vizConfig: VizConfig,
   waveGap: number,
@@ -37,7 +35,7 @@ export default function segmentCoordinatesExpandedMap(
     - responseGap * (vizConfig.responseGroups.expanded.length - 1)//subtract the responseGaps
   //now we can map!
   return new Map(
-    pAndCMapAtWaveAndPartyGroup.proportions.expanded.entries().map(([responseGroup, valAtResponseGroup], responseGroupIdx) => {
+    proportions.expanded.entries().map(([responseGroup, valAtResponseGroup], responseGroupIdx) => {
       const currentSegmentWidth = 2 * layout.pointRadius + widthToBeDistributed * valAtResponseGroup.proportion;
       const cumPrevSegmentWidths = (2 * layout.pointRadius + responseGap) * responseGroupIdx + widthToBeDistributed * valAtResponseGroup.prevCumProportion;
 
@@ -54,7 +52,7 @@ export default function segmentCoordinatesExpandedMap(
             currentSegmentWidth,
             layout.waveHeight,
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            pAndCMapAtWaveAndPartyGroup.counts.get(responseGroup)!,
+            counts.get(responseGroup)!,
             layout.pointRadius
           )
         }

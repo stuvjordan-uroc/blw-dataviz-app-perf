@@ -54,19 +54,22 @@ function counts(expandedResponseGroupsToProportionsMap: ResponseGroupToProportio
 //   )
 // }
 
+
+
 export default function addNumPointsToProportionsMap(data: Data, vizConfig: VizConfig, proportionsMap: ProportionsMap) {
   return new Map(
     proportionsMap.entries().map(([wave, valAtWave]) => ([
       wave,
-      new Map(
-        valAtWave.entries().map(([partyGroup, valAtPartyGroup]) => ([
-          partyGroup,
-          {
-            proportions: valAtPartyGroup,
-            counts: counts(valAtPartyGroup.expanded, vizConfig)
-          }
-        ]))
-      )
+      {
+        impVarIsIncluded: valAtWave.impVarIsIncluded,
+        proportions: valAtWave.proportions,
+        counts: new Map(
+          valAtWave.proportions.entries().map(([partyGroup, valAtPartyGroup]) => ([
+            partyGroup,
+            counts(valAtPartyGroup.expanded, vizConfig)
+          ]))
+        )
+      }
     ]))
   )
 }

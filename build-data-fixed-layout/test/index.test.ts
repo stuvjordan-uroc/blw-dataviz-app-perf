@@ -53,8 +53,15 @@ if (data) {
   };
   const unsplitAndNumAndPropsMap = Object.fromEntries(Object.entries(numAndPropssMaps).map(([impVar, nAndPMap]) => ([
     impVar,
-    addUnsplitCoordinates(layoutSmall, nAndPMap, vizConfig)
+    {
+      countsAndProportions: nAndPMap,
+      unsplit: addUnsplitCoordinates(
+        layoutSmall,
+        new Map(nAndPMap.entries().filter(([wave, valAtWave]) => valAtWave.impVarIsIncluded)),
+        vizConfig)
+    }
+    //addUnsplitCoordinates(layoutSmall, nAndPMap, vizConfig)
   ])))
   console.log("progress so far at =gov_stats=")
-  console.log(util.inspect(unsplitAndNumAndPropsMap.gov_stats, true, 4, true))
+  console.log(util.inspect(unsplitAndNumAndPropsMap.misconduct?.unsplit, true, 1, true))
 }
