@@ -1,34 +1,49 @@
 import type { CountsMap, VizConfig } from "../../types.ts";
 
 export function aggregateCountsByResponseExpanded(countsMap: CountsMap, vizConfig: VizConfig) {
-  const out = new Map(
-    vizConfig.responseGroups.expanded.map(responseGroup => ([
-      responseGroup,
-      countsMap
-        .entries()
-        .filter(([wave, cpAtWave]) => (cpAtWave !== null))
-        .map(([wave, cpAtWave]) => {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          const out = cpAtWave!
-            .entries()
-            .map(([partyGroup, cpAtPartyGroup]) => {
-              const out = cpAtPartyGroup
-                .entries()
-                .filter(([currentResponseGroup, count]) =>
-                  responseGroup.every(rg => currentResponseGroup.includes(rg)) &&
-                  currentResponseGroup.every(rg => responseGroup.includes(rg))
-                )
-                .map(([currentResponseGroup, count]) => count)
-                .toArray()[0]
-              return out
+  //first construct a map that takes each response group to a nested map
+  //that gives the count for that response group at each combination of wave and response group.
+  const countsMapUnFolded = new Map(
+    vizConfig.responseGroups.expanded.map(targetRG => ([
+      targetRG,
+      new Map(
+        countsMap.entries().filter(([wave, countsAtWave]) => countsAtWave !== null).map(([wave, countsAtWave]) => ([
+          wave,
+          new Map(
+            countsAtWave?.entries().map(([partyGroup, countsAtPartyGroup]) => {
+              //find the matching responseGroup
+              const matchingGroup = countsAtPartyGroup.keys().find(rg => (
+                rg.every(r => targetRG.includes(r)) &&
+                targetRG.every(r => rg.includes(r))
+              ))
+              if (!matchingGroup) {
+                console.log('WARNING: We tried to aggregate counts, but could not find a match for', targetRG, 'in the counts map you passed at wave', wave, 'and party group', partyGroup)
+                return ([partyGroup, 0])
+              }
+              const returnCount = countsAtPartyGroup.get(matchingGroup)
+              if (!returnCount) {
+                console.log('WARNING: In trying to aggregate counts, we found a matching group, but failed to use it to retrieve the count.')
+                return ([partyGroup, 0])
+              }
+              return ([partyGroup, returnCount])
             })
-            .toArray()
-            //at this point `out` holds an array of number | undefined.
-            //each one represents the count for the given responseGroup at one partyGroup
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            .reduce((acc, curr) => acc! + (curr ?? 0), 0)
-          //now out is the sum of these counts across the party groups.
-        })
+          )
+        ]))
+      )
     ]))
   )
+  //now roll up the counts!
+  const countsMapFolded = new Map(
+    countsMapUnFolded.entries().map(([rG, countsAtRG]) => {
+      const waveTotals = countsAtRG.values().map(countsAtCurrentWave => {
+        const currentWaveTotal = countsAtCurrentWave.values().reduce((acc, curr) => acc + curr, 0)
+        return currentWaveTotal
+      })
+      return ([
+        rG,
+        waveTotals.reduce((acc, curr) => acc + curr, 0)
+      ])
+    })
+  )
+  return countsMapFolded
 }
