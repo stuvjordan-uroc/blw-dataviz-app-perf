@@ -9,6 +9,7 @@ import setPointCoordinatesUnsplit from './functions-and-types/set-point-coordina
 //for dev/debug
 import util from 'node:util'
 import segmentViewMapByResponseExpanded from './functions-and-types/make-segment-view-maps/byResponseExpanded.ts';
+import setPointCoordinatesByResponseExpanded from './functions-and-types/set-point-coordinates/byResponseExpanded.ts';
 //path to raw data
 const rawDataPathString = path.resolve(
   "build-data-fixed-layout",
@@ -71,14 +72,24 @@ if (data) {
     )
     //NEXT STEP: Build the segments for the expanded byResponse view
     //and assign the points for the expanded byResponse view.
-    //make a map from responseGroups to aggregated proportions.
+    //create the segments
     out.imp[impVar].viz.small!.segments.expanded.byResponse = segmentViewMapByResponseExpanded(
       impVar,
-      data,
+      out.imp[impVar].proportions,
       out.vizConfig,
       out.imp[impVar].viz.small!.layout
     )
+    //assign the points.
+    setPointCoordinatesByResponseExpanded(
+      out.imp[impVar].viz.small!.points,
+      out.imp[impVar].viz.small!.segments.expanded.byResponse,
+      out.imp[impVar].viz.small!.layout,
+      out.imp[impVar].counts,
+      out.vizConfig
+    )
   })
+  //TO DO: layout does not vary with the impVar, so move it up.
+
   //console.log('progress so far on =gov_stats=')
   //console.log(util.inspect(out.imp.gov_stats?.viz.small?.points, true, 5, true))
 

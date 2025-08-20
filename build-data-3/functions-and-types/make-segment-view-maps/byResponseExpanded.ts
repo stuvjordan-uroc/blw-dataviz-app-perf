@@ -1,30 +1,29 @@
-import impVarIsIncluded from "../impvar-is-included.ts";
-import aggPropMapByResponseExpanded from "../make-aggregated-proportion-map/byResponseExpanded.ts";
-import type { Data, Layout, VizConfig } from "../types.ts";
+import { aggregateProportionsByResponseExpanded } from "../aggregate/proportions/byResponse.ts";
+import type { Layout, ProportionsMap, VizConfig } from "../types.ts";
 
 export default function segmentViewMapByResponseExpanded(
   impVar: string,
-  data: Data,
+  proportionsMap: ProportionsMap,
   vizConfig: VizConfig,
   layout: Layout
 ) {
   //get the aggregated proportions map
-  const aggP = aggPropMapByResponseExpanded(impVar, data, vizConfig)
-  //compute the width to be distrubuted between the segments
+  const aggPMap = aggregateProportionsByResponseExpanded(proportionsMap, vizConfig)
+  //compute the stuff needed for the segments
+  const topLeftY = layout.labelHeight
   const widthToBeDistributed =
-    layout.vizWidth //start with the vizWidth
-    - 2 * layout.pointRadius * aggP.size //subtract the minimum width to be allocated to each segement
-    - layout.responseGap * (aggP.size - 1) //subtract the gaps between segments
-  //get the number of waves at which the requested impVar is included
-  const numWavesIncluded = data.waves.imp.filter(wave => impVarIsIncluded(impVar, data, wave)).length
+    layout.vizWidth //start with the whole vizWidth
+    - 2 * layout.pointRadius * aggPMap.size //subtract the minimum widths for the segments
+    - layout.responseGap * (aggPMap.size - 1) //subtract the responseGaps
+  const numberOfIncludedWaves = proportionsMap.values().filter(pAtWave => pAtWave !== null).toArray().length
   return new Map(
-    aggP.entries().map(([responseGroup, pAtRG], responseGroupIdx) => ([
-      responseGroup,
+    aggPMap.entries().map(([rG, pAtRg], rGIdx) => ([
+      rG,
       {
-        topLeftY: layout.labelHeight,
-        topLeftX: (2 * layout.pointRadius + layout.responseGap) * responseGroupIdx + widthToBeDistributed * pAtRG.prevCumProportion,
-        width: 2 * layout.pointRadius + widthToBeDistributed * pAtRG.proportion,
-        height: layout.waveHeight * numWavesIncluded
+        topLeftY: topLeftY,
+        topLeftX: 2 * layout.pointRadius * rGIdx + layout.responseGap * rGIdx + widthToBeDistributed * pAtRg.prevCumProportion,
+        width: 2 * layout.pointRadius + widthToBeDistributed * pAtRg.proportion,
+        height: layout.waveHeight * numberOfIncludedWaves
       }
     ]))
   )

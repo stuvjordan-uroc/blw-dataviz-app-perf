@@ -52,7 +52,6 @@ export default function setPointCoordinatesUnsplit(pointsMap: PointsMap, unsplit
               } else {
                 console.log('WARNING: You tried to set unsplit point coordinates at wave', wave, 'But you passed a CountsMap that has no entry at that wave.')
               }
-
             })
         })
     })
