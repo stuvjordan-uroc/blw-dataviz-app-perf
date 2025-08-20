@@ -40,15 +40,12 @@ export function aggregateProportionsByResponseExpanded(proportionsMap: Proportio
         const currentWaveAvg =
           psAtCurrentWave.values().reduce((acc, curr) => acc + curr, 0) /
           psAtCurrentWave.size
-        if (isNaN(currentWaveAvg)) {
+        if (currentWaveAvg === Infinity) {
           console.log('WARNING: In aggregating proportions, we ended up with 0 party groups with defined proportions at wave', wave)
         }
         return currentWaveAvg
       })
       const rgAvg = waveAvgs.reduce((acc, curr) => acc + curr, 0) / waveAvgs.toArray().length
-      if (isNaN(rgAvg)) {
-        console.log('WARNING: In aggregating proportions, we ended up with 0 waves with defined proportions at response group', rG)
-      }
       return ([
         rG,
         rgAvg

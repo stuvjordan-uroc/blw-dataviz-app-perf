@@ -2,7 +2,6 @@ import { aggregateProportionsByResponseExpanded } from "../aggregate/proportions
 import type { Layout, ProportionsMap, VizConfig } from "../types.ts";
 
 export default function segmentViewMapByResponseExpanded(
-  impVar: string,
   proportionsMap: ProportionsMap,
   vizConfig: VizConfig,
   layout: Layout

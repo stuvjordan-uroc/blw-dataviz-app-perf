@@ -96,48 +96,30 @@ export type PointsMap = Map<
     >
   >
 >
+export interface SegmentGroupedViews {
+  byResponse: Map<string[], Segment>,
+  byResponseAndParty: Map<string[], Segment>,
+  byResponseAndWave: Map<
+    number,
+    null |
+    Map<
+      string[],
+      Segment
+    >
+  >,
+  byResponseAndPartyAndWave: Map<
+    number,
+    null |
+    Map<
+      string[],
+      Segment
+    >
+  >
+}
 export interface SegmentViews {
   unsplit: Segment,
-  collapsed: {
-    byResponse: Map<string[], Segment>,
-    byResponseAndParty: Map<string[], Segment>,
-    byResponseAndWave: Map<
-      number,
-      null |
-      Map<
-        string[],
-        Segment
-      >
-    >,
-    byResponseAndPartyAndWave: Map<
-      number,
-      null |
-      Map<
-        string[],
-        Segment
-      >
-    >
-  }
-  expanded: {
-    byResponse: Map<string[], Segment>,
-    byResponseAndParty: Map<string[], Segment>,
-    byResponseAndWave: Map<
-      number,
-      null |
-      Map<
-        string[],
-        Segment
-      >
-    >,
-    byResponseAndPartyAndWave: Map<
-      number,
-      null |
-      Map<
-        string[],
-        Segment
-      >
-    >
-  }
+  collapsed: SegmentGroupedViews,
+  expanded: SegmentGroupedViews
 }
 
 export interface ImpViz {
