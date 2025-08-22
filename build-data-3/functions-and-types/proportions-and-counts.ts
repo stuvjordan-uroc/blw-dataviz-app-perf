@@ -1,4 +1,3 @@
-import { values } from "lodash";
 import type { Data, VizConfig } from "./types.ts";
 import impVarIsIncluded from "./impvar-is-included.ts";
 
@@ -24,7 +23,7 @@ type PAndC = Record<
 >
 
 function proportion(impVar: string, data: Data, wave: number, partyGroup: string[], responseGroup: string[]) {
-  //subset the data...all rows within the party group
+  //subset the data...all rows within the party group and wave
   const subset = data.data.filter(row => (
     row.wave === wave &&  //row.wave is equal to the wave requested
     row.pid3 && //row.pid3 is not null
@@ -54,22 +53,31 @@ function proportion(impVar: string, data: Data, wave: number, partyGroup: string
   return totalWeightResponseGroup / totalWeight
 }
 
-function counts(proportions: number[], sampleSize: number) {
-  if (proportion.length === 0 || sampleSize <= 0) {
+function countsMap(pMap: Map<string[], number>, sampleSize: number) {
+  if (pMap.size <= 0) {
     return undefined
   }
-  const values = proportions.map(p => ({
-    rounded: Math.floor(p * sampleSize),
-    real: p * sampleSize
-  }))
-  while (values.map(v => v.rounded).reduce((acc, curr) => acc + curr, 0) < sampleSize) {
+  const values = new Map(
+    pMap.entries().map(([rg, p]) => ([
+      rg,
+      {
+        rounded: Math.floor(p * sampleSize),
+        real: p * sampleSize
+      }
+    ]))
+  )
+  while (
+    values.values().reduce((acc, curr) => acc + curr.rounded, 0) < sampleSize
+  ) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const furthestValue = values.reduce((acc, curr) => curr.real - curr.rounded > acc!.real - acc!.rounded ? curr : acc, values[0])
+    const furthestKey = values.keys().reduce((acc, curr) => values.get(curr)!.real - values.get(curr)!.rounded > values.get(acc!)!.real - values.get(acc!)!.rounded ? curr : acc, values.keys().next().value)
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    furthestValue!.rounded = furthestValue!.rounded + 1
+    values.get(furthestKey!)!.rounded = values.get(furthestKey!)!.rounded + 1
   }
-  return values.map(v => v.rounded)
+  return new Map(values.entries().map(([rg, v]) => [rg, v.rounded]))
 }
+
+
 
 export default function proportionsAndCounts(impVar: string, data: Data, vizConfig: VizConfig) {
   //first make the empty pAndC map, nulling out the waves that do not include the impVar
@@ -152,16 +160,35 @@ export default function proportionsAndCounts(impVar: string, data: Data, vizConf
       .reduce((acc, curr) => acc + curr, 0) / rgValue.waveSplit.values().filter(waveVal => waveVal !== null).toArray().length
   })
   //now do the counts at the bottom level
-  pAndC.expanded.forEach((rgValue, rgKey, rgMap) => {
-    rgValue.waveSplit.values().filter(wVal => wVal !== null).forEach(wVal => {
-      const countsByParty = counts(wVal.partySplit.values().map(pVal => pVal.p).toArray(), vizConfig.sampleSize)
-      if (countsByParty !== undefined) {
-        wVal.partySplit.forEach((pgVal, pgKey, pgMap) => {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          pgVal.c = countsByParty.shift()!
+  //start by generating a map that takes each wave-partyGroup to a map from response group to count
+  const countsMapsByWaveAndParty = new Map(
+    data.waves.imp.map(w => ([
+      w,
+      !impVarIsIncluded(impVar, data, w) ? null : new Map(
+        vizConfig.partyGroups.map(pg => {
+          const rgToP = new Map(
+            pAndC.expanded.entries().map(([rg, rgVal]) => ([
+              rg,
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              rgVal.waveSplit.get(w)!.partySplit.get(pg)!.p
+            ]))
+          )
+          return ([pg, countsMap(rgToP, vizConfig.sampleSize)])
         })
-      }
-    })
+      )
+    ]))
+  )
+  //now distribute these counts to the bottom level
+  pAndC.expanded.forEach((rgValue, rgKey, rgMap) => {
+    rgValue.waveSplit.entries()
+      .filter(([w, wVal]) => wVal !== null)
+      .forEach(([w, wVal]) => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        wVal!.partySplit.forEach((pgVal, pgKey, pgMap) => {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          pgVal.c = countsMapsByWaveAndParty.get(w)!.get(pgKey)!.get(rgKey)!
+        })
+      })
   })
   //now aggregate the counts
   //start at the wave level
@@ -171,5 +198,25 @@ export default function proportionsAndCounts(impVar: string, data: Data, vizConf
     })
   })
   //now aggregate counts for rgValue.partySplit
-
+  pAndC.expanded.forEach((rgValue, rgKey, rgMap) => {
+    rgValue.partySplit.forEach((pgValue, pgKey, pgMap) => {
+      pgValue.c = rgValue.waveSplit
+        .values()
+        .filter(waveVal => waveVal !== null)
+        .map(waveVal =>
+          waveVal.partySplit.get(pgKey)
+        )
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        .reduce((acc, curr) => acc + (curr!.c), 0)
+    })
+  })
+  //finally aggregate counts at the top level
+  pAndC.expanded.forEach((rgValue, rgKey, rgMap) => {
+    rgValue.c = rgValue.waveSplit
+      .values()
+      .filter(waveVal => waveVal !== null)
+      .map(waveVal => waveVal.c)
+      .reduce((acc, curr) => acc + curr, 0)
+  })
+  return pAndC
 }
