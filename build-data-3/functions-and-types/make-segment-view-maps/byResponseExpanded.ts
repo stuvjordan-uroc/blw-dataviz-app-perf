@@ -1,28 +1,30 @@
-import { aggregateProportionsByResponseExpanded } from "../aggregate/proportions/byResponse.ts";
-import type { Layout, ProportionsMap, VizConfig } from "../types.ts";
+import type { Layout, PAndC } from "../types.ts";
 
 export default function segmentViewMapByResponseExpanded(
-  proportionsMap: ProportionsMap,
-  vizConfig: VizConfig,
+  pAndC: PAndC,
   layout: Layout
 ) {
-  //get the aggregated proportions map
-  const aggPMap = aggregateProportionsByResponseExpanded(proportionsMap, vizConfig)
   //compute the stuff needed for the segments
   const topLeftY = layout.labelHeight
   const widthToBeDistributed =
     layout.vizWidth //start with the whole vizWidth
-    - 2 * layout.pointRadius * aggPMap.size //subtract the minimum widths for the segments
-    - layout.responseGap * (aggPMap.size - 1) //subtract the responseGaps
-  const numberOfIncludedWaves = proportionsMap.values().filter(pAtWave => pAtWave !== null).toArray().length
+    - 2 * layout.pointRadius * pAndC.expanded.size //subtract the minimum widths for the segments
+    - layout.responseGap * (pAndC.expanded.size - 1) //subtract the responseGaps
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const height = pAndC.expanded.values().toArray()[0]!.waveSplit.size * layout.waveHeight
   return new Map(
-    aggPMap.entries().map(([rG, pAtRg], rGIdx) => ([
-      rG,
+    pAndC.expanded.entries().map(([rg, rgVal], rgIdx) => ([
+      rg,
       {
         topLeftY: topLeftY,
-        topLeftX: 2 * layout.pointRadius * rGIdx + layout.responseGap * rGIdx + widthToBeDistributed * pAtRg.prevCumProportion,
-        width: 2 * layout.pointRadius + widthToBeDistributed * pAtRg.proportion,
-        height: layout.waveHeight * numberOfIncludedWaves
+        topLeftX: rgIdx === 0 ? 0 :
+          pAndC.expanded
+            .values()
+            .take(rgIdx)
+            .map((prevRgVal) => 2 * layout.pointRadius + prevRgVal.p * widthToBeDistributed + layout.responseGap)
+            .reduce((acc, curr) => acc + curr, 0),
+        width: 2 * layout.pointRadius + rgVal.p * widthToBeDistributed,
+        height: height
       }
     ]))
   )

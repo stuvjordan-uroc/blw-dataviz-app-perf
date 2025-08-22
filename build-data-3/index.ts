@@ -8,6 +8,7 @@ import util from 'node:util'
 import segmentViewMapByResponseExpanded from './functions-and-types/make-segment-view-maps/byResponseExpanded.ts';
 import setPointCoordinatesByResponseExpanded from './functions-and-types/set-point-coordinates/byResponseExpanded.ts';
 import proportionsAndCounts from './functions-and-types/proportions-and-counts.ts';
+import { small } from 'motion/react-client';
 //path to raw data
 const rawDataPathString = path.resolve(
   "build-data-fixed-layout",
@@ -66,23 +67,20 @@ if (data) {
       out.imp[impVar].viz.small.layout,
       out.imp[impVar].proportionsAndCounts
     )
-    // //NEXT STEP: Build the segments for the expanded byResponse view
-    // //and assign the points for the expanded byResponse view.
-    // //create the segments
-    // out.imp[impVar].viz.small.segments.expanded.byResponse = segmentViewMapByResponseExpanded(
-    //   out.imp[impVar].proportions,
-    //   out.vizConfig,
-    //   out.imp[impVar].viz.small.layout
-    // )
-    // console.log('Assigning points for expanded byResponse view')
-    // //assign the points.
-    // setPointCoordinatesByResponseExpanded(
-    //   out.imp[impVar].viz.small.points,
-    //   out.imp[impVar].viz.small.segments.expanded.byResponse,
-    //   out.imp[impVar].viz.small.layout,
-    //   out.imp[impVar].counts,
-    //   out.vizConfig
-    // )
+    //NEXT STEP: Build the segments for the expanded byResponse view
+    //and assign the points for the expanded byResponse view.
+    //create the segments
+    out.imp[impVar].viz.small.segments.expanded.byResponse = segmentViewMapByResponseExpanded(
+      out.imp[impVar].proportionsAndCounts,
+      out.imp[impVar].viz.small.layout
+    )
+    //assign the points
+    setPointCoordinatesByResponseExpanded(
+      out.imp[impVar].viz.small.points,
+      out.imp[impVar].viz.small.segments.expanded.byResponse,
+      out.imp[impVar].proportionsAndCounts,
+      out.imp[impVar].viz.small.layout
+    )
   })
   //TO DO: layout does not vary with the impVar, so move it up.
 
