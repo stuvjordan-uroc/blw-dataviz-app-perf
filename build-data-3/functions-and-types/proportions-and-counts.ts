@@ -1,26 +1,6 @@
-import type { Data, VizConfig } from "./types.ts";
+import type { Data, VizConfig, PAndC, GroupedState } from "./types.ts";
 import impVarIsIncluded from "./impvar-is-included.ts";
 
-type GroupedState = 'collapsed' | 'expanded'
-type PAndC = Record<
-  GroupedState,
-  Map<string[], {
-    p: number;
-    c: number;
-    waveSplit: Map<number, null | {
-      p: number;
-      c: number;
-      partySplit: Map<string[], {
-        p: number;
-        c: number;
-      }>;
-    }>;
-    partySplit: Map<string[], {
-      p: number;
-      c: number;
-    }>;
-  }>
->
 
 function proportion(impVar: string, data: Data, wave: number, partyGroup: string[], responseGroup: string[]) {
   //subset the data...all rows within the party group and wave

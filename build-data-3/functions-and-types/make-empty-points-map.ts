@@ -1,33 +1,41 @@
-import type { CountsMap, Point } from "./types.ts";
+import type { Point, PAndC } from "./types.ts";
 
-export default function makeEmptyPointsMap(countsMap: CountsMap) {
-  return new Map(countsMap.entries().map(([wave, valAtWave]) => ([
-    wave,
-    valAtWave === null ? null :
-      new Map(
-        valAtWave.entries().map(([partyGroup, valAtPartyGroup]) => ([
-          partyGroup,
-          new Map(
-            valAtPartyGroup.keys().map((responseGroup) => ([
-              responseGroup,
-              {
-                unsplit: [] as Point[],
-                collapsed: {
-                  byResponse: [] as Point[],
-                  byResponseAndParty: [] as Point[],
-                  byResponseAndWave: [] as Point[],
-                  byResponseAndPartyAndWave: [] as Point[]
-                },
-                expanded: {
-                  byResponse: [] as Point[],
-                  byResponseAndParty: [] as Point[],
-                  byResponseAndWave: [] as Point[],
-                  byResponseAndPartyAndWave: [] as Point[]
-                }
-              }
+export default function makeEmptyPointsMap(pAndC: PAndC) {
+  return new Map(
+    pAndC.expanded
+      .entries()
+      .map(([rg, rgVal]) => ([
+        rg,
+        new Map(
+          rgVal.waveSplit
+            .entries()
+            .map(([wave, waveVal]) => ([
+              wave,
+              waveVal === null ? null :
+                new Map(
+                  waveVal.partySplit
+                    .keys()
+                    .map((pg) => ([
+                      pg,
+                      {
+                        unsplit: [] as Point[],
+                        collapsed: {
+                          byResponse: [] as Point[],
+                          byResponseAndParty: [] as Point[],
+                          byResponseAndWave: [] as Point[],
+                          byResponseAndPartyAndWave: [] as Point[]
+                        },
+                        expanded: {
+                          byResponse: [] as Point[],
+                          byResponseAndParty: [] as Point[],
+                          byResponseAndWave: [] as Point[],
+                          byResponseAndPartyAndWave: [] as Point[]
+                        }
+                      }
+                    ]))
+                )
             ]))
-          )
-        ]))
-      )
-  ])))
+        )
+      ]))
+  )
 }

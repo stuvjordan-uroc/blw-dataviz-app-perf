@@ -27,6 +27,26 @@ export interface VizConfig {
   partyGroups: string[][];
   sampleSize: number;
 }
+export type GroupedState = 'collapsed' | 'expanded'
+export type PAndC = Record<
+  GroupedState,
+  Map<string[], {
+    p: number;
+    c: number;
+    waveSplit: Map<number, null | {
+      p: number;
+      c: number;
+      partySplit: Map<string[], {
+        p: number;
+        c: number;
+      }>;
+    }>;
+    partySplit: Map<string[], {
+      p: number;
+      c: number;
+    }>;
+  }>
+>
 export interface Layout {
   screenWidthRange: number[];
   vizWidth: number;
@@ -36,28 +56,6 @@ export interface Layout {
   partyGap: number;
   labelHeight: number;
 }
-export type ProportionsMap = Map<number, Map<string[], {
-  expanded: Map<string[], {
-    proportion: number;
-    prevCumProportion: number;
-  }>;
-  collapsed: Map<string[], {
-    proportion: number;
-    prevCumProportion: number;
-  }>;
-}> | null>
-
-export type CountsMap = Map<
-  number,
-  null |
-  Map<
-    string[],
-    Map<
-      string[],
-      number
-    >
-  >
->
 export interface Segment {
   topLeftX: number,
   topLeftY: number,
@@ -87,32 +85,39 @@ export interface PointsViews {
   }
 }
 export type PointsMap = Map<
-  number, //wave
-  null | Map<
-    string[], //partyGroup
-    Map<
-      string[], //responseGroup
+  string[], //responseGroup
+  Map<
+    number, //wave
+    null | Map<
+      string[], //partyGroup
       PointsViews
     >
   >
 >
 export interface SegmentGroupedViews {
   byResponse: Map<string[], Segment>,
-  byResponseAndParty: Map<string[], Segment>,
-  byResponseAndWave: Map<
-    number,
-    null |
+  byResponseAndParty: Map<
+    string[], //responseGroup
     Map<
-      string[],
+      string[], //partyGroup
       Segment
     >
   >,
-  byResponseAndPartyAndWave: Map<
-    number,
-    null |
+  byResponseAndWave: Map<
+    string[], //responseGroup
     Map<
-      string[],
-      Segment
+      number, //wave
+      null | Segment
+    >
+  >,
+  byResponseAndPartyAndWave: Map<
+    string[], //responseGroup
+    Map<
+      number, //wave
+      null | Map<
+        string[], //partyGroup
+        Segment
+      >
     >
   >
 }
@@ -123,8 +128,7 @@ export interface SegmentViews {
 }
 
 export interface ImpViz {
-  proportions: ProportionsMap,
-  counts: CountsMap,
+  proportionsAndCounts: PAndC,
   viz: Record<
     string, //screen size
     {
