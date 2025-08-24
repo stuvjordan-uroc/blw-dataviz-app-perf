@@ -14,22 +14,25 @@ export default function makeEmptyPointsMap(pAndC: PAndC) {
               waveVal === null ? null :
                 new Map(
                   waveVal.partySplit
-                    .keys()
-                    .map((pg) => ([
+                    .entries()
+                    .map(([pg, pgVal]) => ([
                       pg,
                       {
-                        unsplit: [] as Point[],
-                        collapsed: {
-                          byResponse: [] as Point[],
-                          byResponseAndParty: [] as Point[],
-                          byResponseAndWave: [] as Point[],
-                          byResponseAndPartyAndWave: [] as Point[]
-                        },
-                        expanded: {
-                          byResponse: [] as Point[],
-                          byResponseAndParty: [] as Point[],
-                          byResponseAndWave: [] as Point[],
-                          byResponseAndPartyAndWave: [] as Point[]
+                        count: pgVal.c,
+                        points: {
+                          unsplit: [] as Point[],
+                          collapsed: {
+                            byResponse: [] as Point[],
+                            byResponseAndParty: [] as Point[],
+                            byResponseAndWave: [] as Point[],
+                            byResponseAndPartyAndWave: [] as Point[]
+                          },
+                          expanded: {
+                            byResponse: [] as Point[],
+                            byResponseAndParty: [] as Point[],
+                            byResponseAndWave: [] as Point[],
+                            byResponseAndPartyAndWave: [] as Point[]
+                          }
                         }
                       }
                     ]))

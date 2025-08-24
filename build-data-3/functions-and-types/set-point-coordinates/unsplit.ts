@@ -15,12 +15,9 @@ export default function setPointCoordinatesUnsplit(pointsMap: PointsMap, unsplit
         .forEach(([wave, valAtWave]) => {
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           valAtWave!
-            .entries()
-            .forEach(([pg, valAtPg]) => {
-              //get the number of coordinates at this rg, wave, pg
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              const sizeOfNextSlice = pAndC.expanded.get(rg)!.waveSplit.get(wave)!.partySplit.get(pg)!.c
-              valAtPg.unsplit = allCoordinates.splice(0, sizeOfNextSlice)
+            .values()
+            .forEach((valAtPg) => {
+              valAtPg.points.unsplit = allCoordinates.splice(0, valAtPg.count)
             })
         })
     })

@@ -36,7 +36,7 @@ if (data) {
     out.imp[impVar].viz.small = {
       layout: {} as Layout,
       segments: {
-        unsplit: {} as Segment,
+        unsplit: { count: 0, segment: {} as Segment },
         collapsed: {} as SegmentGroupedViews,
         expanded: {} as SegmentGroupedViews
       } as SegmentViews,
@@ -52,6 +52,7 @@ if (data) {
       waveHeight: 90
     }
     //set up the unsplit segment
+    const totalPoints = out.imp[impVar].proportionsAndCounts.expanded.values().map(rgVal => rgVal.c).reduce((acc, curr) => acc + curr, 0)
     out.imp[impVar].viz.small.segments.unsplit = {
       topLeftY: out.imp[impVar].viz.small.layout.labelHeight,
       topLeftX: 0,
@@ -67,7 +68,7 @@ if (data) {
       out.imp[impVar].viz.small.layout,
       out.imp[impVar].proportionsAndCounts
     )
-    //NEXT STEP: Build the segments for the expanded byResponse view
+    //Build the segments for the expanded byResponse view
     //and assign the points for the expanded byResponse view.
     //create the segments
     out.imp[impVar].viz.small.segments.expanded.byResponse = segmentViewMapByResponseExpanded(
@@ -85,8 +86,16 @@ if (data) {
   //TO DO: layout does not vary with the impVar, so move it up.
 
   console.log('progress so far on =gov_stats=')
-  console.log(util.inspect(out.imp.gov_stats?.viz.small.points, true, 6, true))
-
-
-
+  //console.log(util.inspect(out.imp.gov_stats?.viz.small?.points, true, 4, true))
+  out.imp.gov_stats?.viz.small?.points.entries().forEach(([rg, rgV]) => {
+    rgV.entries().filter(([w, wV]) => wV !== null)
+      .forEach(([w, wV]) => {
+        wV?.entries().forEach(([pg, pgV]) => {
+          console.log(rg, w, pg)
+          console.log(out.imp.gov_stats?.proportionsAndCounts.expanded.get(rg)?.waveSplit.get(w)?.partySplit.get(pg)?.c)
+          console.log(pgV.expanded.byResponse.length)
+          //console.log(util.inspect(pgV.expanded.byResponse, true, 1, true))
+        })
+      })
+  })
 }

@@ -56,11 +56,16 @@ export interface Layout {
   partyGap: number;
   labelHeight: number;
 }
-export interface Segment {
+export interface SegmentCoordinates {
   topLeftX: number,
   topLeftY: number,
   width: number,
   height: number
+}
+export interface Segment {
+  count: number,
+  segmentCoordinates: SegmentCoordinates,
+  allPoints: Point[]
 }
 
 export interface Point {
@@ -90,7 +95,10 @@ export type PointsMap = Map<
     number, //wave
     null | Map<
       string[], //partyGroup
-      PointsViews
+      {
+        count: number,
+        points: PointsViews
+      }
     >
   >
 >

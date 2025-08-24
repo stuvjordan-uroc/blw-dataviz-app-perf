@@ -108,7 +108,8 @@ export default function segmentPoints(
       stepIsOdd = !stepIsOdd;
     }
   }
-  //We now have C and R set to their minium possible values that can still fit all the points.  This means the minimum number of windows of the maximum possible size.
+  //We now have C and R set to their minium possible values that can still fit all the points.  
+  //This means the minimum number of windows of the maximum possible size.
   //now generate a random position within each window
   const windowWidth = buildingWidth / C;
   const windowHeight = buildingHeight / R;

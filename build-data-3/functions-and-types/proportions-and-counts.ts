@@ -1,4 +1,4 @@
-import type { Data, VizConfig, PAndC, GroupedState } from "./types.ts";
+import type { Data, VizConfig, PAndC, GroupedState, PointsViews } from "./types.ts";
 import impVarIsIncluded from "./impvar-is-included.ts";
 
 
