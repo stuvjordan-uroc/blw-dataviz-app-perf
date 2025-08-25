@@ -1,7 +1,8 @@
 import { test, describe, expect } from '@jest/globals'
-import { byResponse, byResponseAndParty, byResponseAndWave, unSplit } from '../functions-and-types/make-segment-views-expanded.ts'
+import { byResponse, byResponseAndParty, byResponseAndPartyAndWave, byResponseAndWave, unSplit } from '../functions-and-types/make-segment-views-expanded.ts'
 import fakePAndC from './fake-pandc.ts'
 import impVarIsIncluded from '../functions-and-types/impvar-is-included.ts'
+import { fa } from 'zod/locales'
 
 function getLastRgSegments(m: Map<string[], Map<never, never>>) {
   const rgSegmentsIterator = m.values()
@@ -246,15 +247,103 @@ describe("Map returned by byResponseAndWave", () => {
     'coordinates are correct at response group $rg and wave $wave',
     ({ rg, wave, coordinates, correctCoordinates }) => {
       if (coordinates !== null) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        expect(coordinates?.topLeftX).toBeCloseTo(correctCoordinates!.topLeftX)
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        expect(coordinates?.topLeftY).toBeCloseTo(correctCoordinates!.topLeftY)
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        expect(coordinates?.width).toBeCloseTo(correctCoordinates!.width)
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        expect(coordinates?.height).toBeCloseTo(correctCoordinates!.height)
+        expect(coordinates.topLeftX).toBeCloseTo(correctCoordinates.topLeftX)
+        expect(coordinates.topLeftY).toBeCloseTo(correctCoordinates.topLeftY)
+        expect(coordinates.width).toBeCloseTo(correctCoordinates.width)
+        expect(coordinates.height).toBeCloseTo(correctCoordinates.height)
       }
+    }
+  )
+})
+const byresponseandpartyandwave = byResponseAndPartyAndWave(fakePAndC.pAndC.principle1, fakePAndC.layout, fakePAndC.data.waves.imp, fakePAndC.vizConfig.partyGroups.length)
+describe('Map returned byResponseAndPartyAndWave', () => {
+  //test that it's null at the waves where it should be null
+  const tableOfIsNulls = byresponseandpartyandwave.entries().toArray().map(([rg, rgVal]) =>
+    rgVal.entries().toArray().map(([wave, waveVal]) => ({
+      rg: rg,
+      wave: wave,
+      isNullAtWave: waveVal === null,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      correctIsNullAtWave: fakePAndC.pAndC.principle1.expanded.get(rg)!.waveSplit.get(wave) === null
+    }))
+  ).flat(1)
+  test.each(tableOfIsNulls)(
+    'Is null when it should be at $rg, $wave',
+    ({ rg, wave, isNullAtWave, correctIsNullAtWave }) => {
+      expect(isNullAtWave).toBe(correctIsNullAtWave)
+    }
+  )
+  //test that the counts are correct
+  const tableOfCounts = byresponseandpartyandwave.entries().toArray().map(([rg, rgVal]) =>
+    rgVal.entries().toArray().filter(([wave, waveVal]) => waveVal !== null).map(([wave, waveVal]) =>
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      waveVal!.entries().toArray().map(([pg, pgVal]) => {
+        return ({
+          rg: rg,
+          wave: wave,
+          pg: pg,
+          count: pgVal.count,
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          correctCount: fakePAndC.pAndC.principle1.expanded.get(rg)!.waveSplit.get(wave)!.partySplit.get(pg)!.c
+        })
+      })
+    )
+  ).flat(2)
+  test.each(tableOfCounts)(
+    'Has the correct count at $rg, $wave, $pg',
+    ({ rg, wave, pg, count, correctCount }) => {
+      expect(count).toBe(correctCount)
+    }
+  )
+  //test correct coordinates at each segment
+  const tableOfCoordinates = byresponseandpartyandwave.entries().toArray().map(([rg, rgVal], rgIdx) =>
+    rgVal.entries().filter(([wave, waveVal]) => waveVal !== null).toArray().map(([wave, waveVal], waveIdx) =>
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      waveVal!.entries().toArray().map(([pg, pgVal], pgIdx) => {
+        const partyGroupTotalWidth = (fakePAndC.layout.vizWidth
+          - fakePAndC.layout.partyGap * (fakePAndC.vizConfig.partyGroups.length - 1)
+        ) / fakePAndC.vizConfig.partyGroups.length
+        const partyGroupWidthToBeDistributed = partyGroupTotalWidth
+          - 2 * fakePAndC.layout.pointRadius * fakePAndC.pAndC.principle1.expanded.size
+          - fakePAndC.layout.responseGap * (fakePAndC.pAndC.principle1.expanded.size - 1)
+        const partyGroupTopLeftX = (partyGroupTotalWidth + fakePAndC.layout.partyGap) * pgIdx
+        const rgPgTopLeftX = partyGroupTopLeftX + fakePAndC.pAndC.principle1.expanded.values().take(rgIdx)
+          .map((prevRgVal) =>
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            2 * fakePAndC.layout.pointRadius + prevRgVal.waveSplit.get(wave)!.partySplit.get(pg)!.p * partyGroupWidthToBeDistributed + fakePAndC.layout.responseGap
+          )
+          .reduce((acc, curr) => acc + curr, 0)
+        const waveTopLeftY = fakePAndC.layout.labelHeight
+          + (fakePAndC.layout.waveHeight + fakePAndC.layout.labelHeight) * fakePAndC.data.waves.imp.findIndex(w => w === wave)
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const width = 2 * fakePAndC.layout.pointRadius + fakePAndC.pAndC.principle1.expanded.get(rg)!.waveSplit.get(wave)!.partySplit.get(pg)!.p * partyGroupWidthToBeDistributed
+        return ({
+          rg: rg,
+          wave: wave,
+          pg: pg,
+          coordinates: {
+            topLeftX: pgVal.coordinates.topLeftX,
+            topLeftY: pgVal.coordinates.topLeftY,
+            width: pgVal.coordinates.width,
+            height: pgVal.coordinates.height
+          },
+          correctCoordinates: {
+            topLeftX: rgPgTopLeftX,
+            topLeftY: waveTopLeftY,
+            width: width,
+            height: fakePAndC.layout.waveHeight
+          }
+        })
+      })
+    )
+  ).flat(2)
+  test.each(tableOfCoordinates)(
+    'Correct coordinates at $rg, $wave, $pg',
+    ({ rg, wave, pg, coordinates, correctCoordinates }) => {
+      expect(coordinates.topLeftX).toBeCloseTo(correctCoordinates.topLeftX)
+      expect(coordinates.topLeftY).toBeCloseTo(correctCoordinates.topLeftY)
+      expect(coordinates.width).toBeCloseTo(correctCoordinates.width)
+      expect(coordinates.height).toBeCloseTo(correctCoordinates.height)
     }
   )
 })

@@ -149,6 +149,71 @@ export function byResponseAndWave(pAndC: PAndC, layout: Layout, numWaves: number
   )
 }
 
+export function byResponseAndPartyAndWave(pAndC: PAndC, layout: Layout, numWaves: number, numPartyGroups: number) {
+  const partyGroupTotalWidth = (layout.vizWidth - layout.partyGap * (numPartyGroups - 1)) / numPartyGroups
+  const partyGroupWidthToBeDistributed = partyGroupTotalWidth
+    - 2 * layout.pointRadius * pAndC.expanded.size
+    - layout.responseGap * (pAndC.expanded.size - 1)
+  return new Map(
+    pAndC.expanded.entries().map(([rg, rgVal], rgIdx) => {
+      return ([
+        rg,
+        new Map(
+          rgVal.waveSplit.entries().map(([wave, waveVal], waveIdx) => {
+            if (waveVal === null) {
+              return ([
+                wave,
+                null
+              ])
+            }
+            const waveTopLeftY = layout.labelHeight + (layout.waveHeight + layout.labelHeight) * waveIdx
+            return ([
+              wave,
+              new Map(
+                waveVal.partySplit.entries().map(([pg, pgVal], pgIdx) => {
+                  const partyGroupTopLeftX = (partyGroupTotalWidth + layout.partyGap) * pgIdx
+                  const responseGroupTopLeftX = partyGroupTopLeftX
+                    + pAndC.expanded.values().take(rgIdx)
+                      .map((prevRgVal) =>
+                        2 * layout.pointRadius
+                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                        + prevRgVal.waveSplit.get(wave)!.partySplit.get(pg)!.p * partyGroupWidthToBeDistributed
+                        + layout.responseGap
+                      )
+                      .reduce((acc, curr) => acc + curr, 0)
+                  const responseGroupSegmentWidth = 2 * layout.pointRadius + pgVal.p * partyGroupWidthToBeDistributed
+                  return ([
+                    pg,
+                    {
+                      count: pgVal.c,
+                      coordinates: {
+                        topLeftY: waveTopLeftY,
+                        topLeftX: responseGroupTopLeftX,
+                        width: responseGroupSegmentWidth,
+                        height: layout.waveHeight
+                      },
+                      allPoints: allPoints(
+                        {
+                          topLeftY: waveTopLeftY,
+                          topLeftX: responseGroupTopLeftX,
+                          width: responseGroupSegmentWidth,
+                          height: layout.waveHeight
+                        },
+                        pgVal.c,
+                        layout.pointRadius
+                      )
+                    }
+                  ])
+                })
+              )
+            ])
+          })
+        )
+      ])
+    })
+  )
+}
+
 export function makeSegmentViewsExpanded(pAndC: PAndC, layout: Layout, numWaves: number, numPartyGroups: number) {
   //unsplit
   const unsplit = unSplit(pAndC, layout, numWaves)
@@ -158,7 +223,15 @@ export function makeSegmentViewsExpanded(pAndC: PAndC, layout: Layout, numWaves:
   const byresponseandparty = byResponseAndParty(pAndC, layout, numWaves, numPartyGroups)
   //byResponseAndWave
   const byresponseandwave = byResponseAndWave(pAndC, layout, numWaves)
-
+  //byResponseAndWaveAndParty
+  const byresponseandpartyandwave = byResponseAndPartyAndWave(pAndC, layout, numWaves, numPartyGroups)
+  return ({
+    unsplit: unsplit,
+    byResponse: byresponse,
+    byResponseAndWave: byresponseandwave,
+    byResponseAndParty: byresponseandparty,
+    byResponseAndWaveAndParty: byresponseandpartyandwave
+  })
 
 
 }
