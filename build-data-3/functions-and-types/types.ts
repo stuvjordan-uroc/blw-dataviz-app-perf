@@ -1,3 +1,4 @@
+//data
 export interface DataRow {
   weight: number | null;
   pid3: string | null;
@@ -5,8 +6,6 @@ export interface DataRow {
   imp: Record<string, string | null>;
   perf: Record<string, string | null>;
 }
-
-// This is a dataset
 export interface Data {
   impCols: string[];
   perfCols: string[];
@@ -19,6 +18,8 @@ export interface Data {
   allPrinciples: Set<string>;
   data: DataRow[];
 }
+
+//vizconfig
 export interface VizConfig {
   responseGroups: {
     collapsed: string[][];
@@ -27,6 +28,8 @@ export interface VizConfig {
   partyGroups: string[][];
   sampleSize: number;
 }
+
+//proportions and counts
 export type GroupedState = 'collapsed' | 'expanded'
 export type PAndC = Record<
   GroupedState,
@@ -47,6 +50,8 @@ export type PAndC = Record<
     }>;
   }>
 >
+
+//layout
 export interface Layout {
   screenWidthRange: number[];
   vizWidth: number;
@@ -56,24 +61,59 @@ export interface Layout {
   partyGap: number;
   labelHeight: number;
 }
+
+//segments
 export interface SegmentCoordinates {
   topLeftX: number,
   topLeftY: number,
   width: number,
   height: number
 }
-export interface Segment {
-  count: number,
-  segmentCoordinates: SegmentCoordinates,
-  allPoints: Point[]
-}
-
 export interface Point {
   x: number,
   y: number,
   cx: number,
   cy: number
 }
+export interface Segment {
+  count: number,
+  segmentCoordinates: SegmentCoordinates,
+  allPoints: Point[]
+}
+export interface SegmentGroupedViews {
+  byResponse: Map<string[], Segment>,
+  byResponseAndParty: Map<
+    string[], //responseGroup
+    Map<
+      string[], //partyGroup
+      Segment
+    >
+  >,
+  byResponseAndWave: Map<
+    string[], //responseGroup
+    Map<
+      number, //wave
+      null | Segment
+    >
+  >,
+  byResponseAndWaveAndParty: Map<
+    string[], //responseGroup
+    Map<
+      number, //wave
+      null | Map<
+        string[], //partyGroup
+        Segment
+      >
+    >
+  >
+}
+export interface SegmentViews {
+  unsplit: Segment,
+  collapsed: SegmentGroupedViews,
+  expanded: SegmentGroupedViews
+}
+
+//points
 export interface PointsViews {
   unsplit: Point[]
   collapsed: {
@@ -102,38 +142,7 @@ export type PointsMap = Map<
     >
   >
 >
-export interface SegmentGroupedViews {
-  byResponse: Map<string[], Segment>,
-  byResponseAndParty: Map<
-    string[], //responseGroup
-    Map<
-      string[], //partyGroup
-      Segment
-    >
-  >,
-  byResponseAndWave: Map<
-    string[], //responseGroup
-    Map<
-      number, //wave
-      null | Segment
-    >
-  >,
-  byResponseAndPartyAndWave: Map<
-    string[], //responseGroup
-    Map<
-      number, //wave
-      null | Map<
-        string[], //partyGroup
-        Segment
-      >
-    >
-  >
-}
-export interface SegmentViews {
-  unsplit: Segment,
-  collapsed: SegmentGroupedViews,
-  expanded: SegmentGroupedViews
-}
+
 
 export interface ImpViz {
   proportionsAndCounts: PAndC,

@@ -1,5 +1,5 @@
 import segmentPoints from "./set-point-coordinates/segment-points.ts";
-import type { Layout, PAndC, Segment, SegmentCoordinates } from "./types.ts";
+import type { Layout, PAndC, SegmentCoordinates } from "./types.ts";
 
 function allPoints(segmentCoordinates: SegmentCoordinates, count: number, pointRadius: number) {
   return segmentPoints(
@@ -93,7 +93,7 @@ export function byResponseAndParty(pAndC: PAndC, layout: Layout, numWaves: numbe
               pg,
               {
                 count: count,
-                coordinates: coordinates,
+                segmentCoordinates: coordinates,
                 allPoints: allPoints(coordinates, pgVal.c, layout.pointRadius)
               }
             ])
@@ -138,7 +138,7 @@ export function byResponseAndWave(pAndC: PAndC, layout: Layout, numWaves: number
               wave,
               {
                 count: waveVal.c,
-                coordinates: coordinates,
+                segmentCoordinates: coordinates,
                 allPoints: allPoints(coordinates, waveVal.c, layout.pointRadius)
               }
             ])
@@ -186,7 +186,7 @@ export function byResponseAndPartyAndWave(pAndC: PAndC, layout: Layout, numWaves
                     pg,
                     {
                       count: pgVal.c,
-                      coordinates: {
+                      segmentCoordinates: {
                         topLeftY: waveTopLeftY,
                         topLeftX: responseGroupTopLeftX,
                         width: responseGroupSegmentWidth,
@@ -226,7 +226,6 @@ export function makeSegmentViewsExpanded(pAndC: PAndC, layout: Layout, numWaves:
   //byResponseAndWaveAndParty
   const byresponseandpartyandwave = byResponseAndPartyAndWave(pAndC, layout, numWaves, numPartyGroups)
   return ({
-    unsplit: unsplit,
     byResponse: byresponse,
     byResponseAndWave: byresponseandwave,
     byResponseAndParty: byresponseandparty,
