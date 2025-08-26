@@ -1,4 +1,4 @@
-import segmentPoints from "./set-point-coordinates/segment-points.ts";
+import segmentPoints from "./segment-points.ts";
 import type { Layout, PAndC, SegmentCoordinates } from "./types.ts";
 
 function allPoints(segmentCoordinates: SegmentCoordinates, count: number, pointRadius: number) {

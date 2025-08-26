@@ -126,7 +126,7 @@ export interface PointsViews {
     byResponse: Point[],
     byResponseAndParty: Point[],
     byResponseAndWave: Point[],
-    byResponseAndPartyAndWave: Point[]
+    byResponseAndWaveAndParty: Point[]
   }
 }
 export type PointsMap = Map<

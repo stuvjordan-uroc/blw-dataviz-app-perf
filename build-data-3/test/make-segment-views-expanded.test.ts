@@ -2,18 +2,8 @@ import { test, describe, expect } from '@jest/globals'
 import { byResponse, byResponseAndParty, byResponseAndPartyAndWave, byResponseAndWave, unSplit } from '../functions-and-types/make-segment-views-expanded.ts'
 import fakePAndC from './fake-pandc.ts'
 import impVarIsIncluded from '../functions-and-types/impvar-is-included.ts'
-import { fa } from 'zod/locales'
 
-function getLastRgSegments(m: Map<string[], Map<never, never>>) {
-  const rgSegmentsIterator = m.values()
-  let lastElement = new Map()
-  let nextElement = rgSegmentsIterator.next()
-  while (!nextElement.done) {
-    lastElement = nextElement.value
-    nextElement = rgSegmentsIterator.next()
-  }
-  return lastElement
-}
+
 
 const unsplit = unSplit(fakePAndC.pAndC.principle1, fakePAndC.layout, fakePAndC.data.waves.imp.length)
 describe("Unsplit segment's...", () => {
