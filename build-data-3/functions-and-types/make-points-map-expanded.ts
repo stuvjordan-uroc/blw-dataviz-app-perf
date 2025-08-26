@@ -1,11 +1,11 @@
-import type { SegmentViews, Point, PointsMap } from "./types.ts";
+import type { SegmentViews, Point } from "./types.ts";
 
 
 
-export function makePointsMapExpanded(segmentViews: SegmentViews) {
+export default function makePointsMapExpanded(segmentViews: SegmentViews) {
   const allPointsMapByResponse = segmentViews.expanded.byResponse;
   const allPointsMapByResponseAndWave = segmentViews.expanded.byResponseAndWave;
-  const out = new Map(
+  return new Map(
     segmentViews.expanded.byResponseAndWaveAndParty
       .entries()
       .map(([rg, rgVal]) => {
@@ -21,7 +21,7 @@ export function makePointsMapExpanded(segmentViews: SegmentViews) {
               pg,
               pgVal.allPoints
             ]))
-          ) as Map<string[], Point[]>
+          )
         }
         return [
           rg,

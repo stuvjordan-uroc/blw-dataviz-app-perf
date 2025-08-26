@@ -1,4 +1,4 @@
-import segmentPoints from "../functions-and-types/set-point-coordinates/segment-points.ts";
+import segmentPoints from '../functions-and-types/segment-points.ts'
 
 import { test, describe, expect } from '@jest/globals'
 
