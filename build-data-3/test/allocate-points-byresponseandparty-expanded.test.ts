@@ -8,6 +8,8 @@ allocatePointsByResponseAndPartyExpanded(
   fakeSegmentMaps.segmentsRWP,
   pointsMap
 )
+import util from 'node:util'
+//console.log(util.inspect(pointsMap, true, 4, true))
 describe('allocatePointsByResponseAndPartyExpanded...', () => {
   //puts the right number of points in each position at each rg-pg
   const tableOfCounts = pointsMap.entries().toArray()
@@ -41,14 +43,14 @@ describe('allocatePointsByResponseAndPartyExpanded...', () => {
       pg: pg,
       inputAggCount: pgVal.count,
       pointsMapAggCount: pointsMap.get(rg)?.entries().filter(([wave, waveVal]) => waveVal !== null).map(([wave, waveVal]) =>
-        waveVal?.get(pg)?.expanded.byResponse.length
+        waveVal?.get(pg)?.expanded.byResponseAndParty.length
       ).reduce((acc, curr) => acc + curr, 0)
     }))
   )
   test.each(tableOfAggregatedCounts)(
     'The aggregated counts are correct at $rg and $pg',
-    ({ rg, pg, inputAggCount, pointMapAggCount }) => {
-      expect(pointMapAggCount).toBe(inputAggCount)
+    ({ rg, pg, inputAggCount, pointsMapAggCount }) => {
+      expect(pointsMapAggCount).toBe(inputAggCount)
     }
   )
   //point counts aggregate across waves correctly at each rg-pg
