@@ -80,6 +80,9 @@ export interface Segment {
   segmentCoordinates: SegmentCoordinates,
   allPoints: Point[]
 }
+export type SegmentMapR = Map<string[], Segment>
+export type SegmentMapRW = Map<string[], Map<number, null | Segment>>
+export type SegmentMapRP = Map<string[], Map<string[], Segment>>
 export type SegmentMapRWP = Map<
   string[], //responseGroup
   Map<
@@ -91,31 +94,10 @@ export type SegmentMapRWP = Map<
   >
 >
 export interface SegmentGroupedViews {
-  byResponse: Map<string[], Segment>,
-  byResponseAndParty: Map<
-    string[], //responseGroup
-    Map<
-      string[], //partyGroup
-      Segment
-    >
-  >,
-  byResponseAndWave: Map<
-    string[], //responseGroup
-    Map<
-      number, //wave
-      null | Segment
-    >
-  >,
-  byResponseAndWaveAndParty: Map<
-    string[], //responseGroup
-    Map<
-      number, //wave
-      null | Map<
-        string[], //partyGroup
-        Segment
-      >
-    >
-  >
+  byResponse: SegmentMapR,
+  byResponseAndParty: SegmentMapRP,
+  byResponseAndWave: SegmentMapRW,
+  byResponseAndWaveAndParty: SegmentMapRWP
 }
 export interface SegmentViews {
   unsplit: Segment,

@@ -1,4 +1,4 @@
-import type { SegmentMapRWP } from "../functions-and-types/types.ts";
+import type { SegmentMapRWP, SegmentMapR, Segment } from "../functions-and-types/types.ts";
 
 const fakeRgs = [['rg1'], ['rg2']];
 const fakeWaves = [1, 2, 3];
@@ -45,7 +45,44 @@ const allPoints = segmentsRWP.values().toArray().map((rgVal) =>
   )
 ).flat(3)
 
+const segmentsR: SegmentMapR = new Map(
+  segmentsRWP.entries().map(([rg, rgVal]) => {
+    const countAtRg = rgVal.values().filter(waveVal => waveVal !== null)
+      .map((waveVal) =>
+        waveVal.values()
+          .map((pgVal) =>
+            pgVal.count
+          )
+          .reduce((acc, curr) => acc + curr, 0)
+      )
+      .reduce((acc, curr) => acc + curr, 0)
+    const allPointsAtRg = rgVal.values().filter(waveVal => waveVal !== null)
+      .toArray()
+      .map((waveVal) =>
+        waveVal.values()
+          .toArray()
+          .map((pgVal) =>
+            pgVal.allPoints
+          )
+      ).flat(2)
+    return ([
+      rg,
+      {
+        count: countAtRg,
+        allPoints: allPointsAtRg,
+        segmentCoordinates: {
+          topLeftX: 0,
+          topLeftY: 0,
+          width: 0,
+          height: 0
+        }
+      } as Segment
+    ])
+  })
+)
+
 export default {
   segmentsRWP: segmentsRWP,
-  allPoints: allPoints
+  allPoints: allPoints,
+  segmentsR: segmentsR
 }
