@@ -96,7 +96,7 @@ describe("Map returned by byResponseAndParty", () => {
       .toArray()[0]!
       .values()
       .toArray()[0]!
-      .coordinates
+      .segmentCoordinates
       .topLeftX
     expect(leftEdge).toBe(0)
   })
@@ -109,7 +109,7 @@ describe("Map returned by byResponseAndParty", () => {
   //get the last party group
   test('Right most edge is about where is should be', () => {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    expect(lastSegment!.coordinates.topLeftX + lastSegment!.coordinates.width).toBeCloseTo(fakePAndC.layout.vizWidth)
+    expect(lastSegment!.segmentCoordinates.topLeftX + lastSegment!.segmentCoordinates.width).toBeCloseTo(fakePAndC.layout.vizWidth)
   })
   const partyGroupTotalWidth = (fakePAndC.layout.vizWidth - fakePAndC.layout.partyGap * (fakePAndC.vizConfig.partyGroups.length - 1)) / fakePAndC.vizConfig.partyGroups.length
   const partyGroupWidthToDistribute = partyGroupTotalWidth
@@ -128,10 +128,10 @@ describe("Map returned by byResponseAndParty", () => {
       return ([
         rg,
         pg,
-        pgVal.coordinates.width,
-        pgVal.coordinates.height,
-        pgVal.coordinates.topLeftX,
-        pgVal.coordinates.topLeftY,
+        pgVal.segmentCoordinates.width,
+        pgVal.segmentCoordinates.height,
+        pgVal.segmentCoordinates.topLeftX,
+        pgVal.segmentCoordinates.topLeftY,
         //correct width here
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         2 * fakePAndC.layout.pointRadius + fakePAndC.pAndC.principle1.expanded.get(rg)!.partySplit.get(pg)!.p * partyGroupWidthToDistribute,
@@ -219,10 +219,10 @@ describe("Map returned by byResponseAndWave", () => {
         rg: rg,
         wave: wave,
         coordinates: {
-          topLeftX: waveVal.coordinates.topLeftX,
-          topLeftY: waveVal.coordinates.topLeftY,
-          width: waveVal.coordinates.width,
-          height: waveVal.coordinates.height
+          topLeftX: waveVal.segmentCoordinates.topLeftX,
+          topLeftY: waveVal.segmentCoordinates.topLeftY,
+          width: waveVal.segmentCoordinates.width,
+          height: waveVal.segmentCoordinates.height
         },
         correctCoordinates: {
           topLeftX: correctTopLeftX,
@@ -312,10 +312,10 @@ describe('Map returned byResponseAndPartyAndWave', () => {
           wave: wave,
           pg: pg,
           coordinates: {
-            topLeftX: pgVal.coordinates.topLeftX,
-            topLeftY: pgVal.coordinates.topLeftY,
-            width: pgVal.coordinates.width,
-            height: pgVal.coordinates.height
+            topLeftX: pgVal.segmentCoordinates.topLeftX,
+            topLeftY: pgVal.segmentCoordinates.topLeftY,
+            width: pgVal.segmentCoordinates.width,
+            height: pgVal.segmentCoordinates.height
           },
           correctCoordinates: {
             topLeftX: rgPgTopLeftX,

@@ -80,6 +80,16 @@ export interface Segment {
   segmentCoordinates: SegmentCoordinates,
   allPoints: Point[]
 }
+export type SegmentMapRWP = Map<
+  string[], //responseGroup
+  Map<
+    number, //wave
+    null | Map<
+      string[], //partyGroup
+      Segment
+    >
+  >
+>
 export interface SegmentGroupedViews {
   byResponse: Map<string[], Segment>,
   byResponseAndParty: Map<
@@ -115,12 +125,12 @@ export interface SegmentViews {
 
 //points
 export interface PointsViews {
-  unsplit: Point[]
+  unsplit: Point[],
   collapsed: {
     byResponse: Point[],
     byResponseAndParty: Point[],
     byResponseAndWave: Point[],
-    byResponseAndPartyAndWave: Point[]
+    byResponseAndWaveAndParty: Point[]
   },
   expanded: {
     byResponse: Point[],
@@ -135,10 +145,7 @@ export type PointsMap = Map<
     number, //wave
     null | Map<
       string[], //partyGroup
-      {
-        count: number,
-        points: PointsViews
-      }
+      PointsViews
     >
   >
 >
