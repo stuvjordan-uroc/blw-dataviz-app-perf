@@ -1,5 +1,6 @@
 import type { SegmentViews } from "../types.ts";
 import { allocatePointsByResponseExpanded } from "./allocate-points-byresponse.ts";
+import { allocatePointsByResponseAndPartyExpanded } from "./allocate-points-byresponseandparty.ts";
 import allocatePointsUnsplit from "./allocate-points-unsplit.ts";
 import makeEmptyPointsMap from "./make-empty-points-map.ts";
 
@@ -14,6 +15,7 @@ export default function makePointsMap(segmentViews: SegmentViews) {
   ////byResponse
   allocatePointsByResponseExpanded(segmentViews.expanded.byResponse, segmentsRWP, pointsMap)
   ////byResponseAndParty
+  allocatePointsByResponseAndPartyExpanded(segmentViews.expanded.byResponseAndParty, segmentsRWP, pointsMap)
   /* TODO */
   ////byResponseAndWave
   /* TODO */
