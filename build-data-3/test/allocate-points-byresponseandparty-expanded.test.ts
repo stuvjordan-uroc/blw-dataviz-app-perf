@@ -31,7 +31,26 @@ describe('allocatePointsByResponseAndPartyExpanded...', () => {
       expect(numPoints).toBe(correctNumPoints)
     }
   )
+  //take the segmentMapRP used to allocate the points
+  //at each rp-pg in that segmentMapRP, get the count.
+  //call that the inputAggregatedCount.  Check if that matches the
+  //aggregated count implied by the points allocated to the pointsMap
+  const tableOfAggregatedCounts = fakeSegmentMaps.segmentsRP.entries().toArray().map(([rg, rgVal]) =>
+    rgVal.entries().toArray().map(([pg, pgVal]) => ({
+      rg: rg,
+      pg: pg,
+      inputAggCount: pgVal.count,
+      pointsMapAggCount: pointsMap.get(rg)?.entries().filter(([wave, waveVal]) => waveVal !== null).map(([wave, waveVal]) =>
+        waveVal?.get(pg)?.expanded.byResponse.length
+      ).reduce((acc, curr) => acc + curr, 0)
+    }))
+  )
+  test.each(tableOfAggregatedCounts)(
+    'The aggregated counts are correct at $rg and $pg',
+    ({ rg, pg, inputAggCount, pointMapAggCount }) => {
+      expect(pointMapAggCount).toBe(inputAggCount)
+    }
+  )
   //point counts aggregate across waves correctly at each rg-pg
-  const tableOfAggregatedCounts = pointsMap.entries().toArray().map(([]))
   //each point is correctly allocated at each rg-pg
 })
