@@ -10,7 +10,7 @@ export function allocatePointsByResponseAndPartyExpanded(
     rgVal.entries().forEach(([pg, pgVal]) => {
       //get the points-to-be-allocated at rg-pg
       const allPointsAtRP = pgVal.allPoints
-      //don't do anything further unless the segmentMapRWP has the rg and has the pg at each non-null wave
+      //don't do anything further unless the segmentMapRWP has the rg and at that rg has the pg at each non-null wave
       if (
         segmentMapRWP.has(rg) &&
         (
