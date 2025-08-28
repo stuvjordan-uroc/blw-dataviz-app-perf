@@ -7,18 +7,21 @@
   "type": "module",
   "main": "index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "run": "node index.mts"
+    "test": "node --experimental-vm-modules node_modules/.bin/jest",
+    "run": "node index.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
+    "@types/jest": "^30.0.0",
     "@types/node": "^24.1.0",
     "eslint": "^9.32.0",
+    "jest": "^30.0.5",
+    "ts-jest": "^29.4.1",
     "typescript": "^5.8.2",
     "typescript-eslint": "^8.38.0"
   },
   "dependencies": {
     "fflate": "^0.8.2",
-    "lodash": "^4.17.21"
+    "zod": "^4.0.17"
   }
 }
