@@ -30,26 +30,38 @@ export interface VizConfig {
 }
 
 //proportions and counts
-export type GroupedState = 'collapsed' | 'expanded'
+export type GroupedState = "collapsed" | "expanded";
 export type PAndC = Record<
   GroupedState,
-  Map<string[], {
-    p: number;
-    c: number;
-    waveSplit: Map<number, null | {
+  Map<
+    string[],
+    {
       p: number;
       c: number;
-      partySplit: Map<string[], {
-        p: number;
-        c: number;
-      }>;
-    }>;
-    partySplit: Map<string[], {
-      p: number;
-      c: number;
-    }>;
-  }>
->
+      waveSplit: Map<
+        number,
+        null | {
+          p: number;
+          c: number;
+          partySplit: Map<
+            string[],
+            {
+              p: number;
+              c: number;
+            }
+          >;
+        }
+      >;
+      partySplit: Map<
+        string[],
+        {
+          p: number;
+          c: number;
+        }
+      >;
+    }
+  >
+>;
 
 //layout
 export interface Layout {
@@ -61,28 +73,34 @@ export interface Layout {
   partyGap: number;
   labelHeight: number;
 }
+export interface Layouts {
+  small: Layout;
+  medium: Layout;
+  large: Layout;
+  xLarge: Layout;
+}
 
 //segments
 export interface SegmentCoordinates {
-  topLeftX: number,
-  topLeftY: number,
-  width: number,
-  height: number
+  topLeftX: number;
+  topLeftY: number;
+  width: number;
+  height: number;
 }
 export interface Point {
-  x: number,
-  y: number,
-  cx: number,
-  cy: number
+  x: number;
+  y: number;
+  cx: number;
+  cy: number;
 }
 export interface Segment {
-  count: number,
-  segmentCoordinates: SegmentCoordinates,
-  allPoints: Point[]
+  count: number;
+  segmentCoordinates: SegmentCoordinates;
+  allPoints: Point[];
 }
-export type SegmentMapR = Map<string[], Segment>
-export type SegmentMapRW = Map<string[], Map<number, null | Segment>>
-export type SegmentMapRP = Map<string[], Map<string[], Segment>>
+export type SegmentMapR = Map<string[], Segment>;
+export type SegmentMapRW = Map<string[], Map<number, null | Segment>>;
+export type SegmentMapRP = Map<string[], Map<string[], Segment>>;
 export type SegmentMapRWP = Map<
   string[], //responseGroup
   Map<
@@ -92,34 +110,34 @@ export type SegmentMapRWP = Map<
       Segment
     >
   >
->
+>;
 export interface SegmentGroupedViews {
-  byResponse: SegmentMapR,
-  byResponseAndParty: SegmentMapRP,
-  byResponseAndWave: SegmentMapRW,
-  byResponseAndWaveAndParty: SegmentMapRWP
+  byResponse: SegmentMapR;
+  byResponseAndParty: SegmentMapRP;
+  byResponseAndWave: SegmentMapRW;
+  byResponseAndWaveAndParty: SegmentMapRWP;
 }
 export interface SegmentViews {
-  unsplit: Segment,
-  collapsed: SegmentGroupedViews,
-  expanded: SegmentGroupedViews
+  unsplit: Segment;
+  collapsed: SegmentGroupedViews;
+  expanded: SegmentGroupedViews;
 }
 
 //points
 export interface PointsViews {
-  unsplit: Point[],
+  unsplit: Point[];
   collapsed: {
-    byResponse: Point[],
-    byResponseAndParty: Point[],
-    byResponseAndWave: Point[],
-    byResponseAndWaveAndParty: Point[]
-  },
+    byResponse: Point[];
+    byResponseAndParty: Point[];
+    byResponseAndWave: Point[];
+    byResponseAndWaveAndParty: Point[];
+  };
   expanded: {
-    byResponse: Point[],
-    byResponseAndParty: Point[],
-    byResponseAndWave: Point[],
-    byResponseAndWaveAndParty: Point[]
-  }
+    byResponse: Point[];
+    byResponseAndParty: Point[];
+    byResponseAndWave: Point[];
+    byResponseAndWaveAndParty: Point[];
+  };
 }
 export type PointsMap = Map<
   string[], //responseGroup
@@ -130,24 +148,21 @@ export type PointsMap = Map<
       PointsViews
     >
   >
->
-
+>;
 
 export interface ImpViz {
-  proportionsAndCounts: PAndC,
-  viz: Record<
-    string, //screen size
-    {
-      layout: Layout,
-      segments: SegmentViews,
-      points: PointsMap
-    }
-  >
+  proportionsAndCounts: PAndC;
+  viz: {
+    [screenSize in keyof Layouts]: {
+      segments: SegmentViews;
+      points: PointsMap;
+    };
+  };
 }
 export interface Out {
   vizConfig: VizConfig;
   imp: Record<
     string, //one for each impVar
     ImpViz
-  >
+  >;
 }

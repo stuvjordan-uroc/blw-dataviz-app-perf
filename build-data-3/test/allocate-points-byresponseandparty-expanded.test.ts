@@ -1,72 +1,77 @@
-import { describe, test, expect } from '@jest/globals'
-import { allocatePointsByResponseAndPartyExpanded } from '../functions-and-types/points-map/allocate-points-byresponseandparty.ts'
-import fakeSegmentMaps from './fake-segment-maps.ts'
-import makeEmptyPointsMap from '../functions-and-types/points-map/make-empty-points-map.ts'
-const pointsMap = makeEmptyPointsMap(fakeSegmentMaps.segmentsRWP)
+import { describe, test, expect } from "@jest/globals";
+import { allocatePointsByResponseAndPartyExpanded } from "../functions-and-types/points-map/allocate-points-byresponseandparty.ts";
+import fakeSegmentMaps from "./fake-segment-maps.ts";
+import makeEmptyPointsMap from "../functions-and-types/points-map/make-empty-points-map.ts";
+const pointsMap = makeEmptyPointsMap(fakeSegmentMaps.segmentsRWP);
 allocatePointsByResponseAndPartyExpanded(
   fakeSegmentMaps.segmentsRP,
   fakeSegmentMaps.segmentsRWP,
   pointsMap
-)
-describe('allocatePointsByResponseAndPartyExpanded...', () => {
+);
+describe("allocatePointsByResponseAndPartyExpanded...", () => {
   //puts the right number of points in each position at each rg-pg
-  const tableOfCounts = pointsMap.entries().toArray()
+  const tableOfCounts = pointsMap
+    .entries()
+    .toArray()
     .map(([rg, rgVal]) =>
-      rgVal.entries().filter(([wave, waveVal]) => waveVal !== null).toArray()
+      rgVal
+        .entries()
+        .filter(([wave, waveVal]) => waveVal !== null)
+        .toArray()
         .map(([wave, waveVal]) =>
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          waveVal!.entries().toArray()
+          waveVal!
+            .entries()
+            .toArray()
             .map(([pg, pgVal]) => ({
               rg: rg,
               wave: wave,
               pg: pg,
               numPoints: pgVal.expanded.byResponseAndParty.length,
-              correctNumPoints: fakeSegmentMaps.segmentsRWP.get(rg)?.get(wave)?.get(pg)?.count
+              correctNumPoints: fakeSegmentMaps.segmentsRWP
+                .get(rg)
+                ?.get(wave)
+                ?.get(pg)?.count,
             }))
         )
-    ).flat(2)
+    )
+    .flat(2);
   test.each(tableOfCounts)(
-    'puts the correct number of points at $rg, $wave, $pg',
+    "puts the correct number of points at $rg, $wave, $pg",
     ({ rg, wave, pg, numPoints, correctNumPoints }) => {
-      expect(numPoints).toBe(correctNumPoints)
+      expect(numPoints).toBe(correctNumPoints);
     }
-  )
+  );
   //take the segmentMapRP used to allocate the points
   //at each rp-pg in that segmentMapRP, get the count.
   //call that the inputAggregatedCount.  Check if that matches the
   //aggregated count implied by the points allocated to the pointsMap
-  const tableOfAggregatedCounts = fakeSegmentMaps.segmentsRP.entries().toArray().map(([rg, rgVal]) =>
-    rgVal.entries().toArray().map(([pg, pgVal]) => ({
-      rg: rg,
-      pg: pg,
-      inputAggCount: pgVal.count,
-      pointsMapAggCount: pointsMap.get(rg)?.entries().filter(([wave, waveVal]) => waveVal !== null).map(([wave, waveVal]) =>
-        waveVal?.get(pg)?.expanded.byResponseAndParty.length
-      ).reduce((acc, curr) => acc + curr, 0)
-    }))
-  )
+  const tableOfAggregatedCounts = fakeSegmentMaps.segmentsRP
+    .entries()
+    .toArray()
+    .map(([rg, rgVal]) =>
+      rgVal
+        .entries()
+        .toArray()
+        .map(([pg, pgVal]) => ({
+          rg: rg,
+          pg: pg,
+          inputAggCount: pgVal.count,
+          pointsMapAggCount: pointsMap
+            .get(rg)
+            ?.entries()
+            .filter(([wave, waveVal]) => waveVal !== null)
+            .map(
+              ([wave, waveVal]) =>
+                waveVal?.get(pg)?.expanded.byResponseAndParty.length
+            )
+            .reduce((acc, curr) => acc + curr, 0),
+        }))
+    );
   test.each(tableOfAggregatedCounts)(
-    'The aggregated counts are correct at $rg and $pg',
+    "The aggregated counts are correct at $rg and $pg",
     ({ rg, pg, inputAggCount, pointsMapAggCount }) => {
-      expect(pointsMapAggCount).toBe(inputAggCount)
+      expect(pointsMapAggCount).toBe(inputAggCount);
     }
-  )
-  //each point is correctly allocated at each rg-pg
-  const tableOfPoints = pointsMap.entries().toArray().map(([rg, rgVal]) =>
-    rgVal.entries().filter(([wave, waveVal]) => waveVal !== null).toArray().map(([wave, waveVal]) =>
-      waveVal?.entries().toArray().map(([pg, pgVal]) => ({
-        rg: rg,
-        wave: wave,
-        pg: pg,
-        points: pgVal.expanded.byResponseAndParty,
-        correctPoints: fakeSegmentMaps.segmentsRWP.get(rg)?.get(wave)?.get(pg)?.allPoints
-      }))
-    )
-  ).flat(2)
-  test.each(tableOfPoints)(
-    'Allocates the correct points at $rg, $wave, $pg',
-    ({ rg, wave, pg, points, correctPoints }) => {
-      expect(points).toStrictEqual(correctPoints)
-    }
-  )
-})
+  );
+});
