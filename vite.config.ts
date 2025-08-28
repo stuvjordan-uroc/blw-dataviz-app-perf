@@ -1,6 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
-import { buildData } from "./build-data";
+import { buildData, segsAndPointsByScreenSize } from "./build-data";
 import layouts from "./src/config/layouts.json";
 import * as z from "zod";
 import util from "node:util";
@@ -75,6 +75,11 @@ export default defineConfig({
                   );
                 }
               }
+            );
+            //now write one file FOR EACH screen size that holds all the segments and points for each impVar
+            const byScreenSize = segsAndPointsByScreenSize(
+              impVizData.imp,
+              impLayouts.data
             );
           }
         }

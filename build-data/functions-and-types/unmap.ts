@@ -1,4 +1,12 @@
-import type { GroupedState, PAndC } from "./types.ts";
+import type {
+  PAndC,
+  PointsMap,
+  SegmentMapR,
+  SegmentMapRP,
+  SegmentMapRW,
+  SegmentMapRWP,
+  SegmentViews,
+} from "./types.ts";
 
 function mapToKeyValArray<T, K>(map: Map<T, K>): [T, K][] {
   return map.entries().toArray();
@@ -57,4 +65,78 @@ export function unmapPAndC(pAndC: PAndC) {
       ]),
     ])
   );
+}
+export function unMapSegmentMapR(segmentMapR: SegmentMapR) {
+  return segmentMapR.entries().toArray();
+}
+export function unMapSegmentMapRP(segmentMapRP: SegmentMapRP) {
+  return segmentMapRP
+    .entries()
+    .toArray()
+    .map(([rg, rgVal]) => [rg, rgVal.entries().toArray()]);
+}
+export function unMapSegmentMapRW(segmenMapRW: SegmentMapRW) {
+  return segmenMapRW
+    .entries()
+    .toArray()
+    .map(([rg, rgVal]) => [rg, rgVal.entries().toArray()]);
+}
+export function unMapSegmentMapRWP(segmentMapRWP: SegmentMapRWP) {
+  return segmentMapRWP
+    .entries()
+    .toArray()
+    .map(([rg, rgVal]) => [
+      rg,
+      rgVal
+        .entries()
+        .toArray()
+        .map(([wave, waveVal]) => [
+          wave,
+          waveVal === null ? null : waveVal.entries().toArray(),
+        ]),
+    ]);
+}
+export function unMapSegmentViews(segmentViews: SegmentViews) {
+  return {
+    unsplit: segmentViews.unsplit,
+    collapsed: {
+      byResponse: unMapSegmentMapR(segmentViews.collapsed.byResponse),
+      byResponseAndParty: unMapSegmentMapRP(
+        segmentViews.collapsed.byResponseAndParty
+      ),
+      byResponseAndWave: unMapSegmentMapRW(
+        segmentViews.collapsed.byResponseAndWave
+      ),
+      byResponseAndWaveAndParty: unMapSegmentMapRWP(
+        segmentViews.collapsed.byResponseAndWaveAndParty
+      ),
+    },
+    expanded: {
+      byResponse: unMapSegmentMapR(segmentViews.expanded.byResponse),
+      byResponseAndParty: unMapSegmentMapRP(
+        segmentViews.expanded.byResponseAndParty
+      ),
+      byResponseAndWave: unMapSegmentMapRW(
+        segmentViews.expanded.byResponseAndWave
+      ),
+      byResponseAndWaveAndParty: unMapSegmentMapRWP(
+        segmentViews.expanded.byResponseAndWaveAndParty
+      ),
+    },
+  };
+}
+export function unMapPointsMap(pointsMap: PointsMap) {
+  return pointsMap
+    .entries()
+    .toArray()
+    .map(([rg, rgVal]) => [
+      rg,
+      rgVal
+        .entries()
+        .toArray()
+        .map(([wave, waveVal]) => [
+          wave,
+          waveVal === null ? null : waveVal.entries().toArray(),
+        ]),
+    ]);
 }

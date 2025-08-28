@@ -1,6 +1,10 @@
 import makeData from "./functions-and-types/make-data.ts";
-import type { Layouts, Out } from "./functions-and-types/types.ts";
+import type { Layouts, ImpViz } from "./functions-and-types/types.ts";
 import vizAtImp from "./functions-and-types/viz-at-imp.ts";
+import {
+  unMapPointsMap,
+  unMapSegmentViews,
+} from "./functions-and-types/unmap.ts";
 
 //vizConfig is set here.
 const vizConfig = {
@@ -32,4 +36,28 @@ export function buildData(pathString: string, layouts: Layouts) {
       ])
     ),
   };
+}
+
+export function segsAndPointsByScreenSize(
+  imp: Record<string, ImpViz>,
+  layouts: Layouts
+) {
+  return Object.fromEntries(
+    Object.keys(layouts).map((screenSize) => [
+      screenSize,
+      Object.fromEntries(
+        Object.entries(imp).map(([impVar, vizAtImpVar]) => [
+          impVar,
+          {
+            segments: unMapSegmentViews(
+              vizAtImpVar.viz[screenSize as keyof Layouts].segments
+            ),
+            points: unMapPointsMap(
+              vizAtImpVar.viz[screenSize as keyof Layouts].points
+            ),
+          },
+        ])
+      ),
+    ])
+  );
 }
