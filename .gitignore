@@ -1,6 +1,5 @@
 # generated coordinate data files
-src/data/viz/
-src/data/imp.json
+src/data/coordinates/
 
 # raw data
 src/data/raw/

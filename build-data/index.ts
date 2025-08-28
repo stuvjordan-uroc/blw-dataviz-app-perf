@@ -1,4 +1,5 @@
 import makeData from "./functions-and-types/make-data.ts";
+import { serializableVizConfig } from "./functions-and-types/serialize.ts";
 import type { Layouts, Out } from "./functions-and-types/types.ts";
 import vizAtImp from "./functions-and-types/viz-at-imp.ts";
 
@@ -15,10 +16,7 @@ const vizConfig = {
   sampleSize: 100,
 };
 
-export function buildData(
-  pathString: string,
-  layouts: Layouts
-): Out | undefined {
+export function buildData(pathString: string, layouts: Layouts) {
   const data = makeData(pathString);
   if (!data) {
     //note that makeData logs all kinds of warnings to the console when
