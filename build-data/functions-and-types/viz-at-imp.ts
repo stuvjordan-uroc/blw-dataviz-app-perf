@@ -13,16 +13,17 @@ import {
   unSplit,
   makeSegmentViewsExpanded,
 } from "./make-segment-views-expanded.ts";
+import { unmapPAndC } from "./unmap.ts";
 
 export default function vizAtImp(
   impVar: string,
   data: Data,
   vizConfig: VizConfig,
   layouts: Layouts
-): ImpViz {
+) {
   const pAndC = proportionsAndCounts(impVar, data, vizConfig);
   return {
-    proportionsAndCounts: pAndC,
+    proportionsAndCounts: unmapPAndC(pAndC),
     viz: Object.fromEntries(
       Object.entries(layouts).map(([screenSize, layout]) => {
         const segments: SegmentViews = {

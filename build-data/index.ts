@@ -1,5 +1,4 @@
 import makeData from "./functions-and-types/make-data.ts";
-import { serializableVizConfig } from "./functions-and-types/serialize.ts";
 import type { Layouts, Out } from "./functions-and-types/types.ts";
 import vizAtImp from "./functions-and-types/viz-at-imp.ts";
 

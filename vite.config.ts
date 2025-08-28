@@ -64,6 +64,18 @@ export default defineConfig({
                 return [impVar, impViz.proportionsAndCounts];
               })
             );
+            fs.writeFile(
+              pathToCoordinateDataFolder + "pAndC.json",
+              JSON.stringify(impVarToPAndC),
+              (err) => {
+                if (err) {
+                  console.error(
+                    "failed to write pAndC.json to coordinates folder",
+                    err
+                  );
+                }
+              }
+            );
           }
         }
       },
