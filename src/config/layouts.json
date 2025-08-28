@@ -1,0 +1,52 @@
+{
+  "imp": {
+    "small": {
+      "screenWidthRange": [
+        0,
+        768
+      ],
+      "vizWidth": 360,
+      "waveHeight": 90,
+      "pointRadius": 3,
+      "responseGap": 4.5,
+      "partyGap": 6.75,
+      "labelHeight": 30
+    },
+    "medium": {
+      "screenWidthRange": [
+        768,
+        1024
+      ],
+      "vizWidth": 760,
+      "waveHeight": 90,
+      "pointRadius": 3,
+      "responseGap": 4.5,
+      "partyGap": 6.75,
+      "labelHeight": 30
+    },
+    "large": {
+      "screenWidthRange": [
+        1024,
+        1440
+      ],
+      "vizWidth": 1000,
+      "waveHeight": 90,
+      "pointRadius": 3,
+      "responseGap": 4.5,
+      "partyGap": 6.75,
+      "labelHeight": 30
+    },
+    "xLarge": {
+      "screenWidthRange": [
+        1440,
+        5000
+      ],
+      "vizWidth": 1250,
+      "waveHeight": 90,
+      "pointRadius": 3,
+      "responseGap": 4.5,
+      "partyGap": 6.75,
+      "labelHeight": 30
+    }
+  }
+}

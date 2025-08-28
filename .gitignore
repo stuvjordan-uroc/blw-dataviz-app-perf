@@ -2,6 +2,9 @@
 src/data/viz/
 src/data/imp.json
 
+# raw data
+src/data/raw/
+
 # Logs
 logs
 *.log
