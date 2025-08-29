@@ -1,10 +1,10 @@
 import makeData from "./functions-and-types/make-data.ts";
-import type { Layouts, ImpViz } from "./functions-and-types/types.ts";
-import vizAtImp from "./functions-and-types/viz-at-imp.ts";
+import type { Layouts, Layout, Viz } from "./functions-and-types/types.ts";
+import { vizAtImp } from "./functions-and-types/viz-at-imp.ts";
 import {
-  unMapPointsMap,
-  unMapSegmentViews,
+  unMapPAndC
 } from "./functions-and-types/unmap.ts";
+import proportionsAndCounts from "./functions-and-types/proportions-and-counts.ts";
 
 //vizConfig is set here.
 const vizConfig = {
@@ -29,35 +29,17 @@ export function buildData(pathString: string, layouts: Layouts) {
   }
   return {
     vizConfig: vizConfig,
-    imp: Object.fromEntries(
-      data.impCols.map((impCol) => [
+    pAndC: Object.fromEntries(data.impCols.map((impCol) => ([
+      impCol,
+      unMapPAndC(proportionsAndCounts(impCol, data, vizConfig))
+    ]))),
+    viz: Object.fromEntries(Object.entries(layouts).map(([screenSize, layout]) => ([
+      screenSize as keyof Layouts,
+      Object.fromEntries(data.impCols.map((impCol) => ([
         impCol,
-        vizAtImp(impCol, data, vizConfig, layouts),
-      ])
-    ),
-  };
+        vizAtImp(impCol, data, vizConfig, layout as Layout)
+      ])))
+    ]))) as Viz
+  }
 }
 
-export function segsAndPointsByScreenSize(
-  imp: Record<string, ImpViz>,
-  layouts: Layouts
-) {
-  return Object.fromEntries(
-    Object.keys(layouts).map((screenSize) => [
-      screenSize,
-      Object.fromEntries(
-        Object.entries(imp).map(([impVar, vizAtImpVar]) => [
-          impVar,
-          {
-            segments: unMapSegmentViews(
-              vizAtImpVar.viz[screenSize as keyof Layouts].segments
-            ),
-            points: unMapPointsMap(
-              vizAtImpVar.viz[screenSize as keyof Layouts].points
-            ),
-          },
-        ])
-      ),
-    ])
-  );
-}

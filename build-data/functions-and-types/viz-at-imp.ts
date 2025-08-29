@@ -2,10 +2,9 @@ import type {
   Data,
   VizConfig,
   Layout,
-  Layouts,
-  ImpViz,
   SegmentViews,
-  PointsMap,
+  SegmentViewsUnMapped,
+  PointsMapUnMapped
 } from "./types.ts";
 import proportionsAndCounts from "./proportions-and-counts.ts";
 import makePointsMap from "./points-map/make-points-map.ts";
@@ -13,47 +12,36 @@ import {
   unSplit,
   makeSegmentViewsExpanded,
 } from "./make-segment-views-expanded.ts";
-import { unmapPAndC } from "./unmap.ts";
+import { unMapSegmentViews, unMapPointsMap } from "./unmap.ts";
 
-export default function vizAtImp(
+export function vizAtImp(
   impVar: string,
   data: Data,
   vizConfig: VizConfig,
-  layouts: Layouts
-) {
-  const pAndC = proportionsAndCounts(impVar, data, vizConfig);
-  return {
-    proportionsAndCounts: unmapPAndC(pAndC),
-    viz: Object.fromEntries(
-      Object.entries(layouts).map(([screenSize, layout]) => {
-        const segments: SegmentViews = {
-          unsplit: unSplit(pAndC, layout as Layout, data.waves.imp.length),
-          expanded: makeSegmentViewsExpanded(
-            pAndC,
-            layout as Layout,
-            data.waves.imp.length,
-            vizConfig.partyGroups.length
-          ),
-          collapsed: {
-            byResponse: new Map(),
-            byResponseAndWave: new Map(),
-            byResponseAndParty: new Map(),
-            byResponseAndWaveAndParty: new Map(),
-          },
-        };
-        return [
-          screenSize,
-          {
-            segments: segments,
-            points: makePointsMap(segments),
-          },
-        ];
-      })
-    ) as {
-      [screenSize in keyof Layouts]: {
-        segments: SegmentViews;
-        points: PointsMap;
-      };
+  layout: Layout
+): {
+  segments: SegmentViewsUnMapped,
+  points: PointsMapUnMapped
+} {
+  const pAndC = proportionsAndCounts(impVar, data, vizConfig)
+  const segments: SegmentViews = {
+    unsplit: unSplit(pAndC, layout, data.waves.imp.length),
+    expanded: makeSegmentViewsExpanded(
+      pAndC,
+      layout,
+      data.waves.imp.length,
+      vizConfig.partyGroups.length
+    ),
+    collapsed: {
+      byResponse: new Map(),
+      byResponseAndWave: new Map(),
+      byResponseAndParty: new Map(),
+      byResponseAndWaveAndParty: new Map(),
     },
   };
+  return ({
+    segments: unMapSegmentViews(segments),//transform maps to arrays of tuples
+    points: unMapPointsMap(makePointsMap(segments)) //transform maps to arrays of tuples here
+  })
 }
+

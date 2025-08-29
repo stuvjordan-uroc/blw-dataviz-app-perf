@@ -1,9 +1,8 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
-import { buildData, segsAndPointsByScreenSize } from "./build-data";
+import { buildData } from "./build-data";
 import layouts from "./src/config/layouts.json";
 import * as z from "zod";
-import util from "node:util";
 import fs from "node:fs";
 
 const impDataPath = "./src/data/raw/dem_characteristics_importance.gz";
@@ -57,16 +56,10 @@ export default defineConfig({
                 }
               }
             );
-            //write a single file that maps each impVar to it's proportions and counts
-            //from the json string
-            const impVarToPAndC = Object.fromEntries(
-              Object.entries(impVizData.imp).map(([impVar, impViz]) => {
-                return [impVar, impViz.proportionsAndCounts];
-              })
-            );
+            //Write a file that maps each impVar to its proportions and counts
             fs.writeFile(
               pathToCoordinateDataFolder + "pAndC.json",
-              JSON.stringify(impVarToPAndC),
+              JSON.stringify(impVizData.pAndC),
               (err) => {
                 if (err) {
                   console.error(
@@ -76,11 +69,21 @@ export default defineConfig({
                 }
               }
             );
-            //now write one file FOR EACH screen size that holds all the segments and points for each impVar
-            const byScreenSize = segsAndPointsByScreenSize(
-              impVizData.imp,
-              impLayouts.data
-            );
+            //For each screen size, write ONE file that maps each impVar to the segments and points for that impVar at that screensize
+            Object.entries(impVizData.viz).forEach(([screenSize, viz]) => {
+              fs.writeFile(
+                pathToCoordinateDataFolder + `viz-${screenSize}.json`,
+                JSON.stringify(viz),
+                (err) => {
+                  if (err) {
+                    console.error(
+                      `failed to write viz-${screenSize}.json to coordinates folder`,
+                      err
+                    );
+                  }
+                }
+              )
+            })
           }
         }
       },

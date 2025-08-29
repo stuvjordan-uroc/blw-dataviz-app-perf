@@ -1,85 +1,70 @@
 import type {
+  GroupedState,
   PAndC,
+  PAndCUnMapped,
   PointsMap,
+  PointsViews,
+  Segment,
   SegmentMapR,
   SegmentMapRP,
   SegmentMapRW,
   SegmentMapRWP,
   SegmentViews,
+  UnMap,
 } from "./types.ts";
 
-function mapToKeyValArray<T, K>(map: Map<T, K>): [T, K][] {
-  return map.entries().toArray();
-}
 
-type UnMappedPAndC = Record<
-  string,
-  {
-    p: number;
-    c: number;
-    waveSplit: [
-      number,
-      null | {
-        p: number;
-        c: number;
-        partySplit: [
-          string[],
-          {
-            p: number;
-            c: number;
-          },
-        ][];
-      },
-    ][];
-    partySplit: [
-      string[],
+
+export function unMapPAndC(pAndC: PAndC): PAndCUnMapped {
+  return Object.fromEntries(Object.entries(pAndC).map(([groupedState, gsVal]) => ([
+    groupedState as GroupedState,
+    gsVal.entries().toArray().map(([rg, rgVal]) => ([
+      rg,
       {
-        p: number;
-        c: number;
-      },
-    ][];
-  }
->;
-
-export function unmapPAndC(pAndC: PAndC) {
-  return Object.fromEntries(
-    Object.entries(pAndC).map(([groupedState, val]) => [
-      groupedState as keyof PAndC,
-      mapToKeyValArray(val).map(([rg, rgVal]) => [
-        rg,
-        {
-          ...rgVal,
-          waveSplit: mapToKeyValArray(rgVal.waveSplit).map(
-            ([wave, waveVal]) => [
-              wave,
-              waveVal === null
-                ? null
-                : {
-                    ...waveVal,
-                    partySplit: mapToKeyValArray(waveVal.partySplit),
-                  },
-            ]
-          ),
-          partySplit: mapToKeyValArray(rgVal.partySplit),
-        },
-      ]),
-    ])
-  );
+        ...rgVal,
+        waveSplit: rgVal.waveSplit.entries().toArray().map(([wave, waveVal]) => ([
+          wave,
+          waveVal === null ? null :
+            {
+              ...waveVal,
+              partySplit: waveVal.partySplit.entries().toArray()
+            }
+        ])) as [
+          number,
+          null | {
+            p: number,
+            c: number,
+            partySplit: [
+              string[],
+              {
+                p: number,
+                c: number
+              }
+            ][]
+          }
+        ][],
+        partySplit: rgVal.partySplit.entries().toArray() as [string[], { p: number, c: number }][]
+      }
+    ]))
+  ]))) as PAndCUnMapped
+}
+export function unMapMap<T, K>(map: Map<T, K>): UnMap<T, K> {
+  return map.entries().toArray()
 }
 export function unMapSegmentMapR(segmentMapR: SegmentMapR) {
-  return segmentMapR.entries().toArray();
+  return unMapMap(segmentMapR)
 }
 export function unMapSegmentMapRP(segmentMapRP: SegmentMapRP) {
   return segmentMapRP
     .entries()
     .toArray()
-    .map(([rg, rgVal]) => [rg, rgVal.entries().toArray()]);
+    .map(([rg, rgVal]) => [rg, unMapMap(rgVal)]) as UnMap<string[], UnMap<string[], Segment>>;
 }
 export function unMapSegmentMapRW(segmenMapRW: SegmentMapRW) {
   return segmenMapRW
     .entries()
     .toArray()
-    .map(([rg, rgVal]) => [rg, rgVal.entries().toArray()]);
+    .map(([rg, rgVal]) => [rg, unMapMap(rgVal)]) as UnMap<string[], UnMap<number, null | Segment>>;
 }
 export function unMapSegmentMapRWP(segmentMapRWP: SegmentMapRWP) {
   return segmentMapRWP
@@ -92,9 +77,15 @@ export function unMapSegmentMapRWP(segmentMapRWP: SegmentMapRWP) {
         .toArray()
         .map(([wave, waveVal]) => [
           wave,
-          waveVal === null ? null : waveVal.entries().toArray(),
+          waveVal === null ? null : unMapMap(waveVal),
         ]),
-    ]);
+    ]) as UnMap<
+      string[],
+      UnMap<
+        number,
+        null | UnMap<string[], Segment>
+      >
+    >;
 }
 export function unMapSegmentViews(segmentViews: SegmentViews) {
   return {
@@ -136,7 +127,13 @@ export function unMapPointsMap(pointsMap: PointsMap) {
         .toArray()
         .map(([wave, waveVal]) => [
           wave,
-          waveVal === null ? null : waveVal.entries().toArray(),
+          waveVal === null ? null : unMapMap(waveVal),
         ]),
-    ]);
+    ]) as UnMap<
+      string[],
+      UnMap<
+        number,
+        null | UnMap<string[], PointsViews>
+      >
+    >;
 }

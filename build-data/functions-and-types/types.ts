@@ -29,6 +29,9 @@ export interface VizConfig {
   sampleSize: number;
 }
 
+//type for unmapped maps (for serializing)
+export type UnMap<T, K> = [T, K][]
+
 //proportions and counts
 export type GroupedState = "collapsed" | "expanded";
 export type PAndC = Record<
@@ -53,6 +56,37 @@ export type PAndC = Record<
         }
       >;
       partySplit: Map<
+        string[],
+        {
+          p: number;
+          c: number;
+        }
+      >;
+    }
+  >
+>;
+export type PAndCUnMapped = Record<
+  GroupedState,
+  UnMap<
+    string[],
+    {
+      p: number;
+      c: number;
+      waveSplit: UnMap<
+        number,
+        null | {
+          p: number;
+          c: number;
+          partySplit: UnMap<
+            string[],
+            {
+              p: number;
+              c: number;
+            }
+          >;
+        }
+      >;
+      partySplit: UnMap<
         string[],
         {
           p: number;
@@ -98,14 +132,28 @@ export interface Segment {
   segmentCoordinates: SegmentCoordinates;
   allPoints: Point[];
 }
+
 export type SegmentMapR = Map<string[], Segment>;
+export type SegmentMapRUnMapped = UnMap<string[], Segment>;
 export type SegmentMapRW = Map<string[], Map<number, null | Segment>>;
+export type SegmentMapRWUnMapped = UnMap<string[], UnMap<number, null | Segment>>;
 export type SegmentMapRP = Map<string[], Map<string[], Segment>>;
+export type SegmentMapRPUnMapped = UnMap<string[], UnMap<string[], Segment>>;
 export type SegmentMapRWP = Map<
   string[], //responseGroup
   Map<
     number, //wave
     null | Map<
+      string[], //partyGroup
+      Segment
+    >
+  >
+>;
+export type SegmentMapRWPUnMapped = UnMap<
+  string[], //responseGroup
+  UnMap<
+    number, //wave
+    null | UnMap<
       string[], //partyGroup
       Segment
     >
@@ -117,10 +165,21 @@ export interface SegmentGroupedViews {
   byResponseAndWave: SegmentMapRW;
   byResponseAndWaveAndParty: SegmentMapRWP;
 }
+export interface SegmentGroupedViewsUnMapped {
+  byResponse: SegmentMapRUnMapped;
+  byResponseAndParty: SegmentMapRPUnMapped;
+  byResponseAndWave: SegmentMapRWUnMapped;
+  byResponseAndWaveAndParty: SegmentMapRWPUnMapped;
+}
 export interface SegmentViews {
   unsplit: Segment;
   collapsed: SegmentGroupedViews;
   expanded: SegmentGroupedViews;
+}
+export interface SegmentViewsUnMapped {
+  unsplit: Segment;
+  collapsed: SegmentGroupedViewsUnMapped;
+  expanded: SegmentGroupedViewsUnMapped;
 }
 
 //points
@@ -149,20 +208,25 @@ export type PointsMap = Map<
     >
   >
 >;
+export type PointsMapUnMapped = UnMap<
+  string[], //responseGroup
+  UnMap<
+    number, //wave
+    null | UnMap<
+      string[], //partyGroup
+      PointsViews
+    >
+  >
+>;
 
-export interface ImpViz {
-  proportionsAndCounts: PAndC;
-  viz: {
-    [screenSize in keyof Layouts]: {
-      segments: SegmentViews;
-      points: PointsMap;
-    };
-  };
-}
-export interface Out {
-  vizConfig: VizConfig;
-  imp: Record<
-    string, //one for each impVar
-    ImpViz
-  >;
-}
+
+export type Viz = Record<
+  keyof Layouts,
+  Record<
+    string,
+    {
+      segments: SegmentViewsUnMapped,
+      points: PointsMapUnMapped
+    }
+  >
+>
