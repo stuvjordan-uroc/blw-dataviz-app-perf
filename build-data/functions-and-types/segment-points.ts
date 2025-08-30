@@ -83,10 +83,10 @@ export default function segmentPoints(
     }
     //now select the indices of windows that will be empty at random
     const emptyIndices = lodash.sampleSize(
-      allWindows.map((el, idx) => idx),
+      allWindows.map((_el, idx) => idx),
       numResidents - R * C
     );
-    return allWindows.filter((w, wIdx) => !emptyIndices.includes(wIdx));
+    return allWindows.filter((_w, wIdx) => !emptyIndices.includes(wIdx));
   }
 
   //Now let's increase the window size so long as we fit all the points.
@@ -136,8 +136,8 @@ export default function segmentPoints(
   }
   //now select the indices of windows that will be empty at random
   const emptyIndices = lodash.sampleSize(
-    allWindows.map((el, idx) => idx),
+    allWindows.map((_el, idx) => idx),
     numResidents - R * C
   );
-  return allWindows.filter((w, wIdx) => !emptyIndices.includes(wIdx));
+  return allWindows.filter((_w, wIdx) => !emptyIndices.includes(wIdx));
 }

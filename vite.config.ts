@@ -44,34 +44,36 @@ export default defineConfig({
           console.log(impLayouts.error);
         } else {
           const impVizData = buildData(impDataPath, impLayouts.data.imp, vizConfig);
-          //Write a file that maps each impVar to its proportions and counts
-          fs.writeFile(
-            pathToPAndCFolder + "p-and-c.json",
-            JSON.stringify(impVizData.pAndC),
-            (err) => {
-              if (err) {
-                console.error(
-                  "failed to write pAndC.json to coordinates folder",
-                  err
-                );
-              }
-            }
-          );
-          //For each screen size, write ONE file that maps each impVar to the segments and points for that impVar at that screensize
-          Object.entries(impVizData.viz).forEach(([screenSize, viz]) => {
+          if (impVizData) {
+            //Write a file that maps each impVar to its proportions and counts
             fs.writeFile(
-              pathToCoordinateDataFolder + `viz-${screenSize}.json`,
-              JSON.stringify(viz),
-              (err) => {
+              pathToPAndCFolder + "p-and-c.json",
+              JSON.stringify(impVizData.pAndC),
+              (err: unknown) => {
                 if (err) {
                   console.error(
-                    `failed to write viz-${screenSize}.json to coordinates folder`,
+                    "failed to write pAndC.json to coordinates folder",
                     err
                   );
                 }
               }
-            )
-          })
+            );
+            //For each screen size, write ONE file that maps each impVar to the segments and points for that impVar at that screensize
+            Object.entries(impVizData.viz).forEach(([screenSize, viz]) => {
+              fs.writeFile(
+                pathToCoordinateDataFolder + `viz-${screenSize}.json`,
+                JSON.stringify(viz),
+                (err: unknown) => {
+                  if (err) {
+                    console.error(
+                      `failed to write viz-${screenSize}.json to coordinates folder`,
+                      err
+                    );
+                  }
+                }
+              )
+            })
+          }
         }
       }
     },

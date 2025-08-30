@@ -1,5 +1,5 @@
 import segmentPoints from "./segment-points.ts";
-import type { Layout, PAndC, SegmentCoordinates } from "./types.ts";
+import type { Layout, PAndC, SegmentCoordinates, SegmentGroupedViews } from "./types.ts";
 
 function allPoints(segmentCoordinates: SegmentCoordinates, count: number, pointRadius: number) {
   return segmentPoints(
@@ -215,8 +215,6 @@ export function byResponseAndPartyAndWave(pAndC: PAndC, layout: Layout, numWaves
 }
 
 export function makeSegmentViewsExpanded(pAndC: PAndC, layout: Layout, numWaves: number, numPartyGroups: number) {
-  //unsplit
-  const unsplit = unSplit(pAndC, layout, numWaves)
   //byResponse
   const byresponse = byResponse(pAndC, layout, numWaves)
   //byResponseAndParty
@@ -230,7 +228,7 @@ export function makeSegmentViewsExpanded(pAndC: PAndC, layout: Layout, numWaves:
     byResponseAndWave: byresponseandwave,
     byResponseAndParty: byresponseandparty,
     byResponseAndWaveAndParty: byresponseandpartyandwave
-  })
+  } as SegmentGroupedViews)
 
 
 }

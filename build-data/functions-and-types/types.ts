@@ -34,6 +34,34 @@ export type UnMap<T, K> = [T, K][]
 
 //proportions and counts
 export type GroupedState = "collapsed" | "expanded";
+export type PAndCAtGroupedState = Map<
+  string[],
+  {
+    p: number;
+    c: number;
+    waveSplit: Map<
+      number,
+      null | {
+        p: number;
+        c: number;
+        partySplit: Map<
+          string[],
+          {
+            p: number;
+            c: number;
+          }
+        >;
+      }
+    >;
+    partySplit: Map<
+      string[],
+      {
+        p: number;
+        c: number;
+      }
+    >;
+  }
+>
 export type PAndC = Record<
   GroupedState,
   Map<
