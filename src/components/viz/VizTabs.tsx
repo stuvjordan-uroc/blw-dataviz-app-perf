@@ -52,7 +52,7 @@ export default function VizTabs() {
         </button>
       </Tabs.List>
       <Tabs.Content className="viztabs-content" value="imp">
-        <Imp />
+        <Imp layout={layout.imp} />
       </Tabs.Content>
       <Tabs.Content className="viztabs-content" value="perf"></Tabs.Content>
       <Tabs.Content

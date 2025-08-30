@@ -1,5 +1,5 @@
 import makeData from "./functions-and-types/make-data.ts";
-import type { Layouts, Layout, Viz, VizConfig } from "./functions-and-types/types.ts";
+import type { Layouts, Layout, Viz, VizConfig, SegmentViewsUnMapped, PointsMapUnMapped } from "./functions-and-types/types.ts";
 import { vizAtImp } from "./functions-and-types/viz-at-imp.ts";
 import {
   unMapPAndC
@@ -30,3 +30,7 @@ export function buildData(pathString: string, layouts: Layouts, vizConfig: VizCo
   }
 }
 
+export type VizByImpVar = Record<string, {
+  segments: SegmentViewsUnMapped;
+  points: PointsMapUnMapped;
+}>
