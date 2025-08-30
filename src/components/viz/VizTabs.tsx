@@ -1,5 +1,6 @@
 import "./VizTabs.css";
 import * as Tabs from "@radix-ui/react-tabs";
+import Imp from "./imp/Imp";
 
 export default function VizTabs() {
   return (
@@ -31,7 +32,9 @@ export default function VizTabs() {
           </svg>
         </button>
       </Tabs.List>
-      <Tabs.Content className="viztabs-content" value="imp"></Tabs.Content>
+      <Tabs.Content className="viztabs-content" value="imp">
+        <Imp />
+      </Tabs.Content>
       <Tabs.Content className="viztabs-content" value="perf"></Tabs.Content>
       <Tabs.Content
         className="viztabs-content"
