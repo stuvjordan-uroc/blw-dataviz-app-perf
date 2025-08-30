@@ -1,8 +1,8 @@
-# generated coordinate data files
+# old location for generated coordinate data files
 src/data/coordinates/
 
-# raw data
-src/data/raw/
+# location for generated coordinate data files
+public/coordinates/
 
 # Logs
 logs
