@@ -1,5 +1,4 @@
 import "./App.css";
-import * as _ from "lodash";
 import { useCurrentPage } from "./hooks/useCurrentPage";
 import { useUserResponses } from "./hooks/useUserResponses";
 import { CurrentPageStoreContext, UserResponsesStoreContext } from "./Contexts";
