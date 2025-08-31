@@ -34,93 +34,36 @@ export type UnMap<T, K> = [T, K][]
 
 //proportions and counts
 export type GroupedState = "collapsed" | "expanded";
+export interface PropCount { p: number, c: number }
+export type WaveSplitVal = PropCount & { partySplit: Map<string[], PropCount> }
 export type PAndCAtGroupedState = Map<
   string[],
-  {
-    p: number;
-    c: number;
+  PropCount & {
     waveSplit: Map<
       number,
-      null | {
-        p: number;
-        c: number;
-        partySplit: Map<
-          string[],
-          {
-            p: number;
-            c: number;
-          }
-        >;
+      null | PropCount & {
+        partySplit: Map<string[], PropCount>
       }
-    >;
-    partySplit: Map<
-      string[],
-      {
-        p: number;
-        c: number;
-      }
-    >;
+    >,
+    partySplit: Map<string[], PropCount>
   }
 >
 export type PAndC = Record<
   GroupedState,
-  Map<
-    string[],
-    {
-      p: number;
-      c: number;
-      waveSplit: Map<
-        number,
-        null | {
-          p: number;
-          c: number;
-          partySplit: Map<
-            string[],
-            {
-              p: number;
-              c: number;
-            }
-          >;
-        }
-      >;
-      partySplit: Map<
-        string[],
-        {
-          p: number;
-          c: number;
-        }
-      >;
-    }
-  >
+  PAndCAtGroupedState
 >;
 export type PAndCUnMapped = Record<
   GroupedState,
   UnMap<
     string[],
-    {
-      p: number;
-      c: number;
+    PropCount & {
+      partySplit: UnMap<string[], PropCount>,
       waveSplit: UnMap<
         number,
-        null | {
-          p: number;
-          c: number;
-          partySplit: UnMap<
-            string[],
-            {
-              p: number;
-              c: number;
-            }
-          >;
+        null | PropCount & {
+          partySplit: UnMap<string[], PropCount>
         }
-      >;
-      partySplit: UnMap<
-        string[],
-        {
-          p: number;
-          c: number;
-        }
-      >;
+      >
     }
   >
 >;

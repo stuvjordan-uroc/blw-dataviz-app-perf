@@ -1,5 +1,5 @@
 import segmentPoints from "./segment-points.ts";
-import type { Layout, PAndC, SegmentCoordinates, SegmentGroupedViews } from "./types.ts";
+import type { Layout, PAndC, SegmentCoordinates, SegmentGroupedViews, PropCount } from "./types.ts";
 
 function allPoints(segmentCoordinates: SegmentCoordinates, count: number, pointRadius: number) {
   return segmentPoints(
@@ -12,7 +12,17 @@ function allPoints(segmentCoordinates: SegmentCoordinates, count: number, pointR
   )
 }
 export function unSplit(pAndC: PAndC, layout: Layout, numWaves: number) {
-  const count = pAndC.expanded.values().map(rgVal => rgVal.c).reduce((acc, curr) => acc + curr, 0)
+  const count = [...pAndC.expanded.values()].map((
+    rgVal: PropCount & {
+      waveSplit: Map<
+        number,
+        null | PropCount & {
+          partySplit: Map<string[], PropCount>
+        }
+      >,
+      partySplit: Map<string[], PropCount>
+    }
+  ) => rgVal.c).reduce((acc: number, curr: number) => acc + curr, 0)
   const segmentCoordinates = {
     topLeftX: 0,
     topLeftY: layout.labelHeight,
@@ -28,18 +38,36 @@ export function unSplit(pAndC: PAndC, layout: Layout, numWaves: number) {
 }
 export function byResponse(pAndC: PAndC, layout: Layout, numWaves: number) {
   return new Map(
-    pAndC.expanded.entries().map(([rg, rgVal], rgIdx) => {
+    [...pAndC.expanded.entries()].map(([rg, rgVal]: [
+      string[],
+      PropCount & {
+        waveSplit: Map<
+          number,
+          null | PropCount & {
+            partySplit: Map<string[], PropCount>
+          }
+        >,
+        partySplit: Map<string[], PropCount>
+      }
+    ], rgIdx: number) => {
       const count = rgVal.c
       const widthToDistribute = layout.vizWidth //start with the total vizWidth
         - 2 * layout.pointRadius * pAndC.expanded.size //subtract the minimum width each segment
         - layout.responseGap * (pAndC.expanded.size - 1) //subtract the responseGaps
-      const topLeftX = rgIdx === 0 ? 0 : pAndC.expanded
-        .values()
-        .take(rgIdx)  //previous response values
-        .map((prevRgVal) =>
+      const topLeftX = rgIdx === 0 ? 0 : [...pAndC.expanded.values()]
+        .slice(0, rgIdx)  //previous response values
+        .map((prevRgVal: PropCount & {
+          waveSplit: Map<
+            number,
+            null | PropCount & {
+              partySplit: Map<string[], PropCount>
+            }
+          >,
+          partySplit: Map<string[], PropCount>
+        }) =>
           2 * layout.pointRadius + prevRgVal.p * widthToDistribute + layout.responseGap
         ) //width of each segment for each of the previous response values
-        .reduce((acc, curr) => acc + curr, 0) //sum those widths
+        .reduce((acc: number, curr: number) => acc + curr, 0) //sum those widths
       const segmentCoordinates = {
         topLeftY: layout.labelHeight,
         topLeftX: topLeftX,
@@ -65,23 +93,44 @@ export function byResponseAndParty(pAndC: PAndC, layout: Layout, numWaves: numbe
     - layout.responseGap * (pAndC.expanded.size - 1)
   const segmentHeight = layout.waveHeight * numWaves
   return new Map(
-    pAndC.expanded.entries().map(([rg, rgVal], rgIdx) => {
+    [...pAndC.expanded.entries()].map(([rg, rgVal]: [
+      string[],
+      PropCount & {
+        waveSplit: Map<
+          number,
+          null | PropCount & {
+            partySplit: Map<string[], PropCount>
+          }
+        >,
+        partySplit: Map<string[], PropCount>
+      }
+    ], rgIdx: number) => {
       return ([
         rg,
         new Map(
-          rgVal.partySplit.entries().map(([pg, pgVal], pgIdx) => {
+          [...rgVal.partySplit.entries()].map(([pg, pgVal]: [
+            string[],
+            PropCount
+          ], pgIdx: number) => {
             const count = pgVal.c;
             const topLeftY = layout.labelHeight;
             const partyGroupTopLeftX = (partyGroupTotalWidth + layout.partyGap) * pgIdx
             const responseGroupTopLeftX = partyGroupTopLeftX + (
               rgIdx === 0 ? 0 :
-                pAndC.expanded
-                  .values()
-                  .take(rgIdx)
-                  .map((prevRgVal) =>
+                [...pAndC.expanded.values()]
+                  .slice(0, rgIdx)
+                  .map((prevRgVal: PropCount & {
+                    waveSplit: Map<
+                      number,
+                      null | PropCount & {
+                        partySplit: Map<string[], PropCount>
+                      }
+                    >,
+                    partySplit: Map<string[], PropCount>
+                  }) =>
                     2 * layout.pointRadius + prevRgVal.p * partyGroupWidthToDistribute + layout.responseGap
                   )
-                  .reduce((acc, curr) => acc + curr, 0)
+                  .reduce((acc: number, curr: number) => acc + curr, 0)
             )
             const coordinates = {
               topLeftY: topLeftY,
@@ -104,30 +153,45 @@ export function byResponseAndParty(pAndC: PAndC, layout: Layout, numWaves: numbe
   )
 }
 
-export function byResponseAndWave(pAndC: PAndC, layout: Layout, numWaves: number) {
+export function byResponseAndWave(pAndC: PAndC, layout: Layout) {
   return new Map(
-    pAndC.expanded.entries().map(([rg, rgVal], rgIdx) => {
+    [...pAndC.expanded.entries()].map(([rg, rgVal]: [
+      string[],
+      PropCount & {
+        waveSplit: Map<
+          number,
+          null | PropCount & {
+            partySplit: Map<string[], PropCount>
+          }
+        >,
+        partySplit: Map<string[], PropCount>
+      }
+    ], rgIdx: number) => {
       const waveWidthToDistribute = layout.vizWidth //total vizWidth
         - 2 * layout.pointRadius * pAndC.expanded.size //subtract the minimum width for each segment
         - layout.responseGap * (pAndC.expanded.size - 1) //subtract the responseGap
       return ([
         rg,
         new Map(
-          rgVal.waveSplit.entries().map(([wave, waveVal], waveIdx) => {
+          [...rgVal.waveSplit.entries()].map(([wave, waveVal]: [
+            number,
+            null | PropCount & { partySplit: Map<string[], PropCount> }
+          ], waveIdx: number) => {
             if (waveVal === null) {
               return ([wave, null])
             }
             const waveTopLeftY = layout.labelHeight //label prior to top row of segments
               + (layout.waveHeight + layout.labelHeight) * waveIdx //heights of previous rows
             const responseGroupTopLeftX = rgIdx === 0 ? 0 :
-              pAndC.expanded.values().take(rgIdx) //iterate through the previous responseGroups
+              [...pAndC.expanded.values()]
+                .slice(0, rgIdx) //iterate through the previous responseGroups
                 .map(prevRgVal =>  //get the width for each previous responseGap at the current wave 
                   2 * layout.pointRadius //minimum width
                   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                   + prevRgVal.waveSplit.get(wave)!.p * waveWidthToDistribute //width for previous response group at current wave
                   + layout.responseGap //responseGap
                 )
-                .reduce((acc, curr) => acc + curr, 0) //sum the widths of the previous segments
+                .reduce((acc: number, curr: number) => acc + curr, 0) //sum the widths of the previous segments
             const coordinates = {
               topLeftY: waveTopLeftY,
               topLeftX: responseGroupTopLeftX,
@@ -149,17 +213,33 @@ export function byResponseAndWave(pAndC: PAndC, layout: Layout, numWaves: number
   )
 }
 
-export function byResponseAndPartyAndWave(pAndC: PAndC, layout: Layout, numWaves: number, numPartyGroups: number) {
+export function byResponseAndPartyAndWave(pAndC: PAndC, layout: Layout, numPartyGroups: number) {
   const partyGroupTotalWidth = (layout.vizWidth - layout.partyGap * (numPartyGroups - 1)) / numPartyGroups
   const partyGroupWidthToBeDistributed = partyGroupTotalWidth
     - 2 * layout.pointRadius * pAndC.expanded.size
     - layout.responseGap * (pAndC.expanded.size - 1)
   return new Map(
-    pAndC.expanded.entries().map(([rg, rgVal], rgIdx) => {
+    [...pAndC.expanded.entries()].map(([rg, rgVal]: [
+      string[],
+      PropCount & {
+        waveSplit: Map<
+          number,
+          null | PropCount & {
+            partySplit: Map<string[], PropCount>
+          }
+        >,
+        partySplit: Map<string[], PropCount>
+      }
+    ], rgIdx: number) => {
       return ([
         rg,
         new Map(
-          rgVal.waveSplit.entries().map(([wave, waveVal], waveIdx) => {
+          [...rgVal.waveSplit.entries()].map(([wave, waveVal]: [
+            number,
+            null | PropCount & {
+              partySplit: Map<string[], PropCount>
+            }
+          ], waveIdx: number) => {
             if (waveVal === null) {
               return ([
                 wave,
@@ -170,17 +250,25 @@ export function byResponseAndPartyAndWave(pAndC: PAndC, layout: Layout, numWaves
             return ([
               wave,
               new Map(
-                waveVal.partySplit.entries().map(([pg, pgVal], pgIdx) => {
+                [...waveVal.partySplit.entries()].map(([pg, pgVal]: [
+                  string[],
+                  PropCount
+                ], pgIdx: number) => {
                   const partyGroupTopLeftX = (partyGroupTotalWidth + layout.partyGap) * pgIdx
-                  const responseGroupTopLeftX = partyGroupTopLeftX
-                    + pAndC.expanded.values().take(rgIdx)
-                      .map((prevRgVal) =>
-                        2 * layout.pointRadius
+                  let responseGroupTopLeftX = partyGroupTopLeftX
+                  if (rgIdx > 0) {
+                    let prevRgIdx = 0;
+                    for (const prevRgVal of pAndC.expanded.values()) {
+                      if (prevRgIdx >= rgIdx) {
+                        break;
+                      }
+                      responseGroupTopLeftX += 2 * layout.pointRadius
                         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                         + prevRgVal.waveSplit.get(wave)!.partySplit.get(pg)!.p * partyGroupWidthToBeDistributed
                         + layout.responseGap
-                      )
-                      .reduce((acc, curr) => acc + curr, 0)
+                      prevRgIdx++
+                    }
+                  }
                   const responseGroupSegmentWidth = 2 * layout.pointRadius + pgVal.p * partyGroupWidthToBeDistributed
                   return ([
                     pg,
@@ -220,9 +308,9 @@ export function makeSegmentViewsExpanded(pAndC: PAndC, layout: Layout, numWaves:
   //byResponseAndParty
   const byresponseandparty = byResponseAndParty(pAndC, layout, numWaves, numPartyGroups)
   //byResponseAndWave
-  const byresponseandwave = byResponseAndWave(pAndC, layout, numWaves)
+  const byresponseandwave = byResponseAndWave(pAndC, layout)
   //byResponseAndWaveAndParty
-  const byresponseandpartyandwave = byResponseAndPartyAndWave(pAndC, layout, numWaves, numPartyGroups)
+  const byresponseandpartyandwave = byResponseAndPartyAndWave(pAndC, layout, numPartyGroups)
   return ({
     byResponse: byresponse,
     byResponseAndWave: byresponseandwave,

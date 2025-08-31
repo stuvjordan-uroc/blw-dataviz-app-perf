@@ -1,20 +1,32 @@
-import type { Point, PointsMap, PointsViews, SegmentMapRWP } from "../types.ts";
+import type { Point, PointsMap, PointsViews, SegmentMapRWP, Segment } from "../types.ts";
 import emptyPointsView from "./empty-points-view.ts";
 export default function allocatePointsUnsplit(
   allPoints: Point[],
   segmentMapRWP: SegmentMapRWP,
   pointsMap: PointsMap
 ) {
-  segmentMapRWP.entries().forEach(([rg, rgVal]) => {
+  segmentMapRWP.forEach((
+    rgVal: Map<number, null | Map<string[], Segment>>,
+    rg: string[],
+    _mapR: Map<string[], Map<number, null | Map<string[], Segment>>>
+  ) => {
     if (!pointsMap.has(rg)) {
       pointsMap.set(rg, new Map() as Map<number, null | Map<string[], PointsViews>>)
     }
-    rgVal.entries().forEach(([wave, waveVal]) => {
+    rgVal.forEach((
+      waveVal: null | Map<string[], Segment>,
+      wave: number,
+      _mapW: Map<number, null | Map<string[], Segment>>
+    ) => {
       if (!pointsMap.get(rg)?.has(wave)) {
         pointsMap.get(rg)?.set(wave, waveVal === null ? null : new Map() as Map<string[], PointsViews>)
       }
       if (waveVal !== null) {
-        waveVal.entries().forEach(([pg, pgVal]) => {
+        waveVal.forEach((
+          pgVal: Segment,
+          pg: string[],
+          _mapP: Map<string[], Segment>
+        ) => {
           if (!pointsMap.get(rg)?.get(wave)?.has(pg)) {
             pointsMap.get(rg)?.get(wave)?.set(pg, {
               unsplit: [] as Point[],

@@ -1,6 +1,4 @@
 import "./Question.css";
-import { CurrentPageStoreContext } from "../../Contexts";
-import { use } from "react";
 import questions from "../../data/questions.json";
 import { ChevronRightIcon } from "@radix-ui/react-icons";
 
@@ -13,7 +11,6 @@ export default function Question({
   isOpen: boolean;
   toggleOpen: () => void;
 }) {
-  const CurrentPageStore = use(CurrentPageStoreContext);
   return (
     <div className="question-header" onClick={toggleOpen}>
       <h3>

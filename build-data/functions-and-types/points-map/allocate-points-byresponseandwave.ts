@@ -4,6 +4,7 @@ import type {
   SegmentMapRWP,
   PointsViews,
   Point,
+  Segment,
 } from "../types.ts";
 import emptyPointsView from "./empty-points-view.ts";
 
@@ -12,7 +13,11 @@ export function allocatePointsByResponseAndWaveExpanded(
   segmentMapRWP: SegmentMapRWP,
   pointsMap: PointsMap
 ) {
-  segmentMapRW.entries().forEach(([rg, rgVal]) => {
+  segmentMapRW.forEach((
+    rgVal: Map<number, null | Segment>,
+    rg: string[],
+    _mapR: Map<string[], Map<number, null | Segment>>
+  ) => {
     //if the pointsMap doesn't have an entry at rg, add it
     if (!pointsMap.has(rg)) {
       pointsMap.set(
@@ -20,7 +25,11 @@ export function allocatePointsByResponseAndWaveExpanded(
         new Map() as Map<number, null | Map<string[], PointsViews>>
       );
     }
-    rgVal.entries().forEach(([wave, waveVal]) => {
+    rgVal.forEach((
+      waveVal: null | Segment,
+      wave: number,
+      _mapW: Map<number, null | Segment>
+    ) => {
       //if the pointsMap doesn't have an entry at wave, add it
       if (!pointsMap.get(rg)?.has(wave)) {
         pointsMap
@@ -45,8 +54,11 @@ export function allocatePointsByResponseAndWaveExpanded(
           segmentMapRWP
             .get(rg)
             ?.get(wave)
-            ?.entries()
-            .forEach(([pg, pgVal]) => {
+            ?.forEach((
+              pgVal: Segment,
+              pg: string[],
+              _mapP: Map<string[], Segment>
+            ) => {
               //if the pointsMap doesn't have an entry for  pg, at the current rg and wave,
               //add it.
               if (!pointsMap.get(rg)?.get(wave)?.has(pg)) {
@@ -65,9 +77,9 @@ export function allocatePointsByResponseAndWaveExpanded(
                 .get(rg)!
                 .get(wave)!
                 .get(pg)!.expanded.byResponseAndWave = allPointsAtRW.splice(
-                0,
-                pgVal.count
-              );
+                  0,
+                  pgVal.count
+                );
             });
         }
       }

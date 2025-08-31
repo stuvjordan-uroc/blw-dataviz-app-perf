@@ -7,8 +7,8 @@ interface CurrentPageStore {
 }
 interface UserResponsesStore {
   userResponses: Record<string, {
-    perf: null;
-    imp: null;
+    perf: number | null;
+    imp: number | null;
   }>,
   updateUserResponse: (variableName: string, responseType: 'perf' | 'imp', newValue: number | null) => void,
   numUserResponses: {
@@ -30,7 +30,10 @@ export const UserResponsesStoreContext = createContext<UserResponsesStore>({
       imp: null
     }
   },
-  updateUserResponse: (variableName: string, responseType: 'perf' | 'imp', newValue: number | null) => { console.log("this is fake") },
+  updateUserResponse: (
+    _variableName: string,
+    _responseType: 'perf' | 'imp',
+    _newValue: number | null) => { console.log("this is fake") },
   numUserResponses: {
     perf: 0,
     imp: 0

@@ -3,6 +3,7 @@ import responses from "../../data/responses.json";
 import * as _ from "lodash";
 import { UserResponsesStoreContext } from "../../Contexts";
 import { use } from "react";
+import type { FormEventHandler, FormEvent } from "react";
 export default function ResponseFieldSet({
   prompt,
   question,
@@ -32,14 +33,16 @@ export default function ResponseFieldSet({
       imp: number;
     };
   };
-  function handleChange(event: Event) {
+  const handleChange: FormEventHandler<HTMLFieldSetElement> = (
+    event: FormEvent
+  ) => {
     const target = event.target as HTMLInputElement;
     UserResponseStore.updateUserResponse(
       prompt.variable_name,
       question,
       parseInt(target.value, 10)
     );
-  }
+  };
   return (
     <fieldset onChange={handleChange}>
       {responses[question === "imp" ? "importance" : "performance"].map(
