@@ -34,3 +34,5 @@ export type VizByImpVar = Record<string, {
   segments: SegmentViewsUnMapped;
   points: PointsMapUnMapped;
 }>
+export type PointsMapUnMapped = PointsMapUnMapped;
+export type SegmentViewsUnMapped = SegmentViewsUnMapped;
