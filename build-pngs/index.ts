@@ -33,7 +33,7 @@ function svgString(
   if (fillEntry === undefined) {
     return undefined;
   }
-  const svgString = `<svg xmlns="http://www.w3.org/2000/svg" width="${(2 * pointRadius).toString()}" height="${(2 * pointRadius).toString()}">
+  const svgString = `<svg width="${(2 * pointRadius).toString()}" height="${(2 * pointRadius).toString()}">
       <circle 
         r="${pointRadius.toString()}"
         cx="${pointRadius.toString()}"
