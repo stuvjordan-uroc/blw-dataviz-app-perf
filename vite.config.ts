@@ -3,12 +3,16 @@ import react from "@vitejs/plugin-react-swc";
 import { buildData } from "./build-data";
 import layouts from "./src/config/layouts.json";
 import vizConfig from "./src/config/viz-config.json";
+import circleConfig from "./src/config/circles.json";
+import buildPNGs from "./build-pngs";
 import * as z from "zod";
 import fs from "node:fs";
+import type { CircleConfig } from "./build-pngs";
 
 const impDataPath = "./rawdata/dem_characteristics_importance.gz";
 const pathToPAndCFolder = "./src/data/";
 const pathToCoordinateDataFolder = "./public/coordinates/";
+const pathToIMGFolder = "./public/img/";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -43,7 +47,11 @@ export default defineConfig({
           );
           console.log(impLayouts.error);
         } else {
-          const impVizData = buildData(impDataPath, impLayouts.data.imp, vizConfig);
+          const impVizData = buildData(
+            impDataPath,
+            impLayouts.data.imp,
+            vizConfig
+          );
           if (impVizData) {
             //Write a file that maps each impVar to its proportions and counts
             fs.writeFile(
@@ -70,7 +78,7 @@ export default defineConfig({
                   );
                 }
               }
-            )
+            );
             //For each screen size, write ONE file that maps each impVar to the segments and points for that impVar at that screensize
             Object.entries(impVizData.viz).forEach(([screenSize, viz]) => {
               fs.writeFile(
@@ -84,11 +92,52 @@ export default defineConfig({
                     );
                   }
                 }
-              )
-            })
+              );
+            });
           }
         }
-      }
+      },
+    },
+    {
+      name: "make-circles",
+      buildStart() {
+        const pngBuffers = buildPNGs(layouts.imp, circleConfig as CircleConfig);
+        for (const screenSize in pngBuffers) {
+          for (const pgToBuff of pngBuffers[screenSize] as [
+            string[],
+            Buffer<ArrayBufferLike> | undefined,
+          ]) {
+            const typedPgToBuff = pgToBuff as unknown as [
+              string[],
+              Buffer<ArrayBufferLike> | undefined,
+            ];
+            if (typedPgToBuff[1] === undefined) {
+              console.log(
+                "failed to generate buffer for",
+                screenSize,
+                typedPgToBuff[0]
+              );
+            } else {
+              fs.writeFile(
+                pathToIMGFolder +
+                  screenSize +
+                  "-" +
+                  typedPgToBuff[0].join("|") +
+                  ".png",
+                typedPgToBuff[1],
+                (err: unknown) => {
+                  if (err) {
+                    console.error(
+                      `failed to write ${pathToIMGFolder + screenSize + "-" + typedPgToBuff[0].join("|") + ".png"}`,
+                      err
+                    );
+                  }
+                }
+              );
+            }
+          }
+        }
+      },
     },
   ],
 });

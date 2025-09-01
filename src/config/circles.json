@@ -1,0 +1,33 @@
+{
+  "stroke": "#515152",
+  "strokeWidth": 1,
+  "strokeOpacity": 0.7,
+  "fillOpacity": 0.7,
+  "fillByPartyGroup": [
+    [
+      [
+        "none"
+      ],
+      "#72bccf"
+    ],
+    [
+      [
+        "Democrat"
+      ],
+      "#0b03fc"
+    ],
+    [
+      [
+        "Independent",
+        "Other"
+      ],
+      "#c203fc"
+    ],
+    [
+      [
+        "Republican"
+      ],
+      "#fc0303"
+    ]
+  ]
+}
