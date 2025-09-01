@@ -52,12 +52,25 @@ export default defineConfig({
               (err: unknown) => {
                 if (err) {
                   console.error(
-                    "failed to write pAndC.json to coordinates folder",
+                    "failed to write pAndC.json to src-data folder",
                     err
                   );
                 }
               }
             );
+            //write the metadata to the same folder
+            fs.writeFile(
+              pathToPAndCFolder + "data-meta.json",
+              JSON.stringify(impVizData.dataMeta),
+              (err: unknown) => {
+                if (err) {
+                  console.error(
+                    "failed to write data-meta.json to src-data folder",
+                    err
+                  );
+                }
+              }
+            )
             //For each screen size, write ONE file that maps each impVar to the segments and points for that impVar at that screensize
             Object.entries(impVizData.viz).forEach(([screenSize, viz]) => {
               fs.writeFile(

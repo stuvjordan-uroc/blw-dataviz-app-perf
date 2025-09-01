@@ -10,6 +10,7 @@ import type {
   SegmentViewsUnMapped,
 } from "../../../../build-data/functions-and-types/types";
 import useCoordinates from "../../../hooks/useCoordinates";
+import ImpVarDisplay from "./ImpVarDisplay";
 
 export default function Imp({
   layout,
@@ -27,35 +28,15 @@ export default function Imp({
     return null;
   }
   return (
-    <>
+    <div className="imp-viz-root">
       <Controls
         waveState={{ state: isSplitByWave, setter: setIsSplitByWave }}
         partyState={{ state: isSplitByParty, setter: setIsSplitByParty }}
       />
-      {(
-        Object.entries(coordinates) as [
-          string,
-          {
-            questionText: string;
-            shortText: string;
-            segments: SegmentViewsUnMapped;
-            points: PointsMapUnMapped;
-          },
-        ][]
-      ).map(
-        (
-          [impVarName, impVarCoordinates]: [
-            string,
-            {
-              questionText: string;
-              shortText: string;
-              segments: SegmentViewsUnMapped;
-              points: PointsMapUnMapped;
-            },
-          ],
-          _impVarIdx: number,
-          _impVarEntries: [
-            string,
+      <div className="imp-viz-vizarray">
+        {(
+          Object.entries(coordinates) as [
+            string, //impVar name, such as "misconduct"
             {
               questionText: string;
               shortText: string;
@@ -63,10 +44,36 @@ export default function Imp({
               points: PointsMapUnMapped;
             },
           ][]
-        ) => (
-          <div key={impVarName}>{impVarCoordinates.questionText}</div>
-        )
-      )}
-    </>
+        ).map(
+          (
+            [impVarName, impVarCoordinates]: [
+              string,
+              {
+                questionText: string;
+                shortText: string;
+                segments: SegmentViewsUnMapped;
+                points: PointsMapUnMapped;
+              },
+            ],
+            _impVarIdx: number,
+            _impVarEntries: [
+              string,
+              {
+                questionText: string;
+                shortText: string;
+                segments: SegmentViewsUnMapped;
+                points: PointsMapUnMapped;
+              },
+            ][]
+          ) => (
+            <ImpVarDisplay
+              key={impVarName}
+              impVarCoordinates={impVarCoordinates}
+              layout={layout}
+            />
+          )
+        )}
+      </div>
+    </div>
   );
 }

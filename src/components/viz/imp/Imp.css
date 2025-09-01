@@ -4,3 +4,13 @@ fieldset,
 input {
   all: unset;
 }
+
+.imp-viz-root {
+  overflow: clip;
+  height: 100%;
+}
+
+.imp-viz-vizarray {
+  overflow: auto;
+  height: 100%;
+}

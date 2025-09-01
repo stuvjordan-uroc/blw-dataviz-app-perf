@@ -26,7 +26,11 @@ export function buildData(pathString: string, layouts: Layouts, vizConfig: VizCo
         impCol,
         vizAtImp(impCol, data, vizConfig, layout as Layout)
       ])))
-    ]))) as Viz
+    ]))) as Viz,
+    dataMeta: {
+      waves: data.waves.imp,
+      impResponses: [...data.impResponses]
+    }
   }
 }
 
@@ -34,5 +38,5 @@ export type VizByImpVar = Record<string, {
   segments: SegmentViewsUnMapped;
   points: PointsMapUnMapped;
 }>
-export type PointsMapUnMapped = PointsMapUnMapped;
-export type SegmentViewsUnMapped = SegmentViewsUnMapped;
+export type { PointsMapUnMapped };
+export type { SegmentViewsUnMapped };
