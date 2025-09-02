@@ -4,6 +4,9 @@ src/data/coordinates/
 # location for generated coordinate data files
 public/coordinates/
 
+# location for generated pngs for circles
+public/img/
+
 # Logs
 logs
 *.log

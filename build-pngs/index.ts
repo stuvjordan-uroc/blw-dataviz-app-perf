@@ -1,6 +1,5 @@
-import { Resvg } from "@resvg/resvg-js";
-import xmlserializer from "xmlserializer";
-import { parse } from "parse5";
+import Sharp from "sharp"
+import standaloneSVG from "./standalone-svg.ts";
 type ScreenSize = "small" | "medium" | "large" | "xLarge";
 interface Layout {
   screenWidthRange: number[];
@@ -20,52 +19,13 @@ export interface CircleConfig {
   fillByPartyGroup: [string[], string][];
 }
 
-function svgString(
-  pointRadius: number,
-  targetPartyGroup: string[],
-  circleConfig: CircleConfig
-): string | undefined {
-  const fillEntry = circleConfig.fillByPartyGroup.find(
-    ([partyGroup, _fill]: [string[], string]) =>
-      targetPartyGroup.every((tp) => partyGroup.includes(tp)) &&
-      partyGroup.every((pg) => targetPartyGroup.includes(pg))
-  );
-  if (fillEntry === undefined) {
-    return undefined;
-  }
-  const svgString = `<svg width="${(2 * pointRadius).toString()}" height="${(2 * pointRadius).toString()}">
-      <circle 
-        r="${pointRadius.toString()}"
-        cx="${pointRadius.toString()}"
-        cy="${pointRadius.toString()}"
-        stroke="${circleConfig.stroke}"
-        stroke-width="${circleConfig.strokeWidth.toString()}"
-        stroke-opacity="${circleConfig.strokeOpacity.toString()}"
-        fill="${fillEntry[1]}"
-        fill-opacity="${circleConfig.fillOpacity.toString()}"
-      />
-    </svg>`;
 
-  const svgStringAsDocument = parse(svgString);
-  const serialized = xmlserializer.serializeToString(svgStringAsDocument);
 
-  return serialized;
-}
-
-const svgOpts = {
-  font: {
-    loadSystemFonts: false,
-  },
-  imageRendering: 0 as 0 | 1,
-  fitTo: { mode: "original" } as { mode: "original" },
-  background: "transparent",
-};
-
-export default function buildPNGs(
+export default async function buildPNGs(
   layouts: Layouts,
   circleConfig: CircleConfig
 ) {
-  const svgs = Object.fromEntries(
+  const out = Object.fromEntries(
     (Object.entries(layouts) as [ScreenSize, Layout][]).map(
       ([screenSize, layout]: [ScreenSize, Layout]) => [
         screenSize,
@@ -73,27 +33,28 @@ export default function buildPNGs(
           ([partyGroup, _fill]: [string[], string]) => {
             return [
               partyGroup,
-              svgString(layout.pointRadius, partyGroup, circleConfig),
-            ];
+              {
+                svgBuff: standaloneSVG(layout.pointRadius, circleConfig, partyGroup),
+                pngBuff: null
+              },
+            ] as [string[], { svgBuff: Buffer<ArrayBuffer> | undefined, pngBuff: null | Buffer }];
           }
-        ) as [string[], string | undefined],
+        ),
       ]
     )
-  ); //now map this to an array of [ScreenSize, {noParty: pngbuffer, democrat: pngbuffer, etc.}]
-  const buffers = Object.fromEntries(
-    Object.entries(svgs).map(
-      ([screenSize, [partyGroup, svgString]]: [
-        string,
-        [string[], string | undefined],
-      ]) => {
-        const reSvg = svgString ? new Resvg(svgString, svgOpts) : undefined;
-        const pngBuffer = reSvg ? reSvg.render().asPng() : undefined;
-        return [screenSize, [partyGroup, pngBuffer]] as [
-          string,
-          [string[], Buffer | undefined],
-        ];
-      }
-    )
   );
-  return buffers;
+  for (const screenSize in out) {
+    const pgEntries = out[screenSize]
+    if (pgEntries !== undefined) {
+      for (const [_pg, buff] of pgEntries) {
+        if (buff.svgBuff !== undefined) {
+          const pngBuff = await Sharp(buff.svgBuff)
+            .png()
+            .toBuffer()
+          buff.pngBuff = pngBuff
+        }
+      }
+    }
+  }
+  return out;
 }

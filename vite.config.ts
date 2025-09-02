@@ -8,6 +8,9 @@ import buildPNGs from "./build-pngs";
 import * as z from "zod";
 import fs from "node:fs";
 import type { CircleConfig } from "./build-pngs";
+import type { Layouts } from "./build-data/functions-and-types/types";
+
+
 
 const impDataPath = "./rawdata/dem_characteristics_importance.gz";
 const pathToPAndCFolder = "./src/data/";
@@ -100,40 +103,27 @@ export default defineConfig({
     },
     {
       name: "make-circles",
-      buildStart() {
-        const pngBuffers = buildPNGs(layouts.imp, circleConfig as CircleConfig);
+      async buildStart() {
+        const impLayouts = layouts.imp as Layouts
+        const pngBuffers = await buildPNGs(impLayouts, circleConfig as CircleConfig)
+        //write pngs
         for (const screenSize in pngBuffers) {
-          for (const pgToBuff of pngBuffers[screenSize] as [
-            string[],
-            Buffer<ArrayBufferLike> | undefined,
-          ]) {
-            const typedPgToBuff = pgToBuff as unknown as [
-              string[],
-              Buffer<ArrayBufferLike> | undefined,
-            ];
-            if (typedPgToBuff[1] === undefined) {
-              console.log(
-                "failed to generate buffer for",
-                screenSize,
-                typedPgToBuff[0]
-              );
-            } else {
+          for (const [pg, buffs] of pngBuffers[screenSize]) {
+            if (buffs.pngBuff) {
               fs.writeFile(
-                pathToIMGFolder +
-                  screenSize +
-                  "-" +
-                  typedPgToBuff[0].join("|") +
-                  ".png",
-                typedPgToBuff[1],
+                pathToIMGFolder + screenSize + '-' + pg.join("-") + ".png",
+                buffs.pngBuff,
                 (err: unknown) => {
                   if (err) {
                     console.error(
-                      `failed to write ${pathToIMGFolder + screenSize + "-" + typedPgToBuff[0].join("|") + ".png"}`,
+                      `failed to write png for circle at ${screenSize}, ${pg.join("-")}`,
                       err
                     );
                   }
                 }
-              );
+              )
+            } else {
+              console.log(`WARNING: Failed to generate png buffer at ${screenSize}, ${pg.join("-")}`)
             }
           }
         }
