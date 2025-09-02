@@ -1,5 +1,6 @@
 import "./ImpVarDisplay.css";
 import dataMeta from "../../../data/data-meta.json";
+import vizConfig from "../../../config/viz-config.json";
 import type {
   SegmentViewsUnMapped,
   PointsMapUnMapped,
@@ -9,6 +10,7 @@ import type {
   BreakpointConfig,
 } from "../../../config/layouts-types";
 import { useEffect, type RefObject } from "react";
+import { setPointsToByResponse } from "../../../view-setters/set-points-to";
 export default function ImpVarDisplay({
   layout,
   impVarName,
@@ -27,46 +29,39 @@ export default function ImpVarDisplay({
   };
   vizRefCallBack: (node: HTMLCanvasElement) => () => void;
 }) {
-  //function to draw the circles on the canvas
-  //this will be called when the circle png for the relevant rg, wave, and pg has loaded
-  function drawByResponseFactory(
-    ctx: CanvasRenderingContext2D,
-    nonPartyCircleImage: HTMLImageElement
-  ) {
-    return () => {
-      ctx.drawImage(
-        nonPartyCircleImage,
-        Math.random() * layout.vizWidth,
-        layout.labelHeight + Math.random() * layout.waveHeight
-      );
-    };
-  }
-  //effect to draw byResponse view on initial render
+  //effect to run on render
   useEffect(() => {
-    const circleNonPartyImg = new Image();
+    //set up the images we need to draw points on the canvas
+    const imageByPartyGroup = Object.fromEntries(
+      ["none", ...vizConfig.partyGroups.map((pg) => pg.join("-"))].map(
+        (partyGroupString) => [partyGroupString, new Image()]
+      )
+    );
+    //get the canvas
     if (vizRefs.current?.has(impVarName)) {
       const canvas = vizRefs.current.get(impVarName);
       if (canvas) {
-        const ctx = canvas.getContext("2d");
-        if (ctx) {
-          //load the image for the non-party circle
-          //(non-party because we only draw the byResponse view on first render)
-          //set a listener on the "load" event for that circle
-          //fire "drawByResponse" when that event fires
-          circleNonPartyImg.addEventListener(
-            "load",
-            drawByResponseFactory(ctx, circleNonPartyImg)
+        //add an event listener on imageByPartyGroup.none that calls
+        // setPointsToByResponse on load
+        imageByPartyGroup.none.addEventListener("load", () => {
+          setPointsToByResponse(
+            canvas,
+            impVarCoordinates.points,
+            "expanded",
+            imageByPartyGroup.none
           );
-          circleNonPartyImg.src = `/img/${layout.breakPointKey}-none.png`;
-        }
+        });
+        //set the path for none image so that the load event will fire
+        imageByPartyGroup.none.src = `/img/${layout.breakPointKey}-none.png`;
       }
     }
   });
   return (
-    <div>
+    <div className="impvar-display-root">
       <div>{impVarCoordinates.questionText}</div>
-      <div>
+      <div className="impvar-canvas-container">
         <canvas
+          className="impvar-canvas"
           width={layout.vizWidth}
           height={
             layout.labelHeight +

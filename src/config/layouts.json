@@ -8,7 +8,7 @@
       "vizWidth": 360,
       "waveHeight": 90,
       "pointRadius": 3,
-      "responseGap": 4.5,
+      "responseGap": 12,
       "partyGap": 6.75,
       "labelHeight": 30
     },
@@ -19,8 +19,8 @@
       ],
       "vizWidth": 760,
       "waveHeight": 90,
-      "pointRadius": 3,
-      "responseGap": 4.5,
+      "pointRadius": 4,
+      "responseGap": 12,
       "partyGap": 6.75,
       "labelHeight": 30
     },
@@ -31,8 +31,8 @@
       ],
       "vizWidth": 1000,
       "waveHeight": 90,
-      "pointRadius": 3,
-      "responseGap": 4.5,
+      "pointRadius": 6,
+      "responseGap": 18,
       "partyGap": 6.75,
       "labelHeight": 30
     },
@@ -44,7 +44,7 @@
       "vizWidth": 1250,
       "waveHeight": 90,
       "pointRadius": 3,
-      "responseGap": 4.5,
+      "responseGap": 12,
       "partyGap": 6.75,
       "labelHeight": 30
     }

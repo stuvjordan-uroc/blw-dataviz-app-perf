@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import questions from "../data/questions.json"
 import type { VizByImpVar, SegmentViewsUnMapped, PointsMapUnMapped } from "../../build-data";
 import type { BreakpointKey, BreakpointConfig } from "../config/layouts-types";
-type Coordinates = Record<
+export type Coordinates = Record<
   string,
   {
     questionText: string;
@@ -12,7 +12,7 @@ type Coordinates = Record<
   }
 >;
 
-export default function useCoordinates(layout: ({ breakPointKey: BreakpointKey } & BreakpointConfig) | undefined) {
+export function useCoordinates(layout: ({ breakPointKey: BreakpointKey } & BreakpointConfig) | undefined) {
   //set up the state that holds the coordinate data
   const [coordinates, setCoordinates] = useState<null | Coordinates>(null);
   useEffect(() => {
