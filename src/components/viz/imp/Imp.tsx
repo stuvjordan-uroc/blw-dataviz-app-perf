@@ -58,7 +58,7 @@ export default function Imp({
         waveState={{ state: isSplitByWave, setter: setIsSplitByWave }}
         partyState={{ state: isSplitByParty, setter: setIsSplitByParty }}
       />
-      <div className="imp-viz-vizarray" ref={vizArrayRef}>
+      <div className="imp-viz-vizarray">
         {(
           Object.entries(coordinates) as [
             string, //impVar name, such as "misconduct"
@@ -93,6 +93,8 @@ export default function Imp({
           ) => (
             <ImpVarDisplay
               key={impVarName}
+              impVarName={impVarName}
+              vizRefs={vizRefs}
               impVarCoordinates={impVarCoordinates}
               layout={layout}
               vizRefCallBack={vizRefCallBackFactory(impVarName)}

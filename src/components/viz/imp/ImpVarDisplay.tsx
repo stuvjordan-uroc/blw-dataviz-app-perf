@@ -8,12 +8,18 @@ import type {
   BreakpointKey,
   BreakpointConfig,
 } from "../../../config/layouts-types";
+import { useEffect, type RefObject } from "react";
+import { isContext } from "vm";
 export default function ImpVarDisplay({
   layout,
+  impVarName,
+  vizRefs,
   impVarCoordinates,
   vizRefCallBack,
 }: {
   layout: { breakPointKey: BreakpointKey } & BreakpointConfig;
+  impVarName: string;
+  vizRefs: RefObject<null | Map<string, HTMLCanvasElement>>;
   impVarCoordinates: {
     questionText: string;
     shortText: string;
@@ -22,6 +28,19 @@ export default function ImpVarDisplay({
   };
   vizRefCallBack: (node: HTMLCanvasElement) => () => void;
 }) {
+  //effect to draw byResponse view on initial render
+  useEffect(() => {
+    if (vizRefs.current?.has(impVarName)) {
+      const canvas = vizRefs.current.get(impVarName);
+      if (canvas) {
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.fillStyle = "blue";
+          ctx.fillRect(0, 0, 0.25 * layout.vizWidth, 0.75 * layout.waveHeight);
+        }
+      }
+    }
+  });
   return (
     <div>
       <div>{impVarCoordinates.questionText}</div>
