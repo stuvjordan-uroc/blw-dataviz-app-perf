@@ -1,6 +1,6 @@
 import Controls from "./Controls";
 import "./Imp.css";
-import { useRef, useState, createRef } from "react";
+import { useRef, useState } from "react";
 import type {
   BreakpointKey,
   BreakpointConfig,
@@ -11,8 +11,6 @@ import type {
 } from "../../../../build-data/functions-and-types/types";
 import useCoordinates from "../../../hooks/useCoordinates";
 import ImpVarDisplay from "./ImpVarDisplay";
-import questions from "../../../data/questions.json";
-import { map } from "lodash";
 
 export default function Imp({
   layout,
