@@ -11,6 +11,7 @@ import type {
 export default function ImpVarDisplay({
   layout,
   impVarCoordinates,
+  vizRefCallBack,
 }: {
   layout: { breakPointKey: BreakpointKey } & BreakpointConfig;
   impVarCoordinates: {
@@ -19,6 +20,7 @@ export default function ImpVarDisplay({
     segments: SegmentViewsUnMapped;
     points: PointsMapUnMapped;
   };
+  vizRefCallBack: (node: HTMLCanvasElement) => () => void;
 }) {
   return (
     <div>
@@ -30,6 +32,7 @@ export default function ImpVarDisplay({
             layout.labelHeight +
             (layout.waveHeight + layout.labelHeight) * dataMeta.waves.length
           }
+          ref={vizRefCallBack}
         ></canvas>
       </div>
     </div>
