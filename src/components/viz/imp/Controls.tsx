@@ -8,8 +8,6 @@ export default function Controls({
 }: {
   viewChangeHandler: (newView: ViewState) => void;
 }) {
-  //set up state that determines whether buttons are clickable
-  //we want this set to true only once the canvases have rendered
   const [viewState, setViewState] = useState<ViewState>({
     splitByResponse: false,
     splitByWave: false,

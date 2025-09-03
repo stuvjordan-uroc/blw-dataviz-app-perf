@@ -1,18 +1,18 @@
 import Controls from "./Controls";
 import "./Imp.css";
-import { useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import type {
   BreakpointKey,
   BreakpointConfig,
 } from "../../../config/layouts-types";
-import type {
-  PointsMapUnMapped,
-  SegmentViewsUnMapped,
-} from "../../../../build-data/functions-and-types/types";
 import { useCoordinates } from "../../../hooks/useCoordinates";
-import ImpVarDisplay from "./ImpVarDisplay";
-import { byResponse, unsplit } from "../../../view-setters/set-points-to";
-
+import { ImpVarDisplay } from "./ImpVarDisplay";
+import {
+  byResponse,
+  byResponseAndParty,
+  byResponseAndWave,
+  unsplit,
+} from "../../../view-setters/set-points-to";
 export const viewKeys = [
   "splitByResponse",
   "splitByWave",
@@ -24,6 +24,7 @@ export type ObjectFromTuple<T extends readonly string[], K> = Record<
   K
 >;
 export type ViewState = ObjectFromTuple<ViewKeys, boolean>;
+import circleConfig from "../../../config/circles.json";
 
 export function Imp({
   layout,
@@ -40,7 +41,7 @@ export function Imp({
   const vizRefs = useRef<null | Map<string, HTMLCanvasElement>>(null);
   //function to get the vizRefs map in whatever it's current state is.
   // (Used by canvas nodes to get the vizRefs map so they can put themselves into the map)
-  function getVizRefMap() {
+  const getVizRefMap = () => {
     //initialize the map if the viz nodes have not been rendered
     // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
     if (!vizRefs.current) {
@@ -48,18 +49,29 @@ export function Imp({
     }
     //now return the map
     return vizRefs.current;
-  }
+  };
+  //state that tracks when the refs are populated.  This will be used to control
+  //whether the controls on the viz are active
+  //const [_vizReadyMap, setVizReadyMap] = useState<Map<string, boolean>>(
+  //  new Map()
+  //);
   //factory that creates functions for canvas nodes to use as their ref callbacks
-  const vizRefCallBackFactory = (impVarName: string) => {
+  const vizRefCallBackFactory = useCallback((impVarName: string) => {
     return (node: HTMLCanvasElement) => {
       const vizRefMap = getVizRefMap();
       vizRefMap.set(impVarName, node);
+      //update vizReadyMap
+      //setVizReadyMap((prevVizReadyMap) => {
+      //  const newVizReadyMap = new Map(prevVizReadyMap.entries());
+      //  newVizReadyMap.set(impVarName, true);
+      //  return newVizReadyMap;
+      //});
       //cleanup when node is removed from dom
       return () => {
         vizRefMap.delete(impVarName);
       };
     };
-  };
+  }, []);
   //set up an effect that fetches the coordinate data (and refetch when the layout changes)
   //note this effect depends on the layout, and layout is a state variable.
   //So this whole component and its children will re-render when the layout changes
@@ -67,22 +79,22 @@ export function Imp({
   const coordinates = useCoordinates(layout);
   //handler to alter views when user clicks on one of the buttons in the
   //controls component (child of this component)
-  function drawPlaceholder(newView: ViewState, canvas: HTMLCanvasElement) {
-    const ctx = canvas.getContext("2d");
-    if (ctx) {
-      //clear the existing points
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      //placeholder draw
-      ctx.font = "20px serif";
-      ctx.fillText(
-        `splitByResponse: ${newView.splitByResponse.toString()}`,
-        10,
-        24
-      );
-      ctx.fillText(`splitByWave: ${newView.splitByWave.toString()}`, 10, 48);
-      ctx.fillText(`splitByParty: ${newView.splitByParty.toString()}`, 10, 72);
-    }
-  }
+  // function drawPlaceholder(newView: ViewState, canvas: HTMLCanvasElement) {
+  //   const ctx = canvas.getContext("2d");
+  //   if (ctx) {
+  //     //clear the existing points
+  //     ctx.clearRect(0, 0, canvas.width, canvas.height);
+  //     //placeholder draw
+  //     ctx.font = "20px serif";
+  //     ctx.fillText(
+  //       `splitByResponse: ${newView.splitByResponse.toString()}`,
+  //       10,
+  //       24
+  //     );
+  //     ctx.fillText(`splitByWave: ${newView.splitByWave.toString()}`, 10, 48);
+  //     ctx.fillText(`splitByParty: ${newView.splitByParty.toString()}`, 10, 72);
+  //   }
+  // }
   function handleViewChange(newView: ViewState) {
     console.log("someone called the handler to redraw the views!");
     if (vizRefs.current && coordinates && layout) {
@@ -90,10 +102,7 @@ export function Imp({
         "the vizrefs, coordinates, and layout are all defined, so we can reset the views"
       );
       switch (newView.splitByResponse) {
-        case false: //UNSPLIT
-          console.log(
-            `new view has splitByResponse ${newView.splitByResponse.toString()}, so the unsplit view is requested`
-          );
+        case false: //UNSPLIT  ###DONE###
           vizRefs.current.forEach((canvas, impVarName) => {
             //create no-party image
             const noPartyImage = new Image();
@@ -103,66 +112,127 @@ export function Imp({
             });
             //assign a source to the image so that it loads
             noPartyImage.src = `/img/${layout.breakPointKey}-none.png`;
-            console.log("tried to load image:", noPartyImage.src);
           });
           break;
-        default:
+        default: //ONE OF THE SPLITBYRESPONSEVIEWS
+          switch (newView.splitByWave) {
+            case false: //EITHER SPLITBYRESPONSE OR SPLITBYRESPONSEANDPARTY
+              switch (newView.splitByParty) {
+                case false: //SPLITBYRESPONSE ###DONE###
+                  vizRefs.current.forEach((canvas, impVarName) => {
+                    //create no-party image
+                    const noPartyImage = new Image();
+                    //set an event handler to draw the view when the image loads
+                    noPartyImage.addEventListener("load", () => {
+                      byResponse(
+                        canvas,
+                        coordinates[impVarName].points,
+                        "expanded",
+                        noPartyImage
+                      );
+                    });
+                    //assign a source to the image so that it loads
+                    noPartyImage.src = `/img/${layout.breakPointKey}-none.png`;
+                  });
+                  break;
+                default: //SPLITBYRESPONSEANDPARTY
+                  vizRefs.current.forEach((canvas, impVarName) => {
+                    const partyStringToImage = (
+                      circleConfig.fillByPartyGroup as [string[], string][]
+                    )
+                      .map(([pg, _fill]) => pg.join("-"))
+                      .map(
+                        (partyString) =>
+                          [partyString, new Image()] as [
+                            string,
+                            HTMLImageElement,
+                          ]
+                      );
+                    let loadedCounter = 0;
+                    for (const [_partyString, image] of partyStringToImage) {
+                      image.addEventListener("load", () => {
+                        loadedCounter = loadedCounter + 1;
+                        if ((loadedCounter = partyStringToImage.length)) {
+                          byResponseAndParty(
+                            canvas,
+                            coordinates[impVarName].points,
+                            "expanded",
+                            new Map(
+                              partyStringToImage.map(([partyString, image]) => [
+                                partyString.split("-"),
+                                image,
+                              ])
+                            )
+                          );
+                        }
+                      });
+                    }
+                    //assign a source to each image so that it loads
+                    partyStringToImage.forEach(([partyString, image]) => {
+                      image.src = `/img/${layout.breakPointKey}-${partyString}.png`;
+                    });
+                  });
+                  break;
+              }
+              break;
+            default: //EITHER SPLITBYRESPONSEANDWAVE OR SPLITBYRESPONSEANDWAVEANDPARTY
+              switch (newView.splitByParty) {
+                case false: //SPLITBYRESPONSEANDWAVE ###DONE###
+                  vizRefs.current.forEach((canvas, impVarName) => {
+                    //create no-party image
+                    const noPartyImage = new Image();
+                    //set an event handler to draw the view when the image loads
+                    noPartyImage.addEventListener("load", () => {
+                      byResponseAndWave(
+                        canvas,
+                        coordinates[impVarName].points,
+                        "expanded",
+                        noPartyImage
+                      );
+                    });
+                    //assign a source to the image so that it loads
+                    noPartyImage.src = `/img/${layout.breakPointKey}-none.png`;
+                  });
+                  break;
+                default: //SPLITBYRESPONSEANDWAVEANDPARTY
+                  break;
+              }
+              break;
+          }
           break;
       }
     }
     //if vizRefs.current is null, there are no canvases to redraw!
   }
+  //create an array of question names, caching the result so it doesn't re-calculate on
+  //every re-render
+
+  const varToQuestions = useMemo(() => {
+    if (coordinates) {
+      return Object.entries(coordinates).map(([impVarName, c]) => [
+        impVarName,
+        c.questionText,
+      ]);
+    }
+    return null;
+  }, [coordinates]);
   //fallback if layout or coordinates are null
   //for instnace, coordinates will be null if/until the coordinates data successfully loads
-  if (!layout || !coordinates) {
+  if (!layout || !varToQuestions) {
     return null;
   }
   return (
     <div className="imp-viz-root">
       <Controls viewChangeHandler={handleViewChange} />
       <div className="imp-viz-vizarray">
-        {(
-          Object.entries(coordinates) as [
-            string, //impVar name, such as "misconduct"
-            {
-              questionText: string;
-              shortText: string;
-              segments: SegmentViewsUnMapped;
-              points: PointsMapUnMapped;
-            },
-          ][]
-        ).map(
-          (
-            [impVarName, impVarCoordinates]: [
-              string,
-              {
-                questionText: string;
-                shortText: string;
-                segments: SegmentViewsUnMapped;
-                points: PointsMapUnMapped;
-              },
-            ],
-            _impVarIdx: number,
-            _impVarEntries: [
-              string,
-              {
-                questionText: string;
-                shortText: string;
-                segments: SegmentViewsUnMapped;
-                points: PointsMapUnMapped;
-              },
-            ][]
-          ) => (
-            <ImpVarDisplay
-              key={impVarName}
-              impVarName={impVarName}
-              vizRefs={vizRefs}
-              impVarCoordinates={impVarCoordinates}
-              layout={layout}
-              vizRefCallBack={vizRefCallBackFactory(impVarName)}
-            />
-          )
-        )}
+        {varToQuestions.map(([impVarName, question]) => (
+          <ImpVarDisplay
+            key={impVarName}
+            impVarQuestionText={question}
+            layout={layout}
+            vizRefCallBack={vizRefCallBackFactory(impVarName)}
+          />
+        ))}
       </div>
     </div>
   );
