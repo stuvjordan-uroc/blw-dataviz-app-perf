@@ -25,6 +25,8 @@ export default function Imp({
   //the view.
   //technique copied from https://react.dev/learn/manipulating-the-dom-with-refs#how-to-manage-a-list-of-refs-using-a-ref-callback
   const vizRefs = useRef<null | Map<string, HTMLCanvasElement>>(null);
+  //function to get the vizRefs map in whatever it's current state is.
+  // (Used by canvas nodes to get the vizRefs map so they can put themselves into the map)
   function getVizRefMap() {
     //initialize the map if the viz nodes have not been rendered
     // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
@@ -34,31 +36,49 @@ export default function Imp({
     //now return the map
     return vizRefs.current;
   }
+  //factory that creates functions for canvas nodes to use as their ref callbacks
   const vizRefCallBackFactory = (impVarName: string) => {
     return (node: HTMLCanvasElement) => {
       const vizRefMap = getVizRefMap();
       vizRefMap.set(impVarName, node);
+      //cleanup when node is removed from dom
       return () => {
         vizRefMap.delete(impVarName);
       };
     };
   };
-  //view state ref
-  //This holds the current view state for the viz-es
-  //It is a ref, which means that changing it will not
-  //trigger a re-render of this component, nor
-  //will it trigger a re-render of the children
-  //to which it is passed as a prop.
-  //When the user clicks the controls in this component
-  //to switch views, a callback will mutate the .current
-  //property of this ref.
-  //This mutation will NOT trigger re-renders.
-  //But it WILL trigger execution of code that changes
-  //the position of points in each viz.
-  const viewRef = useRef<{ splitByWave: boolean; splitByParty: boolean }>({
-    splitByWave: false,
-    splitByParty: false,
-  });
+
+  //set up handlers to alter views when user clicks on one of the buttons in the
+  //controls component (child of this component)
+  function handleViewChange(newView: {
+    splitByWave: boolean;
+    splitByParty: boolean;
+  }) {
+    if (vizRefs.current) {
+      vizRefs.current.forEach((canvas) => {
+        //get the drawing context
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          //clear the existing points
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          //placeholder draw
+          ctx.font = "20px serif";
+          ctx.fillText(
+            `splitByWave: ${newView.splitByWave.toString()}`,
+            10,
+            24
+          );
+          ctx.fillText(
+            `splitByParty: ${newView.splitByParty.toString()}`,
+            10,
+            48
+          );
+        }
+      });
+    }
+    //if vizRefs.current is null, there are no canvases to redraw!
+  }
+
   //set up an effect that fetches the coordinate data (and refetch when the layout changes)
   //note this effect depends on the layout, and layout is a state variable.
   //So this whole component and its children will re-render when the layout changes
@@ -71,7 +91,7 @@ export default function Imp({
   }
   return (
     <div className="imp-viz-root">
-      <Controls viewRef={viewRef} />
+      <Controls viewChangeHandler={handleViewChange} />
       <div className="imp-viz-vizarray">
         {(
           Object.entries(coordinates) as [

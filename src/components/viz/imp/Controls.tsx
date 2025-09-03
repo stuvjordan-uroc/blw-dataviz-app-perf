@@ -2,24 +2,45 @@ import type React from "react";
 import "./Controls.css";
 import { useState } from "react";
 
+interface ViewState {
+  splitByWave: boolean;
+  splitByParty: boolean;
+}
+
 export default function Controls({
-  viewRef,
+  viewChangeHandler,
 }: {
-  viewRef: React.RefObject<{
-    splitByWave: boolean;
-    splitByParty: boolean;
-  }>;
+  viewChangeHandler: (newView: ViewState) => void;
 }) {
-  //set up a state that is set at initial render to the value of the viewRef Ref.
-  //We'll use this to keep the control buttons' appearnce synced with the user's choices.
-  const [viewState, setViewState] = useState<{
-    splitByWave: boolean;
-    splitByParty: boolean;
-  }>(viewRef.current);
-  //This means that when a user clicks on one of these, we need a callback to do two things:
-  //(1) mutate the viewRef in a way that triggers code that alters the positions of the points
-  //in the canvases
-  //(2) call setViewState to alter the appearance of the buttons
+  //set up state that determines whether buttons are clickable
+  //we want this set to true only once the canvases have rendered
+  const [viewState, setViewState] = useState<ViewState>({
+    splitByWave: false,
+    splitByParty: false,
+  });
+  function handleCheckedChange(
+    e: React.ChangeEvent<HTMLInputElement>,
+    whichInput: "splitByWave" | "splitByParty"
+  ) {
+    const newSplitVal = e.target.checked;
+    setViewState((prevState) => {
+      const newViewState = {
+        ...prevState,
+        [whichInput]: newSplitVal,
+      };
+      viewChangeHandler(newViewState);
+      return newViewState;
+    });
+  }
+  function handleCheckedChangeFactory(
+    whichInput: "splitByWave" | "splitByParty"
+  ) {
+    return (e: React.ChangeEvent<HTMLInputElement>) => {
+      handleCheckedChange(e, whichInput);
+    };
+  }
+  //set up an effect that depends on the viewRef.
+  //Since it depends on the viewRef, this effect will run
   return (
     <form>
       <label>
@@ -27,14 +48,7 @@ export default function Controls({
         <input
           type="checkbox"
           checked={viewState.splitByWave}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            //set the viewState so that the control's appearance updates
-            setViewState({
-              ...viewState,
-              splitByWave: e.target.checked,
-            });
-            //TODO trigger movement of points...
-          }}
+          onChange={handleCheckedChangeFactory("splitByWave")}
         />
       </label>
       <label>
@@ -42,14 +56,7 @@ export default function Controls({
         <input
           type="checkbox"
           checked={viewState.splitByParty}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            //set the viewState so that the control's appearance updates
-            setViewState({
-              ...viewState,
-              splitByParty: e.target.checked,
-            });
-            //TODO trigger movement of points...
-          }}
+          onChange={handleCheckedChangeFactory("splitByParty")}
         />
       </label>
     </form>
