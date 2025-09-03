@@ -23,9 +23,13 @@ export function unSplit(pAndC: PAndC, layout: Layout, numWaves: number) {
       partySplit: Map<string[], PropCount>
     }
   ) => rgVal.c).reduce((acc: number, curr: number) => acc + curr, 0)
+  const topLeftY = (
+    layout.labelHeight + numWaves * (layout.waveHeight + layout.labelHeight) // height of canvas
+    - layout.waveHeight * numWaves //height of segment
+  ) / 2 //divide by 2 so half of free space is on the top and half is on the bottom
   const segmentCoordinates = {
     topLeftX: 0,
-    topLeftY: layout.labelHeight,
+    topLeftY: topLeftY,
     width: layout.vizWidth,
     height: layout.waveHeight * numWaves
   }
@@ -68,8 +72,12 @@ export function byResponse(pAndC: PAndC, layout: Layout, numWaves: number) {
           2 * layout.pointRadius + prevRgVal.p * widthToDistribute + layout.responseGap
         ) //width of each segment for each of the previous response values
         .reduce((acc: number, curr: number) => acc + curr, 0) //sum those widths
+      const topLeftY = (
+        layout.labelHeight + numWaves * (layout.waveHeight + layout.labelHeight) // height of canvas
+        - layout.waveHeight * numWaves //height of segment
+      ) / 2 //divide by 2 so half of free space is on the top and half is on the bottom
       const segmentCoordinates = {
-        topLeftY: layout.labelHeight,
+        topLeftY: topLeftY,
         topLeftX: topLeftX,
         width: 2 * layout.pointRadius + rgVal.p * widthToDistribute,
         height: layout.waveHeight * numWaves
@@ -113,7 +121,10 @@ export function byResponseAndParty(pAndC: PAndC, layout: Layout, numWaves: numbe
             PropCount
           ], pgIdx: number) => {
             const count = pgVal.c;
-            const topLeftY = layout.labelHeight;
+            const topLeftY = (
+              layout.labelHeight + numWaves * (layout.waveHeight + layout.labelHeight) // height of canvas
+              - layout.waveHeight * numWaves //height of segment
+            ) / 2 //divide by 2 so half of free space is on the top and half is on the bottom
             const partyGroupTopLeftX = (partyGroupTotalWidth + layout.partyGap) * pgIdx
             const responseGroupTopLeftX = partyGroupTopLeftX + (
               rgIdx === 0 ? 0 :
