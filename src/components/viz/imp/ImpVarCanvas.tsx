@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import type { RefObject } from "react";
 import "./impVarCanvas.css";
-import { setPointsToByResponse } from "../../../view-setters/set-points-to";
+import { unsplit } from "../../../view-setters/set-points-to";
 import type { PointsMapUnMapped } from "../../../../build-data";
 export default function ImpVarCanvas({
   width,
@@ -20,7 +20,7 @@ export default function ImpVarCanvas({
   points: PointsMapUnMapped;
   breakPointKey: string;
 }) {
-  //effect to run on render -- draws initial byResponse view
+  //effect to run on render -- draws initial unsplit view
   useEffect(() => {
     //set up the image object that will render the points
     const noPartyCircleImg = new Image();
@@ -30,7 +30,7 @@ export default function ImpVarCanvas({
       if (canvas) {
         //add event listener to noPartyCircleImg that uses the image to draw the byResponse view when the image loads
         noPartyCircleImg.addEventListener("load", () => {
-          setPointsToByResponse(canvas, points, "expanded", noPartyCircleImg);
+          unsplit(canvas, points, noPartyCircleImg);
         });
         //set the path for the image so that it will load
         noPartyCircleImg.src = `/img/${breakPointKey}-none.png`;

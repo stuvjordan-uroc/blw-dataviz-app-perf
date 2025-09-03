@@ -11,8 +11,21 @@ import type {
 } from "../../../../build-data/functions-and-types/types";
 import { useCoordinates } from "../../../hooks/useCoordinates";
 import ImpVarDisplay from "./ImpVarDisplay";
+import { byResponse, unsplit } from "../../../view-setters/set-points-to";
 
-export default function Imp({
+export const viewKeys = [
+  "splitByResponse",
+  "splitByWave",
+  "splitByParty",
+] as const;
+export type ViewKeys = typeof viewKeys;
+export type ObjectFromTuple<T extends readonly string[], K> = Record<
+  T[number],
+  K
+>;
+export type ViewState = ObjectFromTuple<ViewKeys, boolean>;
+
+export function Imp({
   layout,
 }: {
   layout: ({ breakPointKey: BreakpointKey } & BreakpointConfig) | undefined;
@@ -47,43 +60,58 @@ export default function Imp({
       };
     };
   };
-
-  //set up handlers to alter views when user clicks on one of the buttons in the
-  //controls component (child of this component)
-  function handleViewChange(newView: {
-    splitByWave: boolean;
-    splitByParty: boolean;
-  }) {
-    if (vizRefs.current) {
-      vizRefs.current.forEach((canvas) => {
-        //get the drawing context
-        const ctx = canvas.getContext("2d");
-        if (ctx) {
-          //clear the existing points
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          //placeholder draw
-          ctx.font = "20px serif";
-          ctx.fillText(
-            `splitByWave: ${newView.splitByWave.toString()}`,
-            10,
-            24
-          );
-          ctx.fillText(
-            `splitByParty: ${newView.splitByParty.toString()}`,
-            10,
-            48
-          );
-        }
-      });
-    }
-    //if vizRefs.current is null, there are no canvases to redraw!
-  }
-
   //set up an effect that fetches the coordinate data (and refetch when the layout changes)
   //note this effect depends on the layout, and layout is a state variable.
   //So this whole component and its children will re-render when the layout changes
   //(e.g. in response to a large change in screen width)
   const coordinates = useCoordinates(layout);
+  //handler to alter views when user clicks on one of the buttons in the
+  //controls component (child of this component)
+  function drawPlaceholder(newView: ViewState, canvas: HTMLCanvasElement) {
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      //clear the existing points
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      //placeholder draw
+      ctx.font = "20px serif";
+      ctx.fillText(
+        `splitByResponse: ${newView.splitByResponse.toString()}`,
+        10,
+        24
+      );
+      ctx.fillText(`splitByWave: ${newView.splitByWave.toString()}`, 10, 48);
+      ctx.fillText(`splitByParty: ${newView.splitByParty.toString()}`, 10, 72);
+    }
+  }
+  function handleViewChange(newView: ViewState) {
+    console.log("someone called the handler to redraw the views!");
+    if (vizRefs.current && coordinates && layout) {
+      console.log(
+        "the vizrefs, coordinates, and layout are all defined, so we can reset the views"
+      );
+      switch (newView.splitByResponse) {
+        case false: //UNSPLIT
+          console.log(
+            `new view has splitByResponse ${newView.splitByResponse.toString()}, so the unsplit view is requested`
+          );
+          vizRefs.current.forEach((canvas, impVarName) => {
+            //create no-party image
+            const noPartyImage = new Image();
+            //set an event handler to draw the view when the image loads
+            noPartyImage.addEventListener("load", () => {
+              unsplit(canvas, coordinates[impVarName].points, noPartyImage);
+            });
+            //assign a source to the image so that it loads
+            noPartyImage.src = `/img/${layout.breakPointKey}-none.png`;
+            console.log("tried to load image:", noPartyImage.src);
+          });
+          break;
+        default:
+          break;
+      }
+    }
+    //if vizRefs.current is null, there are no canvases to redraw!
+  }
   //fallback if layout or coordinates are null
   //for instnace, coordinates will be null if/until the coordinates data successfully loads
   if (!layout || !coordinates) {
