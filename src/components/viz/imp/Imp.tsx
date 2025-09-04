@@ -73,11 +73,12 @@ export function Imp({
       };
     };
   }, []);
-  //set up state that tracks whether vizRefs are populated and thus canvases ready to receive
+  //set up state that tracks whether the canvases are rendered and thus ready to receive
   //input from controls.
+  //rendering of controls will be conditional on this state being true.
   const [canvasesReady, setCanvasesReady] = useState(false);
-  //Any useEffect defined here will be called only after the canvases have been rendered
-  //so set canvasReady to true in a useEffect here
+  //Any useEffect defined here will be called only after the canvases have been rendered.
+  //So set canvasReady to true in a useEffect here.
   useEffect(() => {
     setCanvasesReady(true);
   }, []);
