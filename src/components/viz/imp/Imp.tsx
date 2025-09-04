@@ -33,11 +33,9 @@ export function Imp({
   layout: ({ breakPointKey: BreakpointKey } & BreakpointConfig) | undefined;
 }) {
   //create a ref that will (once the viz-es are rendered) hold
-  //a map that takes the node representing each viz to a ref
-  //to that node.
-  //We'll use these refs to update the positions of the points in
-  //each viz's canvas when the user clicks the buttons that change
-  //the view.
+  //a map that takes the each impVar to the canvas node
+  //in which the viz for that impVar is rendered
+  //We'll use these refs to draw on the canvases
   //technique copied from https://react.dev/learn/manipulating-the-dom-with-refs#how-to-manage-a-list-of-refs-using-a-ref-callback
   const vizRefs = useRef<null | Map<string, HTMLCanvasElement>>(null);
   //function to get the vizRefs map in whatever it's current state is.
@@ -51,11 +49,6 @@ export function Imp({
     //now return the map
     return vizRefs.current;
   };
-  //state that tracks when the refs are populated.  This will be used to control
-  //whether the controls on the viz are active
-  //const [_vizReadyMap, setVizReadyMap] = useState<Map<string, boolean>>(
-  //  new Map()
-  //);
   //factory that creates functions for canvas nodes to use as their ref callbacks
   const vizRefCallBackFactory = useCallback((impVarName: string) => {
     return (node: HTMLCanvasElement) => {
