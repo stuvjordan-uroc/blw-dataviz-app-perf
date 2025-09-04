@@ -11,6 +11,10 @@ import {
   byResponse,
   byResponseAndParty,
   byResponseAndWave,
+  setAllByResponse,
+  setAllByResponseAndParty,
+  setAllByResponseAndWave,
+  setAllunsplit,
   unsplit,
 } from "../../../view-setters/set-points-to";
 export const viewKeys = [
@@ -25,6 +29,7 @@ export type ObjectFromTuple<T extends readonly string[], K> = Record<
 >;
 export type ViewState = ObjectFromTuple<ViewKeys, boolean>;
 import circleConfig from "../../../config/circles.json";
+import type { PointsMapUnMapped } from "../../../../build-data";
 
 export function Imp({
   layout,
@@ -103,96 +108,54 @@ export function Imp({
       );
       switch (newView.splitByResponse) {
         case false: //UNSPLIT  ###DONE###
-          vizRefs.current.forEach((canvas, impVarName) => {
-            //create no-party image
-            const noPartyImage = new Image();
-            //set an event handler to draw the view when the image loads
-            noPartyImage.addEventListener("load", () => {
-              unsplit(canvas, coordinates[impVarName].points, noPartyImage);
-            });
-            //assign a source to the image so that it loads
-            noPartyImage.src = `/img/${layout.breakPointKey}-none.png`;
-          });
+          setAllunsplit(
+            vizRefs.current,
+            coordinates,
+            `/img/${layout.breakPointKey}-none.png`
+          );
           break;
         default: //ONE OF THE SPLITBYRESPONSEVIEWS
           switch (newView.splitByWave) {
             case false: //EITHER SPLITBYRESPONSE OR SPLITBYRESPONSEANDPARTY
               switch (newView.splitByParty) {
                 case false: //SPLITBYRESPONSE ###DONE###
-                  vizRefs.current.forEach((canvas, impVarName) => {
-                    //create no-party image
-                    const noPartyImage = new Image();
-                    //set an event handler to draw the view when the image loads
-                    noPartyImage.addEventListener("load", () => {
-                      byResponse(
-                        canvas,
-                        coordinates[impVarName].points,
-                        "expanded",
-                        noPartyImage
-                      );
-                    });
-                    //assign a source to the image so that it loads
-                    noPartyImage.src = `/img/${layout.breakPointKey}-none.png`;
-                  });
+                  setAllByResponse(
+                    vizRefs.current,
+                    coordinates,
+                    `/img/${layout.breakPointKey}-none.png`
+                  );
                   break;
-                default: //SPLITBYRESPONSEANDPARTY
-                  vizRefs.current.forEach((canvas, impVarName) => {
-                    const partyStringToImage = (
-                      circleConfig.fillByPartyGroup as [string[], string][]
-                    )
-                      .map(([pg, _fill]) => pg.join("-"))
+                default: //SPLITBYRESPONSEANDPARTY ####NOT WORKING####
+                  const pgToImagePath = new Map(
+                    (circleConfig.fillByPartyGroup as [string[], string][])
                       .map(
-                        (partyString) =>
-                          [partyString, new Image()] as [
-                            string,
-                            HTMLImageElement,
-                          ]
-                      );
-                    let loadedCounter = 0;
-                    for (const [_partyString, image] of partyStringToImage) {
-                      image.addEventListener("load", () => {
-                        loadedCounter = loadedCounter + 1;
-                        if ((loadedCounter = partyStringToImage.length)) {
-                          byResponseAndParty(
-                            canvas,
-                            coordinates[impVarName].points,
-                            "expanded",
-                            new Map(
-                              partyStringToImage.map(([partyString, image]) => [
-                                partyString.split("-"),
-                                image,
-                              ])
-                            )
-                          );
-                        }
-                      });
-                    }
-                    //assign a source to each image so that it loads
-                    partyStringToImage.forEach(([partyString, image]) => {
-                      image.src = `/img/${layout.breakPointKey}-${partyString}.png`;
-                    });
-                  });
+                        ([pg, _fill]) =>
+                          [pg, pg.join("-")] as [string[], string]
+                      )
+                      .map(
+                        ([pg, joinedPg]) =>
+                          [
+                            pg,
+                            `/img/${layout.breakPointKey}-${joinedPg}.pg`,
+                          ] as [string[], string]
+                      )
+                  );
+                  setAllByResponseAndParty(
+                    vizRefs.current,
+                    coordinates,
+                    pgToImagePath
+                  );
                   break;
               }
               break;
             default: //EITHER SPLITBYRESPONSEANDWAVE OR SPLITBYRESPONSEANDWAVEANDPARTY
               switch (newView.splitByParty) {
                 case false: //SPLITBYRESPONSEANDWAVE ###DONE###
-                  vizRefs.current.forEach((canvas, impVarName) => {
-                    //create no-party image
-                    const noPartyImage = new Image();
-                    //set an event handler to draw the view when the image loads
-                    noPartyImage.addEventListener("load", () => {
-                      byResponseAndWave(
-                        canvas,
-                        coordinates[impVarName].points,
-                        "expanded",
-                        noPartyImage
-                      );
-                    });
-                    //assign a source to the image so that it loads
-                    noPartyImage.src = `/img/${layout.breakPointKey}-none.png`;
-                  });
+                  setAllByResponseAndWave(
+                    vizRefs.current,
+                    coordinates,
+                    `/img/${layout.breakPointKey}-none.png`
+                  );
                   break;
                 default: //SPLITBYRESPONSEANDWAVEANDPARTY
                   break;
