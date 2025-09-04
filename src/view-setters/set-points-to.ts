@@ -45,17 +45,11 @@ export function unsplit(
 export function setAllunsplit(
   canvasMap: Map<string, HTMLCanvasElement>,
   coordinates: Coordinates,
-  imagePath: string
+  image: HTMLImageElement
 ) {
-  const image = new Image();
-  image.addEventListener("load", () => {
-    canvasToPoints(canvasMap, coordinates).forEach(
-      ([canvasNode, pointsMap]) => {
-        unsplit(canvasNode, pointsMap, image);
-      }
-    );
+  canvasToPoints(canvasMap, coordinates).forEach(([canvasNode, pointsMap]) => {
+    unsplit(canvasNode, pointsMap, image);
   });
-  image.src = imagePath;
 }
 
 export function byResponse(
@@ -86,17 +80,11 @@ export function byResponse(
 export function setAllByResponse(
   canvasMap: Map<string, HTMLCanvasElement>,
   coordinates: Coordinates,
-  imagePath: string
+  image: HTMLImageElement
 ) {
-  const image = new Image();
-  image.addEventListener("load", () => {
-    canvasToPoints(canvasMap, coordinates).forEach(
-      ([canvasNode, pointsMap]) => {
-        byResponse(canvasNode, pointsMap, "expanded", image);
-      }
-    );
+  canvasToPoints(canvasMap, coordinates).forEach(([canvasNode, pointsMap]) => {
+    byResponse(canvasNode, pointsMap, "expanded", image);
   });
-  image.src = imagePath;
 }
 
 export function byResponseAndWave(
@@ -127,17 +115,11 @@ export function byResponseAndWave(
 export function setAllByResponseAndWave(
   canvasMap: Map<string, HTMLCanvasElement>,
   coordinates: Coordinates,
-  imagePath: string
+  image: HTMLImageElement
 ) {
-  const image = new Image();
-  image.addEventListener("load", () => {
-    canvasToPoints(canvasMap, coordinates).forEach(
-      ([canvasNode, pointsMap]) => {
-        byResponseAndWave(canvasNode, pointsMap, "expanded", image);
-      }
-    );
+  canvasToPoints(canvasMap, coordinates).forEach(([canvasNode, pointsMap]) => {
+    byResponseAndWave(canvasNode, pointsMap, "expanded", image);
   });
-  image.src = imagePath;
 }
 
 export function byResponseAndParty(
@@ -190,45 +172,10 @@ export function byResponseAndParty(
 export function setAllByResponseAndParty(
   canvasMap: Map<string, HTMLCanvasElement>,
   coordinates: Coordinates,
-  partyGroupToImagePath: Map<string[], string>
+  partyGroupToImage: Map<string[], HTMLImageElement>
 ) {
-  const partyGroupToImage = new Map(
-    partyGroupToImagePath.entries().map(
-      ([partyGroup, imagePath]) =>
-        [
-          partyGroup,
-          {
-            image: new Image(),
-            imagePath: imagePath,
-          },
-        ] as [string[], { image: HTMLImageElement; imagePath: string }]
-    )
-  );
-  let imagesLoaded = 0;
-  partyGroupToImage.forEach((image) => {
-    image.image.addEventListener("load", () => {
-      imagesLoaded = imagesLoaded + 1;
-      if (imagesLoaded === partyGroupToImage.size) {
-        //draw the image on each canvas here
-        canvasToPoints(canvasMap, coordinates).forEach(
-          ([canvas, pointsMap]) => {
-            byResponseAndParty(
-              canvas,
-              pointsMap,
-              "expanded",
-              new Map(
-                partyGroupToImage
-                  .entries()
-                  .map(([partyGroup, image]) => [partyGroup, image.image])
-              )
-            );
-          }
-        );
-      }
-    });
-  });
-  partyGroupToImage.forEach((image) => {
-    image.image.src = image.imagePath;
+  canvasToPoints(canvasMap, coordinates).forEach(([canvas, pointsMap]) => {
+    byResponseAndParty(canvas, pointsMap, "expanded", partyGroupToImage);
   });
 }
 
@@ -282,44 +229,9 @@ export function byResponseAndWaveAndParty(
 export function setAllByResponseAndWaveAndParty(
   canvasMap: Map<string, HTMLCanvasElement>,
   coordinates: Coordinates,
-  partyGroupToImagePath: Map<string[], string>
+  partyGroupToImage: Map<string[], HTMLImageElement>
 ) {
-  const partyGroupToImage = new Map(
-    partyGroupToImagePath.entries().map(
-      ([partyGroup, imagePath]) =>
-        [
-          partyGroup,
-          {
-            image: new Image(),
-            imagePath: imagePath,
-          },
-        ] as [string[], { image: HTMLImageElement; imagePath: string }]
-    )
-  );
-  let imagesLoaded = 0;
-  partyGroupToImage.forEach((image) => {
-    image.image.addEventListener("load", () => {
-      imagesLoaded = imagesLoaded + 1;
-      if (imagesLoaded === partyGroupToImage.size) {
-        //draw the image on each canvas here
-        canvasToPoints(canvasMap, coordinates).forEach(
-          ([canvas, pointsMap]) => {
-            byResponseAndWaveAndParty(
-              canvas,
-              pointsMap,
-              "expanded",
-              new Map(
-                partyGroupToImage
-                  .entries()
-                  .map(([partyGroup, image]) => [partyGroup, image.image])
-              )
-            );
-          }
-        );
-      }
-    });
-  });
-  partyGroupToImage.forEach((image) => {
-    image.image.src = image.imagePath;
+  canvasToPoints(canvasMap, coordinates).forEach(([canvas, pointsMap]) => {
+    byResponseAndWaveAndParty(canvas, pointsMap, "expanded", partyGroupToImage);
   });
 }

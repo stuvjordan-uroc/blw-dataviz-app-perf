@@ -77,59 +77,94 @@ export function Imp({
   //input from controls.
   //rendering of controls will be conditional on this state being true.
   const [canvasesReady, setCanvasesReady] = useState(false);
-  //Any useEffect defined here will be called only after the canvases have been rendered.
-  //So set canvasReady to true in a useEffect here.
-  useEffect(() => {
-    setCanvasesReady(true);
+  //set up the images used in the viz
+  const pathToNoPartyImage = `/img/${layout.breakPointKey}-none.png`;
+  const noPartyImage = useMemo(() => {
+    return new Image();
   }, []);
+  const pgToImage = useMemo(
+    () =>
+      new Map(
+        (circleConfig.fillByPartyGroup as [string[], string][])
+          .map(([pg, _fill]) => [pg, pg.join("-")] as [string[], string])
+          .map(
+            ([pg, joinedPg]) =>
+              [
+                pg,
+                {
+                  path: layout
+                    ? `/img/${layout.breakPointKey}-${joinedPg}.png`
+                    : undefined,
+                  image: new Image(),
+                },
+              ] as [
+                string[],
+                { path: string | undefined; image: HTMLImageElement },
+              ]
+          )
+      ),
+    [layout]
+  );
+  //set listeners on the images' "load" events.
+  //when all have loaded, draw the initial image on the canvas
+  //and set the setCanvasesReady(true);
+  const [_imagesLoaded, setImagesLoaded] = useState(0);
+  function imageLoadedCallBack() {
+    setImagesLoaded((prevImagesLoaded) => {
+      if (prevImagesLoaded >= 3) {
+        if (vizRefs.current && coordinates && layout) {
+          //draw the initial (unsplit) view
+          setAllunsplit(vizRefs.current, coordinates, noPartyImage);
+          //set canvasReady to true
+          setCanvasesReady(true);
+        }
+      }
+      return prevImagesLoaded + 1;
+    });
+  }
+  //add the listeners
+  noPartyImage.addEventListener("load", imageLoadedCallBack);
+  pgToImage.forEach((value) => {
+    value.image.addEventListener("load", imageLoadedCallBack);
+  });
+  //Any useEffect defined here will be called only after the canvases have been rendered.
+  useEffect(() => {
+    //Pass the paths to each images's .src property so it loads.
+    //this will trigger the event listeners set in the previous lines
+    noPartyImage.src = pathToNoPartyImage;
+    pgToImage.forEach((value) => {
+      if (value.path) {
+        value.image.src = value.path;
+      }
+    });
+  }, [noPartyImage, pathToNoPartyImage, pgToImage]);
   //set up an effect that fetches the coordinate data (and refetch when the layout changes)
   //note this effect depends on the layout, and layout is a state variable.
   //So this whole component and its children will re-render when the layout changes
   //(e.g. in response to a large change in screen width)
   const coordinates = useCoordinates(layout);
-  //populate initial unsplit view on render
-  useEffect(() => {
-    if (vizRefs.current && coordinates && layout) {
-      const pathToNoPartyImage = `/img/${layout.breakPointKey}-none.png`;
-      setAllunsplit(vizRefs.current, coordinates, pathToNoPartyImage);
-    }
-  });
   //handler to alter views when user clicks on one of the buttons in the
   //controls component (child of this component)
   function handleViewChange(newView: ViewState) {
     if (vizRefs.current && coordinates && layout) {
-      const pathToNoPartyImage = `/img/${layout.breakPointKey}-none.png`;
-      const pgToImagePath = new Map(
-        (circleConfig.fillByPartyGroup as [string[], string][])
-          .map(([pg, _fill]) => [pg, pg.join("-")] as [string[], string])
-          .map(
-            ([pg, joinedPg]) =>
-              [pg, `/img/${layout.breakPointKey}-${joinedPg}.png`] as [
-                string[],
-                string,
-              ]
-          )
-      );
       switch (newView.splitByResponse) {
         case false: //UNSPLIT  ###DONE###
-          setAllunsplit(vizRefs.current, coordinates, pathToNoPartyImage);
+          setAllunsplit(vizRefs.current, coordinates, noPartyImage);
           break;
         default: //ONE OF THE SPLITBYRESPONSEVIEWS
           switch (newView.splitByWave) {
             case false: //EITHER SPLITBYRESPONSE OR SPLITBYRESPONSEANDPARTY
               switch (newView.splitByParty) {
                 case false: //SPLITBYRESPONSE ###DONE###
-                  setAllByResponse(
-                    vizRefs.current,
-                    coordinates,
-                    pathToNoPartyImage
-                  );
+                  setAllByResponse(vizRefs.current, coordinates, noPartyImage);
                   break;
                 default: //SPLITBYRESPONSEANDPARTY ####DONE####
                   setAllByResponseAndParty(
                     vizRefs.current,
                     coordinates,
-                    pgToImagePath
+                    new Map(
+                      pgToImage.entries().map(([pg, val]) => [pg, val.image])
+                    )
                   );
                   break;
               }
@@ -140,14 +175,16 @@ export function Imp({
                   setAllByResponseAndWave(
                     vizRefs.current,
                     coordinates,
-                    pathToNoPartyImage
+                    noPartyImage
                   );
                   break;
                 default: //SPLITBYRESPONSEANDWAVEANDPARTY
                   setAllByResponseAndWaveAndParty(
                     vizRefs.current,
                     coordinates,
-                    pgToImagePath
+                    new Map(
+                      pgToImage.entries().map(([pg, val]) => [pg, val.image])
+                    )
                   );
                   break;
               }
