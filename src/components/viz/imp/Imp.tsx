@@ -1,6 +1,6 @@
 import Controls from "./Controls";
 import "./Imp.css";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   BreakpointKey,
   BreakpointConfig,
@@ -8,14 +8,11 @@ import type {
 import { useCoordinates } from "../../../hooks/useCoordinates";
 import { ImpVarDisplay } from "./ImpVarDisplay";
 import {
-  byResponse,
-  byResponseAndParty,
-  byResponseAndWave,
   setAllByResponse,
   setAllByResponseAndParty,
   setAllByResponseAndWave,
+  setAllByResponseAndWaveAndParty,
   setAllunsplit,
-  unsplit,
 } from "../../../view-setters/set-points-to";
 export const viewKeys = [
   "splitByResponse",
@@ -29,7 +26,6 @@ export type ObjectFromTuple<T extends readonly string[], K> = Record<
 >;
 export type ViewState = ObjectFromTuple<ViewKeys, boolean>;
 import circleConfig from "../../../config/circles.json";
-import type { PointsMapUnMapped } from "../../../../build-data";
 
 export function Imp({
   layout,
@@ -77,42 +73,45 @@ export function Imp({
       };
     };
   }, []);
+  //set up state that tracks whether vizRefs are populated and thus canvases ready to receive
+  //input from controls.
+  const [canvasesReady, setCanvasesReady] = useState(false);
+  //Any useEffect defined here will be called only after the canvases have been rendered
+  //so set canvasReady to true in a useEffect here
+  useEffect(() => {
+    setCanvasesReady(true);
+  }, []);
   //set up an effect that fetches the coordinate data (and refetch when the layout changes)
   //note this effect depends on the layout, and layout is a state variable.
   //So this whole component and its children will re-render when the layout changes
   //(e.g. in response to a large change in screen width)
   const coordinates = useCoordinates(layout);
+  //populate initial unsplit view on render
+  useEffect(() => {
+    if (vizRefs.current && coordinates && layout) {
+      const pathToNoPartyImage = `/img/${layout.breakPointKey}-none.png`;
+      setAllunsplit(vizRefs.current, coordinates, pathToNoPartyImage);
+    }
+  });
   //handler to alter views when user clicks on one of the buttons in the
   //controls component (child of this component)
-  // function drawPlaceholder(newView: ViewState, canvas: HTMLCanvasElement) {
-  //   const ctx = canvas.getContext("2d");
-  //   if (ctx) {
-  //     //clear the existing points
-  //     ctx.clearRect(0, 0, canvas.width, canvas.height);
-  //     //placeholder draw
-  //     ctx.font = "20px serif";
-  //     ctx.fillText(
-  //       `splitByResponse: ${newView.splitByResponse.toString()}`,
-  //       10,
-  //       24
-  //     );
-  //     ctx.fillText(`splitByWave: ${newView.splitByWave.toString()}`, 10, 48);
-  //     ctx.fillText(`splitByParty: ${newView.splitByParty.toString()}`, 10, 72);
-  //   }
-  // }
   function handleViewChange(newView: ViewState) {
-    console.log("someone called the handler to redraw the views!");
     if (vizRefs.current && coordinates && layout) {
-      console.log(
-        "the vizrefs, coordinates, and layout are all defined, so we can reset the views"
+      const pathToNoPartyImage = `/img/${layout.breakPointKey}-none.png`;
+      const pgToImagePath = new Map(
+        (circleConfig.fillByPartyGroup as [string[], string][])
+          .map(([pg, _fill]) => [pg, pg.join("-")] as [string[], string])
+          .map(
+            ([pg, joinedPg]) =>
+              [pg, `/img/${layout.breakPointKey}-${joinedPg}.png`] as [
+                string[],
+                string,
+              ]
+          )
       );
       switch (newView.splitByResponse) {
         case false: //UNSPLIT  ###DONE###
-          setAllunsplit(
-            vizRefs.current,
-            coordinates,
-            `/img/${layout.breakPointKey}-none.png`
-          );
+          setAllunsplit(vizRefs.current, coordinates, pathToNoPartyImage);
           break;
         default: //ONE OF THE SPLITBYRESPONSEVIEWS
           switch (newView.splitByWave) {
@@ -122,24 +121,10 @@ export function Imp({
                   setAllByResponse(
                     vizRefs.current,
                     coordinates,
-                    `/img/${layout.breakPointKey}-none.png`
+                    pathToNoPartyImage
                   );
                   break;
-                default: //SPLITBYRESPONSEANDPARTY ####NOT WORKING####
-                  const pgToImagePath = new Map(
-                    (circleConfig.fillByPartyGroup as [string[], string][])
-                      .map(
-                        ([pg, _fill]) =>
-                          [pg, pg.join("-")] as [string[], string]
-                      )
-                      .map(
-                        ([pg, joinedPg]) =>
-                          [
-                            pg,
-                            `/img/${layout.breakPointKey}-${joinedPg}.pg`,
-                          ] as [string[], string]
-                      )
-                  );
+                default: //SPLITBYRESPONSEANDPARTY ####DONE####
                   setAllByResponseAndParty(
                     vizRefs.current,
                     coordinates,
@@ -154,10 +139,15 @@ export function Imp({
                   setAllByResponseAndWave(
                     vizRefs.current,
                     coordinates,
-                    `/img/${layout.breakPointKey}-none.png`
+                    pathToNoPartyImage
                   );
                   break;
                 default: //SPLITBYRESPONSEANDWAVEANDPARTY
+                  setAllByResponseAndWaveAndParty(
+                    vizRefs.current,
+                    coordinates,
+                    pgToImagePath
+                  );
                   break;
               }
               break;
@@ -167,9 +157,9 @@ export function Imp({
     }
     //if vizRefs.current is null, there are no canvases to redraw!
   }
-  //create an array of question names, caching the result so it doesn't re-calculate on
+  //create an array of questions, caching the result so it doesn't re-calculate on
   //every re-render
-
+  //these are used to populate the labels above each viz.
   const varToQuestions = useMemo(() => {
     if (coordinates) {
       return Object.entries(coordinates).map(([impVarName, c]) => [
@@ -186,7 +176,7 @@ export function Imp({
   }
   return (
     <div className="imp-viz-root">
-      <Controls viewChangeHandler={handleViewChange} />
+      {canvasesReady && <Controls viewChangeHandler={handleViewChange} />}
       <div className="imp-viz-vizarray">
         {varToQuestions.map(([impVarName, question]) => (
           <ImpVarDisplay

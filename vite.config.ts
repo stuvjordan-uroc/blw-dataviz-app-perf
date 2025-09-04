@@ -10,8 +10,6 @@ import fs from "node:fs";
 import type { CircleConfig } from "./build-pngs";
 import type { Layouts } from "./build-data/functions-and-types/types";
 
-
-
 const impDataPath = "./rawdata/dem_characteristics_importance.gz";
 const pathToPAndCFolder = "./src/data/";
 const pathToCoordinateDataFolder = "./public/coordinates/";
@@ -57,18 +55,43 @@ export default defineConfig({
           );
           if (impVizData) {
             //Write a file that maps each impVar to its proportions and counts
-            fs.writeFile(
-              pathToPAndCFolder + "p-and-c.json",
-              JSON.stringify(impVizData.pAndC),
-              (err: unknown) => {
-                if (err) {
-                  console.error(
-                    "failed to write pAndC.json to src-data folder",
-                    err
+            fs.mkdir(pathToPAndCFolder, { recursive: true }, (err) => {
+              if (err) {
+                if (err.code !== "EEXIST") {
+                  throw new Error(
+                    `One or more of the directories in the path ${pathToPAndCFolder} does not exist, but call to fs.mkdir failed.`
+                  );
+                } else {
+                  //path already exists, so we can write to it
+                  fs.writeFile(
+                    pathToPAndCFolder + "p-and-c.json",
+                    JSON.stringify(impVizData.pAndC),
+                    (err: unknown) => {
+                      if (err) {
+                        console.error(
+                          "failed to write pAndC.json to src-data folder",
+                          err
+                        );
+                      }
+                    }
                   );
                 }
+              } else {
+                //path didn't exist but now it's been created, so we can write to it
+                fs.writeFile(
+                  pathToPAndCFolder + "p-and-c.json",
+                  JSON.stringify(impVizData.pAndC),
+                  (err: unknown) => {
+                    if (err) {
+                      console.error(
+                        "failed to write pAndC.json to src-data folder",
+                        err
+                      );
+                    }
+                  }
+                );
               }
-            );
+            });
             //write the metadata to the same folder
             fs.writeFile(
               pathToPAndCFolder + "data-meta.json",
@@ -83,19 +106,48 @@ export default defineConfig({
               }
             );
             //For each screen size, write ONE file that maps each impVar to the segments and points for that impVar at that screensize
-            Object.entries(impVizData.viz).forEach(([screenSize, viz]) => {
-              fs.writeFile(
-                pathToCoordinateDataFolder + `viz-${screenSize}.json`,
-                JSON.stringify(viz),
-                (err: unknown) => {
-                  if (err) {
-                    console.error(
-                      `failed to write viz-${screenSize}.json to coordinates folder`,
-                      err
-                    );
-                  }
+            fs.mkdir(pathToCoordinateDataFolder, { recursive: true }, (err) => {
+              if (err) {
+                if (err.code !== "EEXIST") {
+                  throw new Error(
+                    `One or more of the directories in the path ${pathToPAndCFolder} does not exist, but call to fs.mkdir failed.`
+                  );
+                } else {
+                  //path already exists, so we can write to it
+                  Object.entries(impVizData.viz).forEach(
+                    ([screenSize, viz]) => {
+                      fs.writeFile(
+                        pathToCoordinateDataFolder + `viz-${screenSize}.json`,
+                        JSON.stringify(viz),
+                        (err: unknown) => {
+                          if (err) {
+                            console.error(
+                              `failed to write viz-${screenSize}.json to coordinates folder`,
+                              err
+                            );
+                          }
+                        }
+                      );
+                    }
+                  );
                 }
-              );
+              } else {
+                //path did not exist, but now it's been created, so we can write to it.
+                Object.entries(impVizData.viz).forEach(([screenSize, viz]) => {
+                  fs.writeFile(
+                    pathToCoordinateDataFolder + `viz-${screenSize}.json`,
+                    JSON.stringify(viz),
+                    (err: unknown) => {
+                      if (err) {
+                        console.error(
+                          `failed to write viz-${screenSize}.json to coordinates folder`,
+                          err
+                        );
+                      }
+                    }
+                  );
+                });
+              }
             });
           }
         }
@@ -104,26 +156,62 @@ export default defineConfig({
     {
       name: "make-circles",
       async buildStart() {
-        const impLayouts = layouts.imp as Layouts
-        const pngBuffers = await buildPNGs(impLayouts, circleConfig as CircleConfig)
+        const impLayouts = layouts.imp as Layouts;
+        const pngBuffers = await buildPNGs(
+          impLayouts,
+          circleConfig as CircleConfig
+        );
         //write pngs
         for (const screenSize in pngBuffers) {
           for (const [pg, buffs] of pngBuffers[screenSize]) {
             if (buffs.pngBuff) {
-              fs.writeFile(
-                pathToIMGFolder + screenSize + '-' + pg.join("-") + ".png",
-                buffs.pngBuff,
-                (err: unknown) => {
-                  if (err) {
-                    console.error(
-                      `failed to write png for circle at ${screenSize}, ${pg.join("-")}`,
-                      err
+              fs.mkdir(pathToIMGFolder, { recursive: true }, (err) => {
+                if (err) {
+                  if (err.code !== "EEXIST") {
+                    throw new Error(
+                      `One or more of the directories in the path ${pathToPAndCFolder} does not exist, but call to fs.mkdir failed.`
+                    );
+                  } else {
+                    //path did not exist but now it's been created so we can write to ti
+                    fs.writeFile(
+                      pathToIMGFolder +
+                        screenSize +
+                        "-" +
+                        pg.join("-") +
+                        ".png",
+                      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                      buffs.pngBuff!,
+                      (err: unknown) => {
+                        if (err) {
+                          console.error(
+                            `failed to write png for circle at ${screenSize}, ${pg.join("-")}`,
+                            err
+                          );
+                        }
+                      }
                     );
                   }
+                } else {
+                  //path exists so we can write to it
+                  fs.writeFile(
+                    pathToIMGFolder + screenSize + "-" + pg.join("-") + ".png",
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    buffs.pngBuff!,
+                    (err: unknown) => {
+                      if (err) {
+                        console.error(
+                          `failed to write png for circle at ${screenSize}, ${pg.join("-")}`,
+                          err
+                        );
+                      }
+                    }
+                  );
                 }
-              )
+              });
             } else {
-              console.log(`WARNING: Failed to generate png buffer at ${screenSize}, ${pg.join("-")}`)
+              console.log(
+                `WARNING: Failed to generate png buffer at ${screenSize}, ${pg.join("-")}`
+              );
             }
           }
         }
