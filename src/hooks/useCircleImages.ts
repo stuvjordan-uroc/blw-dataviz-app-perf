@@ -1,20 +1,37 @@
-import { useEffect, useState } from "react";
-export default function (imagePaths: [string[], string][]) {
-  const [imagesReady, setImagesReady] = useState<boolean>(false);
-  useEffect(() => {
-    //load images and setImagesReady(true) when all are loaded
-    let numImagesLoaded = 0;
-    imagePaths.forEach(([_pg, path]) => {
-      const img = new Image();
-      img.addEventListener("load", () => {
-        console.log("Image loaded for party group", _pg, "from path", path);
-        numImagesLoaded = numImagesLoaded + 1;
-        if (numImagesLoaded === imagePaths.length) {
-          setImagesReady(true);
-        }
-      });
-      img.src = path;
-    });
-  }, [imagePaths]);
-  return imagesReady
+import { useState } from "react";
+import type { BreakpointKey, BreakpointConfig } from "../config/layouts-types";
+export default function useCircleImages(
+  partyGroups: string[][],
+  layout: ({ breakPointKey: BreakpointKey } & BreakpointConfig) | undefined
+) {
+  //array to map party groups to image path and id
+  const images = partyGroups.map(
+    (pg) =>
+      [
+        pg,
+        {
+          path: layout
+            ? `/img/${layout.breakPointKey}-${pg.join("-")}.png`
+            : null,
+          id: pg.join("-"),
+        },
+      ] as [string[], { path: string | null; id: string }]
+  );
+  //state to track how many images are loaded
+  const [numImagesReady, setNumImagesReady] = useState<number>(0);
+  //handler to update the state when an image loads
+  const imageOnLoadHandler = () => {
+    setNumImagesReady((numImagesReady) => numImagesReady + 1);
+  };
+  return [images, numImagesReady, imageOnLoadHandler] as [
+    [
+      string[],
+      {
+        path: string | null;
+        id: string;
+      },
+    ][],
+    number,
+    () => void,
+  ];
 }

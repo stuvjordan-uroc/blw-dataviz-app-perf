@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import useCanvasRefs from "../../../hooks/useCanvasRefs";
 import type {
   BreakpointKey,
@@ -26,14 +25,10 @@ export default function ImpClean({
   //load the images into memory
   //and get the state tracking whether the images are loaded
   //and thus ready to be used in drawing on the canvases
-  const imagePaths = (circles.fillByPartyGroup as [string[], string][]).map(
-    ([pg, _fill]) =>
-      [
-        pg,
-        layout ? `/img/${layout.breakPointKey}-${pg.join("-")}.png` : null,
-      ] as [string[], string]
+  const [images, numImagesReady, imageOnLoadHander] = useCircleImages(
+    (circles.fillByPartyGroup as [string[], string][]).map(([pg, _fill]) => pg),
+    layout
   );
-  const imagesReady = useCircleImages(imagePaths);
 
   //load the coordinates
   const coordinates = useCoordinates(layout);
@@ -51,12 +46,29 @@ export default function ImpClean({
     images: [string[], HTMLImageElement][]
   ) => {};
 
+  //TO DO
+  //run a useEffect that...
+  //checks if numImagesReady === images.length
+  //and if so, invokes the setView handler to
+  //draw the unsplit view.
+
   //render
   return (
     <div className="imp-viz-root">
-      {cavasesReady && imagesReady && (
+      {cavasesReady && images.length === numImagesReady && (
         <div>Canvases and images ready! Render controls here!</div>
       )}
+      {images.map(([_partyGroup, { path, id }]) => (
+        <img
+          key={id}
+          id={id}
+          src={path ?? ""}
+          style={{
+            display: "none",
+          }}
+          onLoad={imageOnLoadHander}
+        />
+      ))}
       {coordinates &&
         layout &&
         Object.entries(coordinates).map(([impVarName, coordAtImpVar]) => (
