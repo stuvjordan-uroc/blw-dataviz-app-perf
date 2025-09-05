@@ -2,6 +2,7 @@ import "./VizTabs.css";
 import * as Tabs from "@radix-ui/react-tabs";
 import { Imp } from "./imp/Imp";
 import { useInnerWidth } from "../../hooks/useInnerWidth";
+import ImpClean from "./imp/ImpClean";
 
 export default function VizTabs() {
   /* 
@@ -52,7 +53,7 @@ export default function VizTabs() {
         </button>
       </Tabs.List>
       <Tabs.Content className="viztabs-content" value="imp">
-        <Imp layout={layout.imp} />
+        <ImpClean key={layout.imp?.breakPointKey} layout={layout.imp} />
       </Tabs.Content>
       <Tabs.Content className="viztabs-content" value="perf"></Tabs.Content>
       <Tabs.Content

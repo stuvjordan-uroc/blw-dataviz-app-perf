@@ -1,3 +1,4 @@
+import "./Imp.css";
 import useCanvasRefs from "../../../hooks/useCanvasRefs";
 import type {
   BreakpointKey,
@@ -21,10 +22,12 @@ export default function ImpClean({
   //to be drawn on
   const [canvasRefsCallBackFactory, cavasesReady] = useCanvasRefs();
 
-  //set the paths to the images (which depend on the layout),
-  //load the images into memory
-  //and get the state tracking whether the images are loaded
-  //and thus ready to be used in drawing on the canvases
+  //create an array that maps each party group (collected from circles.json),
+  //to a path an and id for the image element for the circle representing
+  //that party group,
+  //create a state that tracks how many of the circle images are loaded
+  //and create a handler to pass to each image that updates that state when the image
+  //loads
   const [images, numImagesReady, imageOnLoadHander] = useCircleImages(
     (circles.fillByPartyGroup as [string[], string][]).map(([pg, _fill]) => pg),
     layout
@@ -58,27 +61,29 @@ export default function ImpClean({
       {cavasesReady && images.length === numImagesReady && (
         <div>Canvases and images ready! Render controls here!</div>
       )}
-      {images.map(([_partyGroup, { path, id }]) => (
-        <img
-          key={id}
-          id={id}
-          src={path ?? ""}
-          style={{
-            display: "none",
-          }}
-          onLoad={imageOnLoadHander}
-        />
-      ))}
-      {coordinates &&
-        layout &&
-        Object.entries(coordinates).map(([impVarName, coordAtImpVar]) => (
-          <ImpVarDisplay
-            key={impVarName}
-            impVarQuestionText={coordAtImpVar.questionText}
-            layout={layout}
-            vizRefCallBack={canvasRefsCallBackFactory(impVarName)}
+      <div className="imp-viz-vizarray">
+        {images.map(([_partyGroup, { path, id }]) => (
+          <img
+            key={id}
+            id={id}
+            src={path ?? ""}
+            style={{
+              display: "none",
+            }}
+            onLoad={imageOnLoadHander}
           />
         ))}
+        {coordinates &&
+          layout &&
+          Object.entries(coordinates).map(([impVarName, coordAtImpVar]) => (
+            <ImpVarDisplay
+              key={impVarName}
+              impVarQuestionText={coordAtImpVar.questionText}
+              layout={layout}
+              vizRefCallBack={canvasRefsCallBackFactory(impVarName)}
+            />
+          ))}
+      </div>
     </div>
   );
 }
