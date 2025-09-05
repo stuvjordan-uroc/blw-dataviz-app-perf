@@ -19,8 +19,10 @@ export default function useCircleImages(
   );
   //state to track how many images are loaded
   const [numImagesReady, setNumImagesReady] = useState<number>(0);
-  //handler to update the state when an image loads
+  //handler to update the state and populate the coordinates-with-images when an image loads
   const imageOnLoadHandler = () => {
+    //populate the coordinates-with-images
+
     setNumImagesReady((numImagesReady) => numImagesReady + 1);
   };
   return [images, numImagesReady, imageOnLoadHandler] as [

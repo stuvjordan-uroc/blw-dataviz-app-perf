@@ -6,10 +6,7 @@ import type {
 } from "../../../config/layouts-types";
 import circles from "../../../config/circles.json";
 import useCircleImages from "../../../hooks/useCircleImages";
-import {
-  useCoordinates,
-  type Coordinates,
-} from "../../../hooks/useCoordinates";
+import { useCoordinates } from "../../../hooks/useCoordinates";
 import { ImpVarDisplay } from "./ImpVarDisplay";
 
 export default function ImpClean({
@@ -36,18 +33,13 @@ export default function ImpClean({
   //load the coordinates
   const coordinates = useCoordinates(layout);
 
+  //TO DO
   //define the setView handler
   //note these handlers are only invoked
   //in context where coordinates are not null
   //and images are loaded.  So no need
   //to test that these things are true
   //inside the handler
-  const setView = (
-    oldView: null | string,
-    newView: null | string,
-    coordinates: Coordinates,
-    images: [string[], HTMLImageElement][]
-  ) => {};
 
   //TO DO
   //run a useEffect that...
