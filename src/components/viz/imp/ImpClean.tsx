@@ -4,10 +4,8 @@ import type {
   BreakpointKey,
   BreakpointConfig,
 } from "../../../config/layouts-types";
-import circles from "../../../config/circles.json";
-import useCircleImages from "../../../hooks/useCircleImages";
-import { useCoordinates } from "../../../hooks/useCoordinates";
 import { ImpVarDisplay } from "./ImpVarDisplay";
+import { usePointsMaps } from "../../../hooks/usePointsMaps";
 
 export default function ImpClean({
   layout,
@@ -19,19 +17,10 @@ export default function ImpClean({
   //to be drawn on
   const [canvasRefsCallBackFactory, cavasesReady] = useCanvasRefs();
 
-  //create an array that maps each party group (collected from circles.json),
-  //to a path an and id for the image element for the circle representing
-  //that party group,
-  //create a state that tracks how many of the circle images are loaded
-  //and create a handler to pass to each image that updates that state when the image
-  //loads
-  const [images, numImagesReady, imageOnLoadHander] = useCircleImages(
-    (circles.fillByPartyGroup as [string[], string][]).map(([pg, _fill]) => pg),
-    layout
-  );
+  const pointsMaps = usePointsMaps(layout);
 
-  //load the coordinates
-  const coordinates = useCoordinates(layout);
+  //TO DO
+  //Modify usePointsMaps to add question text to each impVar
 
   //TO DO
   //define the setView handler
@@ -54,17 +43,6 @@ export default function ImpClean({
         <div>Canvases and images ready! Render controls here!</div>
       )}
       <div className="imp-viz-vizarray">
-        {images.map(([_partyGroup, { path, id }]) => (
-          <img
-            key={id}
-            id={id}
-            src={path ?? ""}
-            style={{
-              display: "none",
-            }}
-            onLoad={imageOnLoadHander}
-          />
-        ))}
         {coordinates &&
           layout &&
           Object.entries(coordinates).map(([impVarName, coordAtImpVar]) => (
