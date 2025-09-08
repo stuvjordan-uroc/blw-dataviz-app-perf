@@ -5,7 +5,7 @@ import type {
   BreakpointConfig,
 } from "../../../config/layouts-types";
 import { ImpVarDisplay } from "./ImpVarDisplay";
-import { usePointsMaps } from "../../../hooks/usePointsMaps";
+import usePointsMaps from "../../../hooks/usePointsMaps";
 import questions from "../../../data/questions.json";
 
 export default function ImpClean({
