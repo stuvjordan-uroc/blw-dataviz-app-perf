@@ -1,5 +1,6 @@
 import "./Imp.css";
 import useCanvasRefs from "../../../hooks/useCanvasRefs";
+import useCoordinates from "../../../hooks/useCoordinates";
 import type {
   BreakpointKey,
   BreakpointConfig,
@@ -33,40 +34,9 @@ export default function Imp({
   //to be drawn on
   const [canvasRefsCallBackFactory, cavasesReady] = useCanvasRefs();
 
-  //state tracking the coordinates and the status of their fetching
-  const [coordinates, setCoordinates] = useState<RawCoordinates | null>(null);
-  const [coordinatesAreLoading, setCoordinatesAreLoading] = useState(false);
-  const [coordinatesDidError, setCoordinatesDidError] = useState(false);
-  //effect to fetch coordinates on initial mount and on re-mount whenever the breakpoint has changed
-  useEffect(() => {
-    //flag to ignore data returned from data that comes in from a fetch that is no longer current
-    let ignore = false;
-    setCoordinatesAreLoading(true);
-    setCoordinatesDidError(false);
-    fetch("/coordinates/viz-" + breakPoint + ".json")
-      .then((response) => {
-        response
-          .json()
-          .then((data: RawCoordinates) => {
-            if (!ignore) {
-              setCoordinates(data);
-            }
-          })
-          .catch(() => {
-            setCoordinatesDidError(true);
-          });
-      })
-      .catch(() => {
-        setCoordinatesDidError(true);
-      })
-      .finally(() => {
-        setCoordinatesAreLoading(false);
-      });
-    //clean up by setting ignore to true so that stale fetches will be ignored
-    return () => {
-      ignore = true;
-    };
-  }, [breakPoint]);
+  //fetch coordinates along with states tracking fetch status (loading/error)
+  const [coordinates, coordinatesAreLoading, coordinatesDidError] =
+    useCoordinates(breakPoint);
 
   //state tracking the images and the status of their loading
   const [images, setImages] = useState<null | Map<
