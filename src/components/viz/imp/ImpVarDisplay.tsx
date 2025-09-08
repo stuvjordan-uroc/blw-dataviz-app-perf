@@ -9,14 +9,10 @@ import ImpVarCanvas from "./ImpVarCanvas";
 export const ImpVarDisplay = memo(
   ({
     layout,
-    //impVarName,
-    //vizRefs,
     impVarQuestionText,
     vizRefCallBack,
   }: {
     layout: { breakPointKey: BreakpointKey } & BreakpointConfig;
-    //impVarName: string;
-    //vizRefs: RefObject<null | Map<string, HTMLCanvasElement>>;
     impVarQuestionText: string | undefined;
     vizRefCallBack: (node: HTMLCanvasElement) => () => void;
   }) => {
@@ -31,10 +27,6 @@ export const ImpVarDisplay = memo(
               (layout.waveHeight + layout.labelHeight) * dataMeta.waves.length
             }
             vizRefCallBack={vizRefCallBack}
-            //vizRefs={vizRefs}
-            //impVarName={impVarName}
-            //points={impVarCoordinates.points}
-            //breakPointKey={layout.breakPointKey}
           />
         </div>
       </div>
