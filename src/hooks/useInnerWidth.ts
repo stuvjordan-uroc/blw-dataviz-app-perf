@@ -4,7 +4,7 @@ import type { BreakpointKey, BreakpointConfig } from "../config/layouts-types";
 
 export function useInnerWidth() {
   const [layout, setLayout] = useState<{
-    imp: ({ breakPointKey: BreakpointKey } & BreakpointConfig) | undefined
+    imp: ({ breakPointKey: BreakpointKey, config: BreakpointConfig }) | undefined
   }
   >({ imp: undefined })
   useEffect(() => {
@@ -41,7 +41,7 @@ export function useInnerWidth() {
           setLayout((prevlayout) => ({
             ...prevlayout,
             imp: {
-              ...newBreakPointConfig,
+              config: newBreakPointConfig,
               breakPointKey: newBreakPointKey
             }
           }))

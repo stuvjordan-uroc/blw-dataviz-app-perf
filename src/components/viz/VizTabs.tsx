@@ -36,7 +36,13 @@ export default function VizTabs() {
         </Tabs.Trigger>
       </Tabs.List>
       <Tabs.Content className="viztabs-content" value="imp">
-        <Imp key={layout.imp?.breakPointKey} layout={layout.imp} />
+        {layout.imp && (
+          <Imp
+            key={layout.imp.breakPointKey}
+            breakPoint={layout.imp.breakPointKey}
+            layoutConfig={layout.imp.config}
+          />
+        )}
       </Tabs.Content>
       <Tabs.Content className="viztabs-content" value="perf"></Tabs.Content>
       <Tabs.Content

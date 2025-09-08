@@ -1,9 +1,6 @@
 import "./ImpVarDisplay.css";
 import dataMeta from "../../../data/data-meta.json";
-import type {
-  BreakpointKey,
-  BreakpointConfig,
-} from "../../../config/layouts-types";
+import type { BreakpointConfig } from "../../../config/layouts-types";
 import { memo } from "react";
 import ImpVarCanvas from "./ImpVarCanvas";
 export const ImpVarDisplay = memo(
@@ -12,7 +9,7 @@ export const ImpVarDisplay = memo(
     impVarQuestionText,
     vizRefCallBack,
   }: {
-    layout: { breakPointKey: BreakpointKey } & BreakpointConfig;
+    layout: BreakpointConfig;
     impVarQuestionText: string | undefined;
     vizRefCallBack: (node: HTMLCanvasElement) => () => void;
   }) => {
