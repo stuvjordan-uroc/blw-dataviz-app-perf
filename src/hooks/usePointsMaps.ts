@@ -1,5 +1,5 @@
 import type { PointsViews, VizByImpVar } from "../../build-data"
-import type { BreakpointKey, BreakpointConfig } from "../config/layouts-types"
+import type { BreakpointKey } from "../config/layouts-types"
 import { useEffect, useState } from "react"
 
 export type PointsMap = Map<
@@ -24,9 +24,9 @@ export type PointsMaps = Map<
   PointsMap
 >
 
-type Layout = { breakPointKey: BreakpointKey } & BreakpointConfig
 
-export function usePointsMaps(layout: Layout | undefined) {
+
+export function usePointsMaps(breakPointKey: BreakpointKey | undefined) {
   //create a state that is null as long as the pointsMaps are not populated
   //and othwerise holds the points maps
   const [pointsMaps, setPointsMaps] = useState<null | PointsMaps>(null)
@@ -34,18 +34,19 @@ export function usePointsMaps(layout: Layout | undefined) {
   //use that data to populate the pointsMaps,
   //and then update the pointsMaps state if fetching and populatig succceed
   useEffect(() => {
+    if (import.meta.env.DEV) { console.log("useEffect in usePointsMaps triggered") }
     //flag to prevent race conditions in case of fast layout changes.
     let ignore = false;
     //just in case we have pointsMaps from a layout that no longer applies...
     setPointsMaps(null)
     //create the new pointsMaps
-    makePointsMaps(ignore, layout, setPointsMaps).catch((error: unknown) => {
+    makePointsMaps(ignore, breakPointKey, setPointsMaps).catch((error: unknown) => {
       console.error(error)
     })
     //cleanup function that sets ignore to true until the next render,
     //somehow (who the fuck knows) preventing race conditions.
     return (() => { ignore = true; })
-  }, [layout])
+  }, [breakPointKey])
   //return the pointsMaps state 
   // (which will be null until/unless the callback inside the useEffect succeeds)
   return pointsMaps
@@ -56,19 +57,21 @@ export function usePointsMaps(layout: Layout | undefined) {
 //of operations more transparent
 async function makePointsMaps(
   ignore: boolean,
-  layout: Layout | undefined,
+  breakPointKey: BreakpointKey | undefined,
   pointsMapsStateSetter: React.Dispatch<React.SetStateAction<PointsMaps | null>>
 ) {
-  //if the layout is undefined, we do not have the data we need to fetch, so do nothing
-  if (!ignore && layout) {
-    //fetch the coordinate data, and use it to construct pointsMaps that does
+  //if the layout is undefined, we do not know neither which coordinates nor which images to fetch, so do nothing
+  if (!ignore && breakPointKey) {
+    //fetch the coordinate data, and use it to construct a pointsMaps that does
     //not yet have the required circle images attached.
     try {
-      const pointsMapsWithoutImages = await getPointsMapsWithoutImages(layout)
+      const pointsMapsWithoutImages = await getPointsMapsWithoutImages(breakPointKey)
+      if (import.meta.env.DEV) { console.log("here is pointsMapsWithoutImages", pointsMapsWithoutImages) }
       //now try to load the images and put references to those loaded images
       //at the appropriate spots in the pointsMaps
       try {
-        const pointsMaps = await attachImages(pointsMapsWithoutImages, layout)
+        const pointsMaps = await attachImages(pointsMapsWithoutImages, breakPointKey)
+        if (import.meta.env.DEV) { console.log("here is the pointsMaps:", pointsMaps) }
         //Everything has succeed if we get to this point, so update the pointsMaps state
         //with the now-populated pointsMaps!
         pointsMapsStateSetter(pointsMaps)
@@ -78,12 +81,14 @@ async function makePointsMaps(
     } catch (error: unknown) {
       console.error("Error fetching coordinate data:", error)
     }
+  } else {
+    if (import.meta.env.DEV) { console.log("Either ignore is true or breakpoint key is undefined.  Leaving pointsMaps null.") }
   }
 }
 
-export async function getPointsMapsWithoutImages(layout: Layout) {
+export async function getPointsMapsWithoutImages(breakPointKey: BreakpointKey) {
   const pointsMapsOutcome = new Promise<PointsMaps>((resolve, reject) => {
-    fetch("/coordinates/viz-" + layout.breakPointKey + ".json")
+    fetch("/coordinates/viz-" + breakPointKey + ".json")
       .then(async (rawCoordinates) => {
         try {
           const newCoordinates = (await rawCoordinates.json()) as VizByImpVar
@@ -124,7 +129,7 @@ export async function getPointsMapsWithoutImages(layout: Layout) {
   return pointsMapsOutcome;
 }
 
-export function attachImages(pointsMaps: PointsMaps, layout: Layout) {
+export function attachImages(pointsMaps: PointsMaps, breakPointKey: BreakpointKey) {
   const attachmentOutcome = new Promise<PointsMaps>((resolve, reject) => {
     //create the empty image map
     const imageMap = new Map() as Map<string, HTMLImageElement>
@@ -134,15 +139,24 @@ export function attachImages(pointsMaps: PointsMaps, layout: Layout) {
         pmAtRg.forEach((pmAtWave) => {
           if (pmAtWave) {
             pmAtWave.forEach((pmAtPg, pg) => {
+              console.log("setting images at pg", pg)
+              const pgString = pg.join("-")
+              if (!(imageMap.get(pgString) instanceof Image)) {
+                imageMap.set(pgString, new Image())
+              }
+              if (!(imageMap.get("none") instanceof Image)) {
+                imageMap.set("none", new Image())
+              }
               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              pmAtPg.images.party = imageMap.has(pg.join("-")) ? imageMap.get(pg.join("-"))! : new Image();
+              pmAtPg.images.party = imageMap.get(pgString)!
               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              pmAtPg.images.noParty = imageMap.has("none") ? imageMap.get("none")! : new Image();
+              pmAtPg.images.noParty = imageMap.get("none")!
             })
           }
         })
       })
     })
+    if (import.meta.env.DEV) { console.log("tried to populate imageMap.  Here's what we made:", imageMap) }
     //counter to track how many images have successfully loaded
     let numImagesLoaded = 0;
     //array to track any images that error when they try to load
@@ -187,7 +201,7 @@ export function attachImages(pointsMaps: PointsMaps, layout: Layout) {
         }
       })
       //assign the image path so the browser starts trying to load the image
-      image.src = `/img/${layout.breakPointKey}-${pgString}.png`
+      image.src = `/img/${breakPointKey}-${pgString}.png`
     })
   })
   return attachmentOutcome

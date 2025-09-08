@@ -1,6 +1,5 @@
 import "./VizTabs.css";
 import * as Tabs from "@radix-ui/react-tabs";
-import { Imp } from "./imp/Imp";
 import { useInnerWidth } from "../../hooks/useInnerWidth";
 import ImpClean from "./imp/ImpClean";
 

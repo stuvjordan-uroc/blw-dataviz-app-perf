@@ -17,7 +17,7 @@ export const ImpVarDisplay = memo(
     layout: { breakPointKey: BreakpointKey } & BreakpointConfig;
     //impVarName: string;
     //vizRefs: RefObject<null | Map<string, HTMLCanvasElement>>;
-    impVarQuestionText: string;
+    impVarQuestionText: string | undefined;
     vizRefCallBack: (node: HTMLCanvasElement) => () => void;
   }) => {
     return (
