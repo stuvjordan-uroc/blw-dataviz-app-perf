@@ -2,8 +2,8 @@
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
     "target": "ES2023",
-    "lib": ["esnext", "dom"],
-    //"lib": ["ES2023", "dom"],
+    "lib": ["esnext", "DOM", "DOM.Iterable"],
+    //"lib": ["ES2023", "dom", "dom.iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
 
