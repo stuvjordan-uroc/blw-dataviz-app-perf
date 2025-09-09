@@ -8,20 +8,12 @@ import type {
 import { ImpVarDisplay } from "./ImpVarDisplay";
 import questions from "../../../data/questions.json";
 import circles from "../../../config/circles.json";
-import { useEffect, useState } from "react";
 import type {
   SegmentViewsUnMapped,
   PointsMapUnMapped,
   PointsViews,
 } from "../../../../build-data";
 import useCircleImages from "../../../hooks/use-circle-images";
-type RawCoordinates = Record<
-  string,
-  {
-    segments: SegmentViewsUnMapped;
-    points: PointsMapUnMapped;
-  }
->;
 
 export default function Imp({
   breakPoint,
@@ -54,146 +46,18 @@ export default function Imp({
   //TO DO  hook that takes coordinates and images and does a useMemo to calcuate
   //vizMaps, as in code below.
   //render when coordinates and images are populated
-  if (coordinates.data && images.data) {
-    const vizMaps = Object.entries(coordinates.data).map(
-      ([impVarName, psAtImpVar]) =>
-        [
-          impVarName,
-          {
-            question: questions.prompts.find(
-              (q) => q.variable_name === impVarName
-            )?.question_text,
-            segments: psAtImpVar.segments,
-            points: new Map(
-              psAtImpVar.points.map(
-                ([rg, unMapAtRg]) =>
-                  [
-                    rg,
-                    new Map(
-                      unMapAtRg.map(
-                        ([wave, unMapAtWave]) =>
-                          [
-                            wave,
-                            unMapAtWave === null
-                              ? null
-                              : new Map(
-                                  unMapAtWave.map(
-                                    ([pg, pointsViews]) =>
-                                      [
-                                        pg,
-                                        {
-                                          pointsViews: pointsViews,
-                                          images: {
-                                            noParty: images.data.get("none"),
-                                            party: images.data.get(
-                                              pg.join("-")
-                                            ),
-                                          },
-                                        },
-                                      ] as [
-                                        string[],
-                                        {
-                                          pointsViews: PointsViews;
-                                          images: {
-                                            noParty: HTMLImageElement;
-                                            party: HTMLImageElement;
-                                          };
-                                        },
-                                      ]
-                                  )
-                                ),
-                          ] as [
-                            number,
-                            null | Map<
-                              string[],
-                              {
-                                pointsViews: PointsViews;
-                                images: {
-                                  noParty: HTMLImageElement;
-                                  party: HTMLImageElement;
-                                };
-                              }
-                            >,
-                          ]
-                      )
-                    ),
-                  ] as [
-                    string[],
-                    Map<
-                      number,
-                      null | Map<
-                        string[],
-                        {
-                          pointsViews: PointsViews;
-                          images: {
-                            noParty: HTMLImageElement;
-                            party: HTMLImageElement;
-                          };
-                        }
-                      >
-                    >,
-                  ]
-              )
-            ),
-          },
-        ] as [
-          string,
-          {
-            question: string | undefined;
-            segments: SegmentViewsUnMapped;
-            points: Map<
-              string[],
-              Map<
-                number,
-                null | Map<
-                  string[],
-                  {
-                    pointsViews: PointsViews;
-                    images: {
-                      noParty: HTMLImageElement;
-                      party: HTMLImageElement;
-                    };
-                  }
-                >
-              >
-            >;
-          },
-        ]
-    );
-    //render view when we have all the data required
-    return (
-      <div className="imp-viz-root">
-        {cavasesReady && <div>Canvases ready! Render controls here!</div>}
-        <div className="imp-viz-vizarray">
-          {vizMaps.map(([impVarName, atImpVar]) => (
-            <ImpVarDisplay
-              key={impVarName}
-              impVarQuestionText={atImpVar.question}
-              layout={layoutConfig}
-              vizRefCallBack={canvasRefsCallBackFactory(impVarName)}
-            />
-          ))}
-        </div>
-      </div>
-    );
+  if (coordinates.data) {
+    if (images.data) {
+      return <div>images and coordinates successfully loaded</div>;
+    } else if (images.isLoading) {
+      return (
+        <div>coordinates succesfully loaded, but images are still loading</div>
+      );
+    } else {
+      return <div>coordinates successfully loaded, but images errored</div>;
+    }
+  } else if (coordinates.isLoading) {
+    return <div>coordinates are loading</div>;
   }
-  //error views
-  //TO DO
-  if (coordinatesDidError || imagesDidError) {
-    return <div>frowny face here</div>;
-  }
-  //coordinates loading
-  if (coordinatesAreLoading) {
-    return <div>spinner here</div>;
-  }
-  //images loading
-  if (imagesAreLoading && coordinates) {
-    return <div>array of spinners here</div>;
-  }
-  //if we get here...
-  //both coordinates and images are null/
-  //but neither is in the error nor loading state
-  //this should never happen, because the useeffect calls always
-  //finish with either or both in the error state or the non-null state
-  return <div>double frowny face here</div>;
+  return <div>coordinates errored</div>;
 }
