@@ -14,6 +14,7 @@ import type {
   PointsMapUnMapped,
   PointsViews,
 } from "../../../../build-data";
+import useCircleImages from "../../../hooks/use-circle-images";
 type RawCoordinates = Record<
   string,
   {
@@ -35,81 +36,26 @@ export default function Imp({
   const [canvasRefsCallBackFactory, cavasesReady] = useCanvasRefs();
 
   //fetch coordinates along with states tracking fetch status (loading/error)
-  const [coordinates, coordinatesAreLoading, coordinatesDidError] =
-    useCoordinates(breakPoint);
+  const coordinates = useCoordinates(`/coordinates/viz-${breakPoint}.json`);
 
   //state tracking the images and the status of their loading
-  const [images, setImages] = useState<null | Map<
-    string,
-    { path: string; image: HTMLImageElement }
-  >>(null);
-  const [imagesAreLoading, setImagesAreLoading] = useState(false);
-  const [imagesDidError, setImagesDidError] = useState(false);
-  //effect to load the images on initial mount and on re-mount whever the breakpoint has changed
-  useEffect(() => {
-    //reset in case react decided to not reset the states on re-mount
-    setImages(null);
-    setImagesAreLoading(false);
-    setImagesDidError(false);
-    //flag to ignore images returned from load that is no longer current
-    let ignore = false;
-    const newImages = new Map(
-      (circles.fillByPartyGroup as [string[], string][]).map(([pg, _fill]) => {
-        const partyString = pg.join("-");
-        return [
-          partyString,
-          {
-            path: "/img/" + breakPoint + "-" + partyString + ".png",
-            image: new Image(),
-          },
-        ];
-      })
-    );
-    if (newImages.size === 0) {
-      setImagesDidError(true);
-      return () => {
-        ignore = true;
-      };
-    }
-    setImagesAreLoading(true);
-    let imagesLoaded = 0;
-    let imagesErrored = 0;
-    newImages.forEach(
-      ({ path, image }: { path: string; image: HTMLImageElement }) => {
-        image.addEventListener("load", () => {
-          if (!ignore) {
-            imagesLoaded = imagesLoaded + 1;
-            if (imagesErrored + imagesLoaded === newImages.size) {
-              //allimages have either loaded or errored
-              if (imagesErrored > 0) {
-                //at least one image Errored
-                setImagesDidError(true);
-              } else {
-                setImages(newImages);
-              }
-              setImagesAreLoading(false);
-            }
-          }
-        });
-        image.addEventListener("error", () => {
-          if (!ignore) {
-            imagesErrored = imagesErrored + 1;
-            if (imagesErrored + imagesLoaded === newImages.size) {
-              //all images have either loaded or errored, and at least one has errored
-              setImagesDidError(true);
-              setImagesAreLoading(false);
-            }
-          }
-        });
-        //set image source to start loading
-        image.src = path;
-      }
-    );
-  }, [breakPoint]);
+  const images = useCircleImages(
+    new Map(
+      (circles.fillByPartyGroup as [string[], string][]).map(
+        ([partyGroup, _fill]) =>
+          [
+            partyGroup.join("-"),
+            "/img/" + breakPoint + "-" + partyGroup.join("-") + ".png",
+          ] as [string, string]
+      )
+    )
+  );
 
+  //TO DO  hook that takes coordinates and images and does a useMemo to calcuate
+  //vizMaps, as in code below.
   //render when coordinates and images are populated
-  if (coordinates && images) {
-    const vizMaps = Object.entries(coordinates).map(
+  if (coordinates.data && images.data) {
+    const vizMaps = Object.entries(coordinates.data).map(
       ([impVarName, psAtImpVar]) =>
         [
           impVarName,
@@ -138,9 +84,10 @@ export default function Imp({
                                         {
                                           pointsViews: pointsViews,
                                           images: {
-                                            noParty: images.get("none")?.image,
-                                            party: images.get(pg.join("-"))
-                                              ?.image,
+                                            noParty: images.data.get("none"),
+                                            party: images.data.get(
+                                              pg.join("-")
+                                            ),
                                           },
                                         },
                                       ] as [
