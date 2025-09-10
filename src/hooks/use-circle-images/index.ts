@@ -25,17 +25,19 @@ export default function useCircleImages(
     didError: false,
   });
   useEffect(() => {
-    //create the imageelements in a map linking each partystring to a new 
-    // HTMLImageElement in the browser's memory
-    const imageElements = new Map(
+    //create in a map linking each partystring to a new not-attached-to-any-DOM
+    //instance of HTMLImageElement
+    const imageInstances = new Map(
       partyStringToPathMap.entries().map(([partyString, path]) => ([
         partyString,
         [path, new Image()]
       ] as [string, [string, HTMLImageElement]]))
     )
-    //for each image in the map, create a promise that resolves when the image loads
-    //and rejects when the image errors
-    const imagePromises = imageElements.values().map(([_path, image]) =>
+    //for each HTMLImageElement instance in the map, 
+    //create a promise that 
+    // (a) resolves when the image loads and
+    // (b) rejects when the image errors
+    const instancePromises = imageInstances.values().map(([_path, image]) =>
       new Promise<void>((resolve, reject) => {
         image.onload = () => { resolve() }
         image.onerror = () => { reject() }
@@ -43,15 +45,15 @@ export default function useCircleImages(
     )
     //create a promise that resolves when all the images have loaded and rejects when
     //any of the images errors
-    const allImagesPromise = Promise.all(imagePromises)
-    //set handlers on the allImagePromise that set the circleImages state
+    const allImagesPromise = Promise.all(instancePromises)
+    //set handlers on the allImagesPromise that set the circleImages state
     let ignore = false;
     allImagesPromise
       .then(() => {
         if (!ignore) {
           setCircleImages({
             data: new Map(
-              imageElements.entries().map(([partyString, [_path, image]]) => ([
+              imageInstances.entries().map(([partyString, [_path, image]]) => ([
                 partyString,
                 image
               ]))
