@@ -19,9 +19,8 @@ const pathToIMGFolder = "./public/img/";
 // https://vite.dev/config/
 export default defineConfig({
   test: {
-    environment: "jsdom",
     globals: true,
-    setupFiles: "./test/setupTest.ts",
+    environment: "jsdom"
   },
   plugins: [
     react(),
@@ -181,10 +180,10 @@ export default defineConfig({
                     //path did not exist but now it's been created so we can write to ti
                     fs.writeFile(
                       pathToIMGFolder +
-                        screenSize +
-                        "-" +
-                        pg.join("-") +
-                        ".png",
+                      screenSize +
+                      "-" +
+                      pg.join("-") +
+                      ".png",
                       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                       buffs.pngBuff!,
                       (err: unknown) => {

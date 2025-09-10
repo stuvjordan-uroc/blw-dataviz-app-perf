@@ -11,6 +11,9 @@ import eslintConfigPrettier from 'eslint-config-prettier'
 export default tseslint.config([
   globalIgnores(['dist']),
   {
+    plugins: {
+      vitest
+    },
     files: ['**/*.{ts,tsx}'],
     extends: [
       // Other configs...
@@ -29,7 +32,12 @@ export default tseslint.config([
       eslintConfigPrettier,
 
       // Other configs...
+      "plugin:vitest/recommended",
+      "plugin:vitest-globals/recommended"
     ],
+    "env": {
+      "vitest-globals/env": true,
+    },
     languageOptions: {
       parserOptions: {
         project: ['./tsconfig.node.json', './tsconfig.app.json'],

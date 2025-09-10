@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import loadImages from "./load-images";
 type ImageState =
   | {
     data: Map<string, HTMLImageElement>;
@@ -26,12 +25,37 @@ export default function useCircleImages(
     didError: false,
   });
   useEffect(() => {
+    //create the imageelements in a map linking each partystring to a new 
+    // HTMLImageElement in the browser's memory
+    const imageElements = new Map(
+      partyStringToPathMap.entries().map(([partyString, path]) => ([
+        partyString,
+        [path, new Image()]
+      ] as [string, [string, HTMLImageElement]]))
+    )
+    //for each image in the map, create a promise that resolves when the image loads
+    //and rejects when the image errors
+    const imagePromises = imageElements.values().map(([_path, image]) =>
+      new Promise<void>((resolve, reject) => {
+        image.onload = () => { resolve() }
+        image.onerror = () => { reject() }
+      })
+    )
+    //create a promise that resolves when all the images have loaded and rejects when
+    //any of the images errors
+    const allImagesPromise = Promise.all(imagePromises)
+    //set handlers on the allImagePromise that set the circleImages state
     let ignore = false;
-    loadImages(partyStringToPathMap)
-      .then((partyStringToImageMap) => {
+    allImagesPromise
+      .then(() => {
         if (!ignore) {
           setCircleImages({
-            data: partyStringToImageMap,
+            data: new Map(
+              imageElements.entries().map(([partyString, [_path, image]]) => ([
+                partyString,
+                image
+              ]))
+            ),
             isLoading: false,
             didError: false
           })
@@ -46,6 +70,11 @@ export default function useCircleImages(
           })
         }
       })
+    //set each image's src property, which will cause the browser to
+    //try to load the image from supplied path
+    imageElements.values().forEach(([path, image]) => {
+      image.src = path
+    })
     return (() => { ignore = true })
   })
   return circleImages;

@@ -6,6 +6,7 @@
     //"lib": ["ES2023", "dom", "dom.iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
+    "types": ["vitest/globals"]
 
     /* Bundler mode */
     "moduleResolution": "bundler",
