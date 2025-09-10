@@ -1,21 +1,21 @@
 import { useEffect, useState } from "react";
-import loadImage from "./load-image";
+import loadImages from "./load-images";
 type ImageState =
   | {
-      data: Map<string, HTMLImageElement>;
-      isLoading: false;
-      didError: false;
-    }
+    data: Map<string, HTMLImageElement>;
+    isLoading: false;
+    didError: false;
+  }
   | {
-      data: null;
-      isLoading: true;
-      didError: false;
-    }
+    data: null;
+    isLoading: true;
+    didError: false;
+  }
   | {
-      data: null;
-      isLoading: false;
-      didError: true;
-    };
+    data: null;
+    isLoading: false;
+    didError: true;
+  };
 
 export default function useCircleImages(
   partyStringToPathMap: Map<string, string>
@@ -25,40 +25,16 @@ export default function useCircleImages(
     isLoading: true,
     didError: false,
   });
-  //add image elements to each entry in the passed map
-  const partyStringToPathAndImageMap = new Map(
-    partyStringToPathMap
-      .entries()
-      .map(
-        ([partyString, path]) =>
-          [partyString, [path, new Image()]] as [
-            string,
-            [string, HTMLImageElement],
-          ]
-      )
-  );
   useEffect(() => {
     let ignore = false;
-    Promise.all(
-      partyStringToPathAndImageMap
-        .values()
-        .map(([path, image]) => loadImage([path, image]))
-    )
-      .then(() => {
-        //images referenced in partStringToPathAndImageMap are all now loaded
+    loadImages(partyStringToPathMap)
+      .then((partyStringToImageMap) => {
         if (!ignore) {
           setCircleImages({
-            data: new Map(
-              partyStringToPathAndImageMap
-                .entries()
-                .map(
-                  ([partyString, [_path, image]]) =>
-                    [partyString, image] as [string, HTMLImageElement]
-                )
-            ),
+            data: partyStringToImageMap,
             isLoading: false,
-            didError: false,
-          });
+            didError: false
+          })
         }
       })
       .catch(() => {
@@ -66,13 +42,11 @@ export default function useCircleImages(
           setCircleImages({
             data: null,
             isLoading: false,
-            didError: true,
-          });
+            didError: true
+          })
         }
-      });
-    return () => {
-      ignore = true;
-    };
-  });
+      })
+    return (() => { ignore = true })
+  })
   return circleImages;
 }
