@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import PathMapToPromise from "./pathmap-to-promise";
 type ImageState =
   | {
     data: Map<string, HTMLImageElement>;
@@ -25,39 +26,13 @@ export default function useCircleImages(
     didError: false,
   });
   useEffect(() => {
-    //create in a map linking each partystring to a new not-attached-to-any-DOM
-    //instance of HTMLImageElement
-    const imageInstances = new Map(
-      partyStringToPathMap.entries().map(([partyString, path]) => ([
-        partyString,
-        [path, new Image()]
-      ] as [string, [string, HTMLImageElement]]))
-    )
-    //for each HTMLImageElement instance in the map, 
-    //create a promise that 
-    // (a) resolves when the image loads and
-    // (b) rejects when the image errors
-    const instancePromises = imageInstances.values().map(([_path, image]) =>
-      new Promise<void>((resolve, reject) => {
-        image.onload = () => { resolve() }
-        image.onerror = () => { reject() }
-      })
-    )
-    //create a promise that resolves when all the images have loaded and rejects when
-    //any of the images errors
-    const allImagesPromise = Promise.all(instancePromises)
-    //set handlers on the allImagesPromise that set the circleImages state
+    const [imagesAndPathsMap, imagesPromise] = PathMapToPromise(partyStringToPathMap)
     let ignore = false;
-    allImagesPromise
-      .then(() => {
+    imagesPromise
+      .then((imagesMap) => {
         if (!ignore) {
           setCircleImages({
-            data: new Map(
-              imageInstances.entries().map(([partyString, [_path, image]]) => ([
-                partyString,
-                image
-              ]))
-            ),
+            data: imagesMap,
             isLoading: false,
             didError: false
           })
@@ -74,7 +49,7 @@ export default function useCircleImages(
       })
     //set each image's src property, which will cause the browser to
     //try to load the image from supplied path
-    imageElements.values().forEach(([path, image]) => {
+    imagesAndPathsMap.forEach(([path, image]) => {
       image.src = path
     })
     return (() => { ignore = true })
