@@ -9,7 +9,7 @@ import type {
 import circles from "../../../config/circles.json";
 //hooks
 import { useCoordinates } from "../../../hooks/useCoordinates";
-import useCircleImages from "../../../hooks/use-circle-images";
+import { useCircleImages } from "../../../hooks/use-circle-images";
 import useCanvases from "../../../hooks/useCanvases";
 
 export default function Imp({
@@ -19,11 +19,6 @@ export default function Imp({
   breakPoint: BreakpointKey;
   layoutConfig: BreakpointConfig;
 }) {
-  //canvas ref callbacks
-  //and statebtracking whether the canvases are rendered and thus ready
-  //to be drawn on
-  const [canvasRefsCallBackFactory, cavasesReady, canvasMap] = useCanvases();
-
   //fetch coordinates along with states tracking fetch status (loading/error)
   const coordinates = useCoordinates(`/coordinates/viz-${breakPoint}.json`);
 
@@ -39,6 +34,23 @@ export default function Imp({
       )
     )
   );
+
+  //set up the canvases
+  /* 
+  useCanvases uses useRef to create a map which takes each impVar name to an object
+  The object cooresponding to each impVar is like this:
+  {
+    node: HTMLCanvasNode //the html node for the canvas
+    stage: createjs.Stage //createjs Stage for drawing stuff on the canvas
+    points: 
+  }
+  */
+  //canvas ref callbacks,
+  //state tracking whether the canvases are rendered and thus ready to be drawn on
+  //map taking each impVar to its canvas node and a createjs Stage for drawing
+  const [canvasRefsCallBackFactory, cavasesReady, canvasMap] = useCanvases();
+
+  //useEffect that creates the createjs BitMaps for each group of points
 
   //TO DO  hook that takes coordinates and images and does a useMemo to calcuate
   //vizMaps, as in code below.

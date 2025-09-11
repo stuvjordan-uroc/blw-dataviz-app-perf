@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import PathMapToPromise from "./pathmap-to-promise";
-type ImageState =
+export type ImageState =
   | {
-    data: Map<string, { image: HTMLImageElement, cjsBitmap: createjs.Bitmap }>;
+    data: Map<string, HTMLImageElement>;
     isLoading: false;
     didError: false;
   }
@@ -17,7 +17,7 @@ type ImageState =
     didError: true;
   };
 
-export default function useCircleImages(
+export function useCircleImages(
   partyStringToPathMap: Map<string, string>
 ) {
   const [circleImages, setCircleImages] = useState<ImageState>({

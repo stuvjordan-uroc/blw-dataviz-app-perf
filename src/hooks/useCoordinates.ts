@@ -7,7 +7,7 @@ export type RawCoordinates = Record<
     points: PointsMapUnMapped;
   }
 >;
-type CoordinatesState =
+export type CoordinatesState =
   | {
     data: null;
     isLoading: true;
