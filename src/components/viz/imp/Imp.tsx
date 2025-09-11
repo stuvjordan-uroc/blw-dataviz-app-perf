@@ -1,19 +1,16 @@
+//css
 import "./Imp.css";
-import useCanvasRefs from "../../../hooks/useCanvasRefs";
-import useCoordinates from "../../../hooks/useCoordinates";
+//types
 import type {
   BreakpointKey,
   BreakpointConfig,
 } from "../../../config/layouts-types";
-import { ImpVarDisplay } from "./ImpVarDisplay";
-import questions from "../../../data/questions.json";
+//data
 import circles from "../../../config/circles.json";
-import type {
-  SegmentViewsUnMapped,
-  PointsMapUnMapped,
-  PointsViews,
-} from "../../../../build-data";
+//hooks
+import useCoordinates from "../../../hooks/useCoordinates";
 import useCircleImages from "../../../hooks/use-circle-images";
+import useCanvases from "../../../hooks/useCanvases";
 
 export default function Imp({
   breakPoint,
@@ -25,7 +22,7 @@ export default function Imp({
   //canvas ref callbacks
   //and statebtracking whether the canvases are rendered and thus ready
   //to be drawn on
-  const [canvasRefsCallBackFactory, cavasesReady] = useCanvasRefs();
+  const [canvasRefsCallBackFactory, cavasesReady, canvasMap] = useCanvases();
 
   //fetch coordinates along with states tracking fetch status (loading/error)
   const coordinates = useCoordinates(`/coordinates/viz-${breakPoint}.json`);

@@ -39,6 +39,7 @@ export default tseslint.config([
       "vitest-globals/env": true,
     },
     languageOptions: {
+      parser: '@typescript-eslint/parser',
       parserOptions: {
         project: ['./tsconfig.node.json', './tsconfig.app.json'],
         tsconfigRootDir: import.meta.dirname,

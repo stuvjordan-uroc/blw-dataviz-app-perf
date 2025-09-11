@@ -1,12 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-export default function useCanvasRefs(): [
-  (impVarName: string) => (
-    (node: HTMLCanvasElement) => (
-      () => void
-    )
-  ),
-  boolean
-] {
+import * as createjs from 'createjs-module'
+export default function useCanvases() {
   //create state tracking whether canvases are ready
   //to be drawn on
   const [canvasesReady, setCanvasesReady] = useState<boolean>(false)
@@ -15,25 +9,25 @@ export default function useCanvasRefs(): [
   //Techniqued used here for creating
   //a Mapped collection of DOM nodes adapted from
   //https://react.dev/learn/manipulating-the-dom-with-refs#how-to-manage-a-list-of-refs-using-a-ref-callback
-  const canvasRefsMap = useRef<null | Map<string, HTMLCanvasElement>>(null);
+  const canvasMap = useRef<null | Map<string, { node: HTMLCanvasElement, stage: createjs.Stage }>>(null);
   //function used by canvas nodes to get the vizRefs map so they can put themselves into the map)
-  const getCanvasRefsMap = () => {
+  const getCanvasMap = () => {
     //If the ref has been created, return it
-    if (canvasRefsMap.current) {
-      return canvasRefsMap.current
+    if (canvasMap.current) {
+      return canvasMap.current
     }
     //Otherwise initialize the ref...
-    canvasRefsMap.current = new Map()
+    canvasMap.current = new Map()
     //...and return the new map
-    return canvasRefsMap.current;
+    return canvasMap.current;
   };
   //factory that creates functions for canvas nodes to use as their ref callbacks
   const canvasRefCallBackFactory = (impVarName: string) => (
     (node: HTMLCanvasElement) => {
-      const canvasRefsMap = getCanvasRefsMap();
-      canvasRefsMap.set(impVarName, node);
+      const canvasMap = getCanvasMap();
+      canvasMap.set(impVarName, { node: node, stage: new createjs.Stage(node) });
       return (() => {
-        canvasRefsMap.delete(impVarName)
+        canvasMap.delete(impVarName)
       })
     }
   )
@@ -45,5 +39,12 @@ export default function useCanvasRefs(): [
   useEffect(() => {
     setCanvasesReady(true)
   }, [])
-  return [canvasRefCallBackFactory, canvasesReady]
+  return [canvasRefCallBackFactory, canvasesReady, canvasMap] as [
+    (impVarName: string) => (node: HTMLCanvasElement) => () => void,
+    boolean,
+    React.RefObject<Map<string, {
+      node: HTMLCanvasElement;
+      stage: createjs.Stage;
+    }> | null>
+  ]
 }
