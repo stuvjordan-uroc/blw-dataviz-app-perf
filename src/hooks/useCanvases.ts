@@ -111,7 +111,30 @@ export default function useCanvases(coordinates: CoordinatesState, images: Image
           ]))
         })
       })
-      //NEXT STEP: draw the initial unsplit view on the canvas
+      //draw the initial unsplit view on each canvas
+      canvasMap.current?.forEach(({ node, stage, points }) => {
+        //empty the display list
+        stage.removeAllChildren()
+        points.forEach(([_rg, valAtRg]) => {
+          valAtRg.forEach(([_wave, valAtWave]) => {
+            if (valAtWave !== null) {
+              valAtWave.forEach(([pg, valAtPg]) => {
+                //set the x and y properties on the noparty bitmaps to the unsplit view
+                //and when those coordinates are defined, add the bitmap to the stage
+                valAtPg.bitMapsNoParty.forEach((bitmap, bitmapIdx) => {
+                  const coordinates = valAtPg.pointsViews.unsplit[bitmapIdx]
+                  if (coordinates) {
+                    bitmap.set({ x: coordinates.x, y: coordinates.y })
+                    stage.addChild(bitmap)
+                  }
+                })
+              })
+            }
+          })
+        })
+        //all bitmaps are added to the stage, so draw it!
+        stage.update()
+      })
       setCanvasesReady(true)
     }
   }, [coordinates, images])
