@@ -8,7 +8,7 @@ import type {
 //data
 import circles from "../../../config/circles.json";
 //hooks
-import useCoordinates from "../../../hooks/useCoordinates";
+import { useCoordinates } from "../../../hooks/useCoordinates";
 import useCircleImages from "../../../hooks/use-circle-images";
 import useCanvases from "../../../hooks/useCanvases";
 

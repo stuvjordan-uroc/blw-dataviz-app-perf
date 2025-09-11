@@ -1,5 +1,5 @@
 import makeData from "./functions-and-types/make-data.ts";
-import type { Layouts, Layout, Viz, VizConfig, SegmentViewsUnMapped, PointsMapUnMapped, PointsViews } from "./functions-and-types/types.ts";
+import type { Point, Layouts, Layout, Viz, VizConfig, SegmentViewsUnMapped, PointsMapUnMapped, PointsViews } from "./functions-and-types/types.ts";
 import { vizAtImp } from "./functions-and-types/viz-at-imp.ts";
 import {
   unMapPAndC
@@ -40,4 +40,5 @@ export type VizByImpVar = Record<string, {
 }>
 export type { PointsMapUnMapped };
 export type { SegmentViewsUnMapped };
-export type { PointsViews }
+export type { PointsViews };
+export type { Point };

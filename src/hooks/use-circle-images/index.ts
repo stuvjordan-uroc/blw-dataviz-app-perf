@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import PathMapToPromise from "./pathmap-to-promise";
 type ImageState =
   | {
-    data: Map<string, HTMLImageElement>;
+    data: Map<string, { image: HTMLImageElement, cjsBitmap: createjs.Bitmap }>;
     isLoading: false;
     didError: false;
   }

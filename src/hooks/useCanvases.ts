@@ -25,7 +25,10 @@ export default function useCanvases() {
   const canvasRefCallBackFactory = (impVarName: string) => (
     (node: HTMLCanvasElement) => {
       const canvasMap = getCanvasMap();
-      canvasMap.set(impVarName, { node: node, stage: new createjs.Stage(node) });
+      canvasMap.set(
+        impVarName,
+        { node: node, stage: new createjs.Stage(node) }
+      );
       return (() => {
         canvasMap.delete(impVarName)
       })

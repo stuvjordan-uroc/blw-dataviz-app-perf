@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import type { SegmentViewsUnMapped, PointsMapUnMapped } from "../../build-data";
-type RawCoordinates = Record<
+export type RawCoordinates = Record<
   string,
   {
     segments: SegmentViewsUnMapped;
@@ -9,22 +9,22 @@ type RawCoordinates = Record<
 >;
 type CoordinatesState =
   | {
-      data: null;
-      isLoading: true;
-      didError: false;
-    }
+    data: null;
+    isLoading: true;
+    didError: false;
+  }
   | {
-      data: null;
-      isLoading: false;
-      didError: true;
-    }
+    data: null;
+    isLoading: false;
+    didError: true;
+  }
   | {
-      data: RawCoordinates;
-      isLoading: false;
-      didError: false;
-    };
+    data: RawCoordinates;
+    isLoading: false;
+    didError: false;
+  };
 
-export default function useCoordinates(pathToCoordinates: string) {
+export function useCoordinates(pathToCoordinates: string) {
   const [coordinates, setCoordinates] = useState<CoordinatesState>({
     data: null,
     isLoading: true,
