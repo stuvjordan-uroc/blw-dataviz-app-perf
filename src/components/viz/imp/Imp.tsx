@@ -17,6 +17,7 @@ import { useCircleImages } from "../../../hooks/use-circle-images";
 import useCanvases from "../../../hooks/useCanvases";
 //component
 import ImpVarDisplay from "./ImpVarDisplay";
+import useDrawingData from "../../../hooks/useDrawingData";
 
 export default function Imp({
   breakPoint,
@@ -57,73 +58,29 @@ export default function Imp({
   const [canvasRefsCallBackFactory, canvasesReady, canvasMap] = useCanvases();
 
   //create a data structure for drawing on the canvases
-  const forDrawing =
-    coordinates.data === null || images.data === null || !canvasesReady
-      ? null
-      : new Map(
-          coordinates.data.entries().map(([impVar, { pointGroups }]) => {
-            const noPartyImage = images.data.get("none");
-            const stage =
-              canvasMap.current && canvasMap.current.get(impVar)
-                ? new createjs.Stage(canvasMap.current.get(impVar)!)
-                : undefined;
-            const pointGroupsWithAssets = pointGroups.map((pointGroup) => {
-              const partyImage = images.data.get(pointGroup.pg.join("-"));
-              return {
-                ...pointGroup,
-                bitMapsNoParty: noPartyImage
-                  ? pointGroup.coordinates.unsplit.map(
-                      () => new createjs.Bitmap(noPartyImage)
-                    )
-                  : [],
-                bitMapsParty: partyImage
-                  ? pointGroup.coordinates.unsplit.map(
-                      () => new createjs.Bitmap(partyImage)
-                    )
-                  : [],
-              };
-            });
-            return [
-              impVar,
-              {
-                question: questions.prompts.find(
-                  (v) => v.variable_name === impVar
-                )?.question_text,
-                stage: stage,
-                pointGroups: pointGroupsWithAssets,
-              },
-            ] as [
-              string,
-              {
-                question: string | undefined;
-                stage: createjs.Stage | undefined;
-                pointGroups: {
-                  bitMapsNoParty: createjs.Bitmap[];
-                  bitMapsParty: createjs.Bitmap[];
-                  rg: string[];
-                  wave: number;
-                  pg: string[];
-                  coordinates: PointsViews;
-                }[];
-              },
-            ];
-          })
-        );
-
+  const forDrawing = useDrawingData(
+    coordinates,
+    images,
+    canvasesReady,
+    canvasMap
+  );
   //render
   if (forDrawing) {
     return (
       <div className="imp-viz-root">
         <div>Controls here</div>
         <div className="imp-viz-vizarray">
-          {forDrawing.entries().map(([impVarName, { question }]) => (
-            <ImpVarDisplay
-              key={impVarName}
-              impVarQuestionText={question}
-              layout={layoutConfig}
-              vizRefCallBack={canvasRefsCallBackFactory(impVarName)}
-            />
-          ))}
+          {forDrawing
+            .entries()
+            .toArray()
+            .map(([impVarName, { question }]) => (
+              <ImpVarDisplay
+                key={impVarName}
+                impVarQuestionText={question}
+                layout={layoutConfig}
+                vizRefCallBack={canvasRefsCallBackFactory(impVarName)}
+              />
+            ))}
         </div>
       </div>
     );

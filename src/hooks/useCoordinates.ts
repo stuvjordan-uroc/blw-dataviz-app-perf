@@ -79,7 +79,6 @@ export function useCoordinates(pathToCoordinates: string) {
           .json()
           .then((data: RawCoordinates) => {
             if (!ignore) {
-              console.log("successfully read the json from the coordinates file")
               setCoordinates({
                 data: rawCoordinatesToPointGroups(data),
                 isLoading: false,
@@ -87,8 +86,7 @@ export function useCoordinates(pathToCoordinates: string) {
               });
             }
           })
-          .catch((error: unknown) => {
-            console.log("json threw an error when we tried to read the coordinates buffer from", pathToCoordinates, error as Error)
+          .catch(() => {
             setCoordinates({
               data: null,
               isLoading: false,
@@ -97,7 +95,6 @@ export function useCoordinates(pathToCoordinates: string) {
           });
       })
       .catch(() => {
-        console.log("fetch threw an error when we tried to get coordinates file at", pathToCoordinates)
         setCoordinates({
           data: null,
           isLoading: false,

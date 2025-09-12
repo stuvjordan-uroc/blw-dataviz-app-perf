@@ -53,6 +53,6 @@ export function useCircleImages(
       image.src = path
     })
     return (() => { ignore = true })
-  })
+  }, [])
   return circleImages;
 }
