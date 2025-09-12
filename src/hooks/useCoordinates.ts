@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import type { SegmentViewsUnMapped, PointsMapUnMapped } from "../../build-data";
+import type { SegmentViewsUnMapped, PointsMapUnMapped, PointsViews } from "../../build-data";
 export type RawCoordinates = Record<
   string,
   {
@@ -19,10 +19,49 @@ export type CoordinatesState =
     didError: true;
   }
   | {
-    data: RawCoordinates;
+    data: Map<string, {
+      segments: SegmentViewsUnMapped;
+      pointGroups: {
+        rg: string[];
+        wave: number;
+        pg: string[];
+        coordinates: PointsViews;
+      }[];
+    }>;
     isLoading: false;
     didError: false;
   };
+
+function rawCoordinatesToPointGroups(rawCoordinates: RawCoordinates) {
+  return new Map(Object.entries(rawCoordinates).map(([impVar, { segments, points }]) => {
+    const pointGroups = points
+      .map(([rg, valAtRg]) => valAtRg
+        .filter(([wave, _valAtWave]) => wave !== null)
+        .map(([wave, valAtWave]) => valAtWave!
+          .map(([pg, pointsViews]) => ({
+            rg: rg,
+            wave: wave,
+            pg: pg,
+            coordinates: pointsViews
+          }))
+        )
+      ).flat(2)
+    return ([
+      impVar,
+      {
+        segments: segments,
+        pointGroups: pointGroups
+      }
+    ] as [string, {
+      segments: SegmentViewsUnMapped, pointGroups: {
+        rg: string[];
+        wave: number;
+        pg: string[];
+        coordinates: PointsViews;
+      }[]
+    }])
+  }))
+}
 
 export function useCoordinates(pathToCoordinates: string) {
   const [coordinates, setCoordinates] = useState<CoordinatesState>({
@@ -41,7 +80,7 @@ export function useCoordinates(pathToCoordinates: string) {
           .then((data: RawCoordinates) => {
             if (!ignore) {
               setCoordinates({
-                data: data,
+                data: rawCoordinatesToPointGroups(data),
                 isLoading: false,
                 didError: false,
               });

@@ -1,24 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import * as createjs from 'createjs-module'
-import type { PointsViews } from "../../build-data";
+import type { PointsViews, SegmentViewsUnMapped } from "../../build-data";
 import type { CoordinatesState } from "./useCoordinates";
 import type { ImageState } from "./use-circle-images";
 
-interface PointsViewsAndBitMaps {
-  pointsViews: PointsViews,
-  bitMapsNoParty: createjs.Bitmap[],
+interface PointGroup {
+  rg: string[];
+  wave: number;
+  pg: string[];
+  coordinates: PointsViews;
+  bitMapsNoParty: createjs.Bitmap[]
   bitMapsParty: createjs.Bitmap[]
 }
-type Points = [
-  string[],//response group
-  [
-    number, //wave
-    null | [
-      string,  //party group as string
-      PointsViewsAndBitMaps //see above
-    ][]
-  ][]
-][]
 
 
 
@@ -35,7 +28,17 @@ export default function useCanvases(coordinates: CoordinatesState, images: Image
   and (2) the data needed to know where in the canvas to position these bitmaps
   depending on the selected by the user
   */
-  const canvasMap = useRef<null | Map<string, { node: HTMLCanvasElement, stage: createjs.Stage, points: Points }>>(null);
+  const canvasMap = useRef<
+    null |
+    Map<
+      string,
+      {
+        node: HTMLCanvasElement,
+        stage: createjs.Stage,
+        pointGroups: PointGroup[]
+      }
+    >
+  >(null);
   //function used by canvas nodes to get the vizRefs map so they can put themselves into the map)
   const getCanvasMap = () => {
     //If the ref has been created, return it
@@ -59,7 +62,7 @@ export default function useCanvases(coordinates: CoordinatesState, images: Image
         {
           node: node, //use the node to populate the node propery
           stage: new createjs.Stage(node), //create the canvas stage
-          points: [] //points starts as an empty array.  We'll run a useEffect below to populate it when the data we need is ready
+          pointGroups: [] as PointGroup[] //points starts as an empty array.  We'll run a useEffect below to populate it when the data we need is ready
         }
       );
       return (() => {
@@ -78,59 +81,36 @@ export default function useCanvases(coordinates: CoordinatesState, images: Image
       //hydrate the canvas map with the data
       canvasMap.current?.forEach((val, impVar, map) => {
         //get the coordinate data at the current impVar
-        const dataAtImpVar = coordinates.data[impVar]
+        const dataAtImpVar = coordinates.data.get(impVar)
         //set the current value of the canvases map based on the data...
-        map.set(impVar, {
-          ...val,
-          points: dataAtImpVar.points.map(([rg, unMapAtRg]) => ([
-            rg,
-            unMapAtRg.map(([wave, unMapAtWave]) => ([
-              wave,
-              unMapAtWave === null ? null : unMapAtWave.map(([pg, pointsViews]) => {
-                //at the given rg-wave-pg...
-                //construct the party string
-                const partyString = pg.join("-")
-                //get a reference to the image for the "none" circle
-                const noPartyImage = images.data.get("none")
-                //get a reference to the image for the circle for the current pg
-                const partyImage = images.data.get(partyString)
-                //return the entry for the current rg-wave-pg
-                return ([
-                  partyString,
-                  {
-                    //coordinate data for the points at this rg-wave-pg
-                    pointsViews: pointsViews,
-                    //bitmaps that will be used to represent points at this rg-wave-pg in non-byParty views
-                    bitMapsNoParty: noPartyImage ? pointsViews.unsplit.map(() => new createjs.Bitmap(noPartyImage)) : [],
-                    //bitmaps that will  used to represent points at this rg-wave-pg in the byParty views
-                    bitMapsParty: partyImage ? pointsViews.unsplit.map(() => new createjs.Bitmap(partyImage)) : [],
-                  }
-                ])
+        if (dataAtImpVar) {
+          const noPartyImage = images.data.get("none")
+          map.set(impVar, {
+            ...val,
+            pointGroups: dataAtImpVar.pointGroups.map(pointGroup => {
+              const partyImage = images.data.get(pointGroup.pg.join("-"))
+              return ({
+                ...pointGroup,
+                bitMapsNoParty: noPartyImage ? pointGroup.coordinates.unsplit.map(() => new createjs.Bitmap(noPartyImage)) : [],
+                bitMapsParty: partyImage ? pointGroup.coordinates.unsplit.map(() => new createjs.Bitmap(partyImage)) : []
               })
-            ]))
-          ]))
-        })
+            })
+          })
+        }
       })
       //draw the initial unsplit view on each canvas
-      canvasMap.current?.forEach(({ node, stage, points }) => {
+      canvasMap.current?.forEach(({ node, stage, pointGroups }) => {
         //empty the display list
         stage.removeAllChildren()
-        points.forEach(([_rg, valAtRg]) => {
-          valAtRg.forEach(([_wave, valAtWave]) => {
-            if (valAtWave !== null) {
-              valAtWave.forEach(([pg, valAtPg]) => {
-                //set the x and y properties on the noparty bitmaps to the unsplit view
-                //and when those coordinates are defined, add the bitmap to the stage
-                valAtPg.bitMapsNoParty.forEach((bitmap, bitmapIdx) => {
-                  const coordinates = valAtPg.pointsViews.unsplit[bitmapIdx]
-                  if (coordinates) {
-                    bitmap.set({ x: coordinates.x, y: coordinates.y })
-                    stage.addChild(bitmap)
-                  }
-                })
-              })
-            }
+        //at each pointGroup...
+        pointGroups.forEach((pointGroup) => {
+          //set the x and y properties of the noparty bitmaps
+          //to the coordinates at the unsplit view
+          pointGroup.bitMapsNoParty.forEach((bm, bmIdx) => {
+            bm.set({ x: pointGroup.coordinates.unsplit[bmIdx].x, y: pointGroup.coordinates.unsplit[bmIdx].y })
           })
+          //add those bitmaps to the stage
+          stage.addChild(...pointGroup.bitMapsNoParty)
         })
         //all bitmaps are added to the stage, so draw it!
         stage.update()
@@ -145,7 +125,7 @@ export default function useCanvases(coordinates: CoordinatesState, images: Image
     React.RefObject<Map<string, {
       node: HTMLCanvasElement;
       stage: createjs.Stage;
-      points: Points;
+      pointGroups: PointGroup[];
     }> | null>
   ]
 }

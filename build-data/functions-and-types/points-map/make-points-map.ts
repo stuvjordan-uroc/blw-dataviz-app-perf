@@ -36,7 +36,6 @@ export default function makePointsMap(segmentViews: SegmentViews): PointsMap {
     segmentViews.expanded.byResponseAndWaveAndParty,
     pointsMap
   );
-  /* TODO */
   ////byResponseAndWaveAndParty
   allocatePointsByResponseAndWaveAndPartyExpanded(
     segmentViews.expanded.byResponseAndWaveAndParty,
