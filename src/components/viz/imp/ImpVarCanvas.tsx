@@ -3,10 +3,6 @@ export default function ImpVarCanvas({
   width,
   height,
   vizRefCallBack,
-  //vizRefs,
-  //impVarName,
-  //points,
-  //breakPointKey,
 }: {
   width: number;
   height: number;

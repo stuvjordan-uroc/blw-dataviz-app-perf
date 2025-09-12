@@ -36,7 +36,7 @@ function rawCoordinatesToPointGroups(rawCoordinates: RawCoordinates) {
   return new Map(Object.entries(rawCoordinates).map(([impVar, { segments, points }]) => {
     const pointGroups = points
       .map(([rg, valAtRg]) => valAtRg
-        .filter(([wave, _valAtWave]) => wave !== null)
+        .filter(([_wave, valAtWave]) => valAtWave !== null)
         .map(([wave, valAtWave]) => valAtWave!
           .map(([pg, pointsViews]) => ({
             rg: rg,
@@ -79,6 +79,7 @@ export function useCoordinates(pathToCoordinates: string) {
           .json()
           .then((data: RawCoordinates) => {
             if (!ignore) {
+              console.log("successfully read the json from the coordinates file")
               setCoordinates({
                 data: rawCoordinatesToPointGroups(data),
                 isLoading: false,
@@ -86,7 +87,8 @@ export function useCoordinates(pathToCoordinates: string) {
               });
             }
           })
-          .catch(() => {
+          .catch((error: unknown) => {
+            console.log("json threw an error when we tried to read the coordinates buffer from", pathToCoordinates, error as Error)
             setCoordinates({
               data: null,
               isLoading: false,
@@ -95,6 +97,7 @@ export function useCoordinates(pathToCoordinates: string) {
           });
       })
       .catch(() => {
+        console.log("fetch threw an error when we tried to get coordinates file at", pathToCoordinates)
         setCoordinates({
           data: null,
           isLoading: false,
