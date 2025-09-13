@@ -13,9 +13,9 @@ import dataMeta from "../../data/data-meta.json";
 import { useCoordinates } from "../../hooks/useCoordinates";
 import { useCircleImages } from "../../hooks/use-circle-images";
 import useCanvases from "../../hooks/useCanvases";
-import useDrawingData from "../../hooks/useDrawingData";
 //components
 import Spinner from "../Spinner";
+import useView from "../../hooks/useView";
 
 export default function Imp({
   breakPoint,
@@ -24,10 +24,10 @@ export default function Imp({
   breakPoint: BreakpointKey;
   layoutConfig: BreakpointConfig;
 }) {
-  //fetch coordinates along with states tracking fetch status (loading/error)
+  //fetch coordinates and get state tracking coordinates and their status (loading/error)
   const coordinates = useCoordinates(`/coordinates/viz-${breakPoint}.json`);
 
-  //state tracking the images and the status of their loading
+  //load images and get state images and their status (loading/error)
   const images = useCircleImages(
     new Map(
       (circles.fillByPartyGroup as [string[], string][]).map(
@@ -41,27 +41,17 @@ export default function Imp({
   );
 
   //set up the canvases
-  /* 
-  useCanvases uses useRef to create a map which takes each impVar name to an object
-  The object cooresponding to each impVar is like this:
-  {
-    node: HTMLCanvasNode //the html node for the canvas
-    stage: createjs.Stage //createjs Stage for drawing stuff on the canvas
-    points: 
-  }
-  */
-  //canvas ref callbacks,
-  //state tracking whether the canvases are rendered and thus ready to be drawn on
-  //map taking each impVar to its canvas node and a createjs Stage for drawing
+  //set up the canvas refs, getting..
+  // a callback to populate the refs (canvasRefsCallBackFactory),
+  //a state tracking whether canvases are in the dom and ready to be drawn on (canvasesReady)
+  //and the map (which is a ref) that takes each impVar to its canvas canvasMap
   const [canvasRefsCallBackFactory, canvasesReady, canvasMap] = useCanvases();
 
-  //create a data structure for drawing on the canvases
-  const forDrawing = useDrawingData(
-    coordinates,
-    images,
-    canvasesReady,
-    canvasMap
-  );
+  //get a state tracking which view is being displayed, and trigger the canvases
+  //to show the unsplit view once the coordinates and images are loaded and the
+  //canvases are ready
+  const viewState = useView(coordinates, images, canvasesReady, canvasMap);
+
   //render
   if (coordinates.didError || images.didError) {
     return <div>Something went wrong</div>;
@@ -76,7 +66,7 @@ export default function Imp({
       <div>Controls here</div>
       <div className="imp-viz-vizarray">
         {questions.prompts.map(({ variable_name, question_text }) => (
-          <div className="impvar-display-root">
+          <div key={variable_name} className="impvar-display-root">
             <div>{question_text}</div>
             <div className="impvar-canvas-container">
               {(coordinates.isLoading || images.isLoading) ?? <Spinner />}
