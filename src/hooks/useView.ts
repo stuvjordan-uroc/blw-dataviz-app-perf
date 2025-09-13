@@ -3,14 +3,21 @@ import type { ImageState } from "./use-circle-images";
 import type { CoordinatesState } from "./useCoordinates";
 import createjs from "createjs-module";
 
-type ViewState = null | {
-  response: {
-    collapsed: boolean,
-    expanded: boolean
-  },
-  party: boolean,
-  wave: boolean
-}
+export type DrawingData = Map<string, {
+  stage: createjs.Stage | undefined;
+  pointGroups: {
+    bitMapsNoParty: createjs.Bitmap[];
+    bitMapsParty: createjs.Bitmap[];
+    rg: string[];
+    wave: number;
+    pg: string[];
+    coordinates: PointsViews;
+  }[];
+}> | null
+
+export type ViewState = null |
+["unsplit", null] |
+["collapsed" | "expanded", "byResponse" | "byResponseAndWave" | "byResponseAndParty" | "byResponseAndWaveAndParty"]
 
 export default function useView(
   coordinates: CoordinatesState,
@@ -93,14 +100,7 @@ export default function useView(
           }
         })
         //now set the view to unsplit
-        return ({
-          response: {
-            expanded: false,
-            collapsed: false
-          },
-          wave: false,
-          party: false
-        })
+        return (["unsplit", null])
       })
     }
 
