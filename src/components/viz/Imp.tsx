@@ -69,7 +69,12 @@ export default function Imp({
           <div key={variable_name} className="impvar-display-root">
             <div>{question_text}</div>
             <div className="impvar-canvas-container">
-              {(coordinates.isLoading || images.isLoading) ?? <Spinner />}
+              {(images.isLoading || coordinates.isLoading) && (
+                <Spinner
+                  canvasWidth={layoutConfig.vizWidth}
+                  canvasHeight={canvasHeight}
+                />
+              )}
               <canvas
                 width={layoutConfig.vizWidth}
                 height={canvasHeight}
