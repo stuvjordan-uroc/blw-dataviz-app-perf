@@ -1,7 +1,7 @@
 import "./VizTabs.css";
 import * as Tabs from "@radix-ui/react-tabs";
 import { useInnerWidth } from "../../hooks/useInnerWidth";
-import Imp from "./imp/Imp";
+import Imp from "./Imp";
 
 export default function VizTabs() {
   /* 

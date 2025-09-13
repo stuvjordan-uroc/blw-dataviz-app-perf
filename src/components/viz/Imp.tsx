@@ -1,23 +1,21 @@
 //css
 import "./Imp.css";
-//modules
-import createjs from "createjs-module";
 //types
 import type {
   BreakpointKey,
   BreakpointConfig,
-} from "../../../config/layouts-types";
-import type { PointsViews } from "../../../../build-data";
+} from "../../config/layouts-types";
 //data
-import circles from "../../../config/circles.json";
-import questions from "../../../data/questions.json";
+import circles from "../../config/circles.json";
+import questions from "../../data/questions.json";
+import dataMeta from "../../data/data-meta.json";
 //hooks
-import { useCoordinates } from "../../../hooks/useCoordinates";
-import { useCircleImages } from "../../../hooks/use-circle-images";
-import useCanvases from "../../../hooks/useCanvases";
-//component
-import ImpVarDisplay from "./ImpVarDisplay";
-import useDrawingData from "../../../hooks/useDrawingData";
+import { useCoordinates } from "../../hooks/useCoordinates";
+import { useCircleImages } from "../../hooks/use-circle-images";
+import useCanvases from "../../hooks/useCanvases";
+import useDrawingData from "../../hooks/useDrawingData";
+//components
+import Spinner from "../Spinner";
 
 export default function Imp({
   breakPoint,
@@ -65,29 +63,32 @@ export default function Imp({
     canvasMap
   );
   //render
-  if (forDrawing) {
-    return (
-      <div className="imp-viz-root">
-        <div>Controls here</div>
-        <div className="imp-viz-vizarray">
-          {forDrawing
-            .entries()
-            .toArray()
-            .map(([impVarName, { question }]) => (
-              <ImpVarDisplay
-                key={impVarName}
-                impVarQuestionText={question}
-                layout={layoutConfig}
-                vizRefCallBack={canvasRefsCallBackFactory(impVarName)}
-              />
-            ))}
-        </div>
-      </div>
-    );
-  }
-  //if we get here, coordinates and/or images are loading or errored
   if (coordinates.didError || images.didError) {
     return <div>Something went wrong</div>;
   }
-  return <div>Loading...</div>;
+  //if we get here, coordinates and images are each either loading or ready
+  const canvasHeight =
+    layoutConfig.labelHeight +
+    (layoutConfig.waveHeight + layoutConfig.labelHeight) *
+      dataMeta.waves.length;
+  return (
+    <div className="imp-viz-root">
+      <div>Controls here</div>
+      <div className="imp-viz-vizarray">
+        {questions.prompts.map(({ variable_name, question_text }) => (
+          <div className="impvar-display-root">
+            <div>{question_text}</div>
+            <div className="impvar-canvas-container">
+              {(coordinates.isLoading || images.isLoading) ?? <Spinner />}
+              <canvas
+                width={layoutConfig.vizWidth}
+                height={canvasHeight}
+                ref={canvasRefsCallBackFactory(variable_name)}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
