@@ -1,6 +1,61 @@
-import type { DrawingData, ViewState } from "./useView";
-import type { Point, PointsViews } from "../../build-data";
-import createjs from "createjs-module";
+import type { DrawingData, DrawingDataAtImpVar, ViewState } from "./useView";
+import type { PointsViews } from "../../build-data";
+
+export function drawPoints(
+  {
+    drawingContext,
+    canvasWidth,
+    canvasHeight,
+    noPartyOpacity,
+    partyOpacity,
+    pointGroups
+  }: DrawingDataAtImpVar,
+  imageMap: Map<string, HTMLImageElement>
+) {
+  if (drawingContext && canvasWidth && canvasHeight) {
+    //clear the context
+    drawingContext.clearRect(0, 0, canvasWidth, canvasHeight);
+    //get the no party image
+    const noPartyImage = noPartyOpacity > 0 ? imageMap.get("none") : null;
+    //draw
+    pointGroups.forEach(({ imagesNoParty, imagesParty, pg }) => {
+      //no party images
+      if (noPartyImage) {
+        if (noPartyOpacity >= 1) {
+          imagesNoParty.forEach(({ x, y }) => {
+            drawingContext.drawImage(noPartyImage, x, y)
+          })
+        } else {
+          drawingContext.save();
+          drawingContext.globalAlpha = noPartyOpacity;
+          imagesNoParty.forEach(({ x, y }) => {
+            drawingContext.drawImage(noPartyImage, x, y)
+          })
+          drawingContext.restore();
+        }
+      }
+      //party image
+      const partyImage = partyOpacity > 0 ? imageMap.get(pg.join("-")) : null
+      if (partyImage) {
+        if (partyOpacity >= 1) {
+          imagesParty.forEach(({ x, y }) => {
+            drawingContext.drawImage(partyImage, x, y)
+          })
+        } else {
+          drawingContext.save();
+          drawingContext.globalAlpha = partyOpacity;
+          imagesParty.forEach(({ x, y }) => {
+            drawingContext.drawImage(partyImage, x, y)
+          })
+          drawingContext.restore();
+        }
+      }
+    })
+  }
+}
+
+
+
 
 export function transitionView(
   prevView: ViewState,

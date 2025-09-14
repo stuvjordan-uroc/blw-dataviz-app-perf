@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import type { ImageState } from "./use-circle-images";
 import type { CoordinatesState } from "./useCoordinates";
 import type { PointsViews } from "../../build-data";
+import { drawPoints } from "./transitionView";
 
-export type DrawingData = Map<string, {
+export type DrawingDataAtImpVar = {
   drawingContext: null | CanvasRenderingContext2D
   canvasWidth: null | number,
   canvasHeight: null | number,
@@ -23,7 +24,9 @@ export type DrawingData = Map<string, {
     pg: string[];
     coordinates: PointsViews;
   }[];
-}> | null
+}
+
+export type DrawingData = Map<string, DrawingDataAtImpVar> | null
 
 export interface ViewState {
   pending: boolean,
@@ -102,10 +105,9 @@ export default function useView(
         //draw the unsplit views on the canvas
         drawingData.forEach(({ drawingContext, canvasWidth, canvasHeight, pointGroups, ...dataAtImpVar }) => {
           if (drawingContext && canvasWidth && canvasHeight) {
-            //set the opacities
+            //set the opacities and image coordinates for the unsplit view
             dataAtImpVar.noPartyOpacity = 1;
             dataAtImpVar.partyOpacity = 0;
-            //loop through the pointGroups to set the image coordinates
             pointGroups.forEach(({ imagesNoParty, coordinates }) => {
               //set the coordinates for the noParty images
               imagesNoParty.forEach((image, idx) => {
@@ -115,45 +117,7 @@ export default function useView(
               //don't bother with imagesNoParty, because we set partyOpacity to zero
             })
             //draw the images
-            //TO DO: Write this as a function in transitionView.ts
-            //clear context
-            drawingContext.clearRect(0, 0, canvasWidth, canvasHeight)
-            //get the no-party image
-            const noPartyImage = dataAtImpVar.noPartyOpacity > 0 ? images.data.get("none") : null
-            //draw
-            pointGroups.forEach(({ imagesNoParty, imagesParty, pg }) => {
-              //no party images
-              if (noPartyImage) {
-                if (dataAtImpVar.noPartyOpacity >= 1) {
-                  imagesNoParty.forEach(({ x, y }) => {
-                    drawingContext.drawImage(noPartyImage, x, y)
-                  })
-                } else {
-                  drawingContext.save();
-                  drawingContext.globalAlpha = dataAtImpVar.noPartyOpacity;
-                  imagesNoParty.forEach(({ x, y }) => {
-                    drawingContext.drawImage(noPartyImage, x, y)
-                  })
-                  drawingContext.restore();
-                }
-              }
-              //party image
-              const partyImage = dataAtImpVar.partyOpacity > 0 ? images.data.get(pg.join("-")) : null
-              if (partyImage) {
-                if (dataAtImpVar.partyOpacity >= 1) {
-                  imagesParty.forEach(({ x, y }) => {
-                    drawingContext.drawImage(partyImage, x, y)
-                  })
-                } else {
-                  drawingContext.save();
-                  drawingContext.globalAlpha = dataAtImpVar.partyOpacity;
-                  imagesParty.forEach(({ x, y }) => {
-                    drawingContext.drawImage(partyImage, x, y)
-                  })
-                  drawingContext.restore();
-                }
-              }
-            })
+            drawPoints({ drawingContext, canvasWidth, canvasHeight, pointGroups, ...dataAtImpVar }, images.data)
           }
         })
         //now set the view to unsplit
