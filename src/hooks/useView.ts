@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type { ImageState } from "./use-circle-images";
 import type { CoordinatesState } from "./useCoordinates";
 import type { PointsViews } from "../../build-data";
-import { drawPoints } from "./transitionView";
+import { drawPoints, setOpacitiesAndCoordinates } from "./transitionView";
 
 export type DrawingDataAtImpVar = {
   drawingContext: null | CanvasRenderingContext2D
@@ -28,14 +28,16 @@ export type DrawingDataAtImpVar = {
 
 export type DrawingData = Map<string, DrawingDataAtImpVar> | null
 
-export interface ViewState {
-  pending: boolean,
-  view:
+export type View =
   | [null, null, null] //unsplit
   | ["expanded" | "collapsed", null, null] //by response expanded
   | ["expanded" | "collapsed", "wave", null] //byResponseAndWave expanded
   | ["expanded" | "collapsed", null, "party"] //byResponseAndParty expanded
   | ["expanded" | "collapsed", "wave", "party"] //byResponseAndWaveAndParty
+
+export interface ViewState {
+  pending: boolean,
+  view: View
 }
 
 export default function useView(
@@ -103,21 +105,12 @@ export default function useView(
     if (coordinates.data && images.data && canvasesReady && drawingData) {
       setView(() => {
         //draw the unsplit views on the canvas
-        drawingData.forEach(({ drawingContext, canvasWidth, canvasHeight, pointGroups, ...dataAtImpVar }) => {
-          if (drawingContext && canvasWidth && canvasHeight) {
+        drawingData.forEach((dataAtImpVar) => {
+          if (dataAtImpVar.drawingContext && dataAtImpVar.canvasWidth && dataAtImpVar.canvasHeight) {
             //set the opacities and image coordinates for the unsplit view
-            dataAtImpVar.noPartyOpacity = 1;
-            dataAtImpVar.partyOpacity = 0;
-            pointGroups.forEach(({ imagesNoParty, coordinates }) => {
-              //set the coordinates for the noParty images
-              imagesNoParty.forEach((image, idx) => {
-                image.x = coordinates.unsplit[idx].x;
-                image.y = coordinates.unsplit[idx].y;
-              })
-              //don't bother with imagesNoParty, because we set partyOpacity to zero
-            })
+            setOpacitiesAndCoordinates(dataAtImpVar, [null, null, null])
             //draw the images
-            drawPoints({ drawingContext, canvasWidth, canvasHeight, pointGroups, ...dataAtImpVar }, images.data)
+            drawPoints(dataAtImpVar, images.data)
           }
         })
         //now set the view to unsplit

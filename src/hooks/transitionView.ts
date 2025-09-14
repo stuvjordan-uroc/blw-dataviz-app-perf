@@ -1,4 +1,4 @@
-import type { DrawingData, DrawingDataAtImpVar, ViewState } from "./useView";
+import type { DrawingData, DrawingDataAtImpVar, View, ViewState } from "./useView";
 import type { PointsViews } from "../../build-data";
 
 export function drawPoints(
@@ -54,8 +54,45 @@ export function drawPoints(
   }
 }
 
+export function setOpacitiesAndCoordinates(drawingDataAtImpVar: DrawingDataAtImpVar, view: View) {
+  if (view[2] === "party") {
+    //set the opacities
+    drawingDataAtImpVar.noPartyOpacity = 0;
+    drawingDataAtImpVar.partyOpacity = 1;
+    //set the coordinates
+    const viewString = "byResponseAnd" + (view[1] === "wave" ? "WaveAnd" : "") + "Party" as "byResponseAndWaveAndParty" | "byResponseAndWave"
+    drawingDataAtImpVar.pointGroups.forEach(({ imagesParty, coordinates }) => {
+      imagesParty.forEach((image, idx) => {
+        image.x = coordinates[view[0]][viewString][idx].x;
+        image.y = coordinates[view[0]][viewString][idx].y;
+      })
+    })
+  } else {
+    drawingDataAtImpVar.noPartyOpacity = 1;
+    drawingDataAtImpVar.partyOpacity = 0;
+    //set the coordinates
+    if (view[0] === null) {
+      //unsplit view
+      drawingDataAtImpVar.pointGroups.forEach(({ imagesNoParty, coordinates }) => {
+        imagesNoParty.forEach((image, idx) => {
+          image.x = coordinates.unsplit[idx].x;
+          image.y = coordinates.unsplit[idx].y;
+        })
+      })
+    } else {
+      const viewString = "byResponse" + (view[1] === "wave" ? "AndWave" : "") as "byResponse" | "byResponseAndWave"
+      drawingDataAtImpVar.pointGroups.forEach(({ imagesNoParty, coordinates }) => {
+        imagesNoParty.forEach((image, idx) => {
+          image.x = coordinates[view[0]][viewString][idx].x;
+          image.y = coordinates[view[0]][viewString][idx].y;
+        })
+      })
+    }
+  }
 
+}
 
+//NEXT STEP...WRITE THE TRANSITION VIEW FUNCTION, using GSAP
 
 export function transitionView(
   prevView: ViewState,
