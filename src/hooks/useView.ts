@@ -1,44 +1,46 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useTransition } from "react";
 import type { ImageState } from "./use-circle-images";
 import type { CoordinatesState } from "./useCoordinates";
-import type { PointsViews } from "../../build-data";
-import { drawPoints, setOpacitiesAndCoordinates } from "./transitionView";
+import { drawPoints, viewPropsAtRequestedView } from "./transitionView";
 
-export type DrawingDataAtImpVar = {
-  drawingContext: null | CanvasRenderingContext2D
-  canvasWidth: null | number,
-  canvasHeight: null | number,
+
+export type ViewPropsAtImpVar = {
   noPartyOpacity: number,
   partyOpacity: number,
   pointGroups: {
-    imagesNoParty: {
-      x: number,
-      y: number
-    }[];
-    imagesParty: {
+    imageCoordinates: {
       x: number,
       y: number
     }[];
     rg: string[];
     wave: number;
     pg: string[];
-    coordinates: PointsViews;
   }[];
 }
 
-export type DrawingData = Map<string, DrawingDataAtImpVar> | null
+export interface ViewProps {
+  noPartyOpacity: number,
+  partyOpacity: number,
+  coordinates: Map<
+    string,
+    {
+      rg: string[],
+      wave: number,
+      pg: string[],
+      coordinates: { x: number, y: number }[]
+    }[]
+  >
+}
 
-export type View =
+
+export type RequestedView =
   | [null, null, null] //unsplit
   | ["expanded" | "collapsed", null, null] //by response expanded
   | ["expanded" | "collapsed", "wave", null] //byResponseAndWave expanded
   | ["expanded" | "collapsed", null, "party"] //byResponseAndParty expanded
   | ["expanded" | "collapsed", "wave", "party"] //byResponseAndWaveAndParty
 
-export interface ViewState {
-  pending: boolean,
-  view: View
-}
+
 
 export default function useView(
   coordinates: CoordinatesState,
@@ -46,46 +48,15 @@ export default function useView(
   canvasesReady: boolean,
   canvasMap: React.RefObject<Map<string, HTMLCanvasElement> | null>
 ) {
-  const [view, setView] = useState<ViewState>({ pending: true, view: [null, null, null] })
-  const drawingData = coordinates.data === null || images.data === null
-    ? null
-    : new Map(
-      coordinates.data.entries().map(([impVar, { pointGroups }]) => {
-        const noPartyImage = images.data.get("none");
-        const drawingContext = canvasMap.current && canvasMap.current.get(impVar) ? canvasMap.current.get(impVar)!.getContext('2d') : null;
-        const canvasWidth = canvasMap.current && canvasMap.current.get(impVar) ? canvasMap.current.get(impVar)!.width : null;
-        const canvasHeight = canvasMap.current && canvasMap.current.get(impVar) ? canvasMap.current.get(impVar)!.height : null;
-        const pointGroupsWithAssets = pointGroups.map((pointGroup) => {
-          const partyImage = images.data.get(pointGroup.pg.join("-"));
-          return {
-            ...pointGroup,
-            imagesNoParty: noPartyImage
-              ? pointGroup.coordinates.unsplit.map((point) => ({
-                x: point.x,
-                y: point.y
-              }))
-              : [],
-            imagesParty: partyImage
-              ? pointGroup.coordinates.expanded.byResponseAndParty.map((point) => ({
-                x: point.x,
-                y: point.y
-              }))
-              : [],
-          };
-        })
-        return ([
-          impVar,
-          {
-            drawingContext: drawingContext,
-            canvasHeight: canvasHeight,
-            canvasWidth: canvasWidth,
-            partyOpacity: 0,
-            noPartyOpacity: 0,
-            pointGroups: pointGroupsWithAssets
-          }
-        ])
-      })
-    )
+  const [newViewPending, startTransitionToNewView] = useTransition();
+  //wrap the calls of the function that triggers the animation startTransitionToNewView
+  //inside event handlers.  This this will cause "newViewPending" to switch to "true"
+  //when the animation commences (so we can disable the control checkboxes), 
+  // and allow user interaction with other controls (e.g. the tabs) during the animation
+  //https://react.dev/reference/react/useTransition
+
+  //on initial render, set the actual view (a ref) to unsplit (if the data needed to calculate the view exists)
+  const viewProps = useRef<null | ViewProps>(coordinates.data === null ? null : viewPropsAtRequestedView([null, null, null], coordinates.data))
   //useEffect to set the view to unsplit when canvases are ready
   useEffect(() => {
     //this runs on first render, and on ever re-render when 
@@ -94,29 +65,34 @@ export default function useView(
     //on first render, view will be null, and we don't want to change
     //that if coordinates.data or images.data is null, or if canvasesReady is false
     //But if on first render, coordinates.data and images.data are defined, and
-    //canvasesReady is true, we want to switch to the unsplit view
+    //canvasesReady is true, we want to switch to the view defined by viewProps
 
-    //on re-render, where coordinates.data, images.data, or canvasesReady
-    //has changed, we have gone from a state where some data need to draw
-    //wasn't loaded to a state where that data is loaded,
-    //or we've gone from a state where canvases weren't ready for drawing
-    //to a state where they are.
-    //Either way, view will be null, and we want to set it to unsplit.
-    if (coordinates.data && images.data && canvasesReady && drawingData) {
-      setView(() => {
-        //draw the unsplit views on the canvas
-        drawingData.forEach((dataAtImpVar) => {
-          if (dataAtImpVar.drawingContext && dataAtImpVar.canvasWidth && dataAtImpVar.canvasHeight) {
-            //set the opacities and image coordinates for the unsplit view
-            setOpacitiesAndCoordinates(dataAtImpVar, [null, null, null])
-            //draw the images
-            drawPoints(dataAtImpVar, images.data)
-          }
-        })
-        //now set the view to unsplit
-        return ({ pending: false, view: [null, null, null] })
+    //viewProps is a ref, so that means that its value will
+    //be remembered across renders!
+    if (viewProps.current && images.data && canvasesReady && canvasMap.current) {
+      const currentNoPartyOpacity = viewProps.current.noPartyOpacity
+      const currentPartyOpacity = viewProps.current.partyOpacity
+      viewProps.current.coordinates.forEach((value, impVarName) => {
+        const canvasNode = canvasMap.current?.get(impVarName)
+        if (canvasNode) {
+          drawPoints(
+            currentPartyOpacity,
+            currentNoPartyOpacity,
+            value as {
+              rg: string[];
+              wave: number;
+              pg: string[];
+              coordinates: {
+                x: number;
+                y: number;
+              }[];
+            }[],
+            images.data,
+            canvasNode
+          )
+        }
       })
     }
   }, [coordinates.data, images.data, canvasesReady])
-  return view
+  return [viewProps, newViewPending, startTransitionToNewView]
 }

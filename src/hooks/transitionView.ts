@@ -1,60 +1,100 @@
-import type { DrawingData, DrawingDataAtImpVar, View, ViewState } from "./useView";
-import type { PointsViews } from "../../build-data";
+import type { RequestedView, ViewProps } from "./useView";
+import type { SegmentViewsUnMapped, PointsViews } from "../../build-data";
 
-export function drawPoints(
-  {
-    drawingContext,
-    canvasWidth,
-    canvasHeight,
-    noPartyOpacity,
-    partyOpacity,
-    pointGroups
-  }: DrawingDataAtImpVar,
-  imageMap: Map<string, HTMLImageElement>
-) {
-  if (drawingContext && canvasWidth && canvasHeight) {
-    //clear the context
-    drawingContext.clearRect(0, 0, canvasWidth, canvasHeight);
-    //get the no party image
-    const noPartyImage = noPartyOpacity > 0 ? imageMap.get("none") : null;
-    //draw
-    pointGroups.forEach(({ imagesNoParty, imagesParty, pg }) => {
-      //no party images
-      if (noPartyImage) {
-        if (noPartyOpacity >= 1) {
-          imagesNoParty.forEach(({ x, y }) => {
-            drawingContext.drawImage(noPartyImage, x, y)
-          })
-        } else {
-          drawingContext.save();
-          drawingContext.globalAlpha = noPartyOpacity;
-          imagesNoParty.forEach(({ x, y }) => {
-            drawingContext.drawImage(noPartyImage, x, y)
-          })
-          drawingContext.restore();
-        }
-      }
-      //party image
-      const partyImage = partyOpacity > 0 ? imageMap.get(pg.join("-")) : null
-      if (partyImage) {
-        if (partyOpacity >= 1) {
-          imagesParty.forEach(({ x, y }) => {
-            drawingContext.drawImage(partyImage, x, y)
-          })
-        } else {
-          drawingContext.save();
-          drawingContext.globalAlpha = partyOpacity;
-          imagesParty.forEach(({ x, y }) => {
-            drawingContext.drawImage(partyImage, x, y)
-          })
-          drawingContext.restore();
-        }
-      }
-    })
+
+export function viewPropsAtRequestedView(
+  requestedView: RequestedView,
+  coordinateData: Map<string, {
+    segments: SegmentViewsUnMapped;
+    pointGroups: {
+      rg: string[];
+      wave: number;
+      pg: string[];
+      coordinates: PointsViews;
+    }[];
+  }>
+): ViewProps {
+  return {
+    noPartyOpacity: (requestedView[2] === "party") ? 0 : 1,
+    partyOpacity: (requestedView[2] === "party") ? 1 : 0,
+    coordinates: new Map(
+      coordinateData.entries().map(([impVarName, { pointGroups }]) => {
+        const viewKeyString = "byResponse" + (requestedView[1] === "wave" ? "AndWave" : "") + (requestedView[2] === "party" ? "AndParty" : "") as "byResponse" | "byResponseAndWave" | "byResponseAndParty" | "byResponseAndWaveAndParty"
+        return ([
+          impVarName,
+          pointGroups.map(({ rg, wave, pg, coordinates }) => ({
+            rg: rg,
+            wave: wave,
+            pg: pg,
+            coordinates: requestedView[0] === null ? coordinates.unsplit : coordinates[requestedView[0] as "expanded" | "collapsed"][viewKeyString]
+          }))
+        ])
+      })
+    )
   }
 }
 
-export function setOpacitiesAndCoordinates(drawingDataAtImpVar: DrawingDataAtImpVar, view: View) {
+
+export function drawPoints(
+  partyOpacity: number,
+  noPartyOpacity: number,
+  pointGroups: {
+    rg: string[],
+    wave: number,
+    pg: string[],
+    coordinates: { x: number, y: number }[]
+  }[],
+  imageMap: Map<string, HTMLImageElement>,
+  canvas: HTMLCanvasElement
+) {
+  //get the context
+  const ctx = canvas.getContext('2d')
+  if (ctx) {
+    //clear the context
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    //get the noParty image
+    const noPartyImage = noPartyOpacity > 0 ? imageMap.get("none") : null;
+    if (noPartyImage) {
+      pointGroups.forEach(({ coordinates }) => {
+        if (noPartyOpacity >= 1) {
+          coordinates.forEach(({ x, y }) => {
+            ctx.drawImage(noPartyImage, x, y)
+          })
+        } else {
+          ctx.save();
+          ctx.globalAlpha = noPartyOpacity;
+          coordinates.forEach(({ x, y }) => {
+            ctx.drawImage(noPartyImage, x, y)
+          })
+          ctx.restore()
+        }
+      })
+    } else {
+      pointGroups.forEach(({ pg, coordinates }) => {
+        const partyImage = partyOpacity > 0 ? imageMap.get(pg.join("-")) : null;
+        if (partyImage) {
+          if (partyOpacity >= 1) {
+            coordinates.forEach(({ x, y }) => {
+              ctx.drawImage(partyImage, x, y)
+            })
+          } else {
+            ctx.save();
+            ctx.globalAlpha = noPartyOpacity;
+            coordinates.forEach(({ x, y }) => {
+              ctx.drawImage(partyImage, x, y)
+            })
+            ctx.restore()
+          }
+        }
+      })
+    }
+  }
+}
+
+export function setOpacitiesAndCoordinates(
+  drawingDataAtImpVar: DrawingDataAtImpVar,
+  view: View
+) {
   if (view[2] === "party") {
     //set the opacities
     drawingDataAtImpVar.noPartyOpacity = 0;
@@ -92,55 +132,31 @@ export function setOpacitiesAndCoordinates(drawingDataAtImpVar: DrawingDataAtImp
 
 }
 
-//NEXT STEP...WRITE THE TRANSITION VIEW FUNCTION, using GSAP
 
-export function transitionView(
-  prevView: ViewState,
-  newView: ViewState,
+export function transitionToView(
+  oldView: View,
+  newView: View,
   drawingData: DrawingData,
-  setView: React.Dispatch<React.SetStateAction<ViewState>>,
-  duration: number
 ) {
-  if (prevView && newView && drawingData && (prevView[0] !== newView[0] || prevView[1] !== newView[1])) {
-    if ((!prevView[1] || !prevView[1].includes("Party")) && (!newView[1] || !newView[1].includes("Party"))) {
-      //this is one of the easy cases where we don't have to switch bitmaps
-      const tweens = [] as createjs.Tween[];
-      drawingData.forEach(({ stage, pointGroups }) => {
-        if (stage) {
-          pointGroups.forEach(({ bitMapsNoParty, coordinates }: { bitMapsNoParty: createjs.Bitmap[], coordinates: PointsViews }) => {
-            const newCoordinates = (newView[0] === "unsplit") ? coordinates.unsplit : coordinates[newView[0]][newView[1]]
-            bitMapsNoParty.forEach((bm, bmIdx) => {
-              tweens.push(
-                createjs.Tween
-                  .get(bm, { override: true })
-                  .to({ x: newCoordinates[bmIdx].x, y: newCoordinates[bmIdx].y }, duration, createjs.Ease.quartOut)
-              )
-            })
-          })
-          const timeline = new createjs.Timeline(
-            tweens,
-            [],
-            {
-              onComplete: () => { setView(newView) }
-            }
-          )
-        }
-      })
-    }
+  if (drawingData) {
+    //read the opacities of the 
+    //set the opacities and coordinates
+    drawingData.forEach((drawingDataAtImpVar) => {
+      setOpacitiesAndCoordinates(drawingDataAtImpVar, newView)
+    })
+    //configure the animation
+    drawingData.forEach((drawingDataAtImpVar) => {
+
+    })
+
+    ///something here
+
+    //trigger the animation
+
+    ///MAYBE pass it a callback to be called when the animation completes
+
+    ///Doing a setState to change the view state is probably something
+    //that happens in the click handler, not in this function.
   }
-  //do nothing if prevView, newView, or drawingData are null
 }
 
-function diffViews(prevView: ViewState, newView: ViewState) {
-  if (!prevView || !newView) {
-    return undefined
-  }
-  return ({
-    response: {
-      collapsed: +newView.response.collapsed - +prevView.response.collapsed,
-      expanded: +newView.response.expanded - +prevView.response.expanded
-    },
-    party: +newView.party - +prevView.party,
-    wave: +newView.wave - +prevView.wave
-  })
-}
