@@ -1,13 +1,23 @@
 import { useEffect, useState } from "react";
 import type { ImageState } from "./use-circle-images";
 import type { CoordinatesState } from "./useCoordinates";
-import createjs from "createjs-module";
+import type { PointsViews } from "../../build-data";
 
 export type DrawingData = Map<string, {
-  stage: createjs.Stage | undefined;
+  drawingContext: null | CanvasRenderingContext2D
+  canvasWidth: null | number,
+  canvasHeight: null | number,
+  noPartyOpacity: number,
+  partyOpacity: number,
   pointGroups: {
-    bitMapsNoParty: createjs.Bitmap[];
-    bitMapsParty: createjs.Bitmap[];
+    imagesNoParty: {
+      x: number,
+      y: number
+    }[];
+    imagesParty: {
+      x: number,
+      y: number
+    }[];
     rg: string[];
     wave: number;
     pg: string[];
@@ -15,9 +25,15 @@ export type DrawingData = Map<string, {
   }[];
 }> | null
 
-export type ViewState = null |
-["unsplit", null] |
-["collapsed" | "expanded", "byResponse" | "byResponseAndWave" | "byResponseAndParty" | "byResponseAndWaveAndParty"]
+export interface ViewState {
+  pending: boolean,
+  view:
+  | [null, null, null] //unsplit
+  | ["expanded" | "collapsed", null, null] //by response expanded
+  | ["expanded" | "collapsed", "wave", null] //byResponseAndWave expanded
+  | ["expanded" | "collapsed", null, "party"] //byResponseAndParty expanded
+  | ["expanded" | "collapsed", "wave", "party"] //byResponseAndWaveAndParty
+}
 
 export default function useView(
   coordinates: CoordinatesState,
@@ -25,36 +41,41 @@ export default function useView(
   canvasesReady: boolean,
   canvasMap: React.RefObject<Map<string, HTMLCanvasElement> | null>
 ) {
-  const [view, setView] = useState<ViewState>(null)
+  const [view, setView] = useState<ViewState>({ pending: true, view: [null, null, null] })
   const drawingData = coordinates.data === null || images.data === null
     ? null
     : new Map(
       coordinates.data.entries().map(([impVar, { pointGroups }]) => {
         const noPartyImage = images.data.get("none");
-        const stage =
-          canvasMap.current && canvasMap.current.get(impVar)
-            ? new createjs.Stage(canvasMap.current.get(impVar)!)
-            : undefined;
+        const drawingContext = canvasMap.current && canvasMap.current.get(impVar) ? canvasMap.current.get(impVar)!.getContext('2d') : null;
+        const canvasWidth = canvasMap.current && canvasMap.current.get(impVar) ? canvasMap.current.get(impVar)!.width : null;
+        const canvasHeight = canvasMap.current && canvasMap.current.get(impVar) ? canvasMap.current.get(impVar)!.height : null;
         const pointGroupsWithAssets = pointGroups.map((pointGroup) => {
           const partyImage = images.data.get(pointGroup.pg.join("-"));
           return {
             ...pointGroup,
-            bitMapsNoParty: noPartyImage
-              ? pointGroup.coordinates.unsplit.map(
-                () => new createjs.Bitmap(noPartyImage)
-              )
+            imagesNoParty: noPartyImage
+              ? pointGroup.coordinates.unsplit.map((point) => ({
+                x: point.x,
+                y: point.y
+              }))
               : [],
-            bitMapsParty: partyImage
-              ? pointGroup.coordinates.unsplit.map(
-                () => new createjs.Bitmap(partyImage)
-              )
+            imagesParty: partyImage
+              ? pointGroup.coordinates.expanded.byResponseAndParty.map((point) => ({
+                x: point.x,
+                y: point.y
+              }))
               : [],
           };
         })
         return ([
           impVar,
           {
-            stage: stage,
+            drawingContext: drawingContext,
+            canvasHeight: canvasHeight,
+            canvasWidth: canvasWidth,
+            partyOpacity: 0,
+            noPartyOpacity: 0,
             pointGroups: pointGroupsWithAssets
           }
         ])
@@ -78,32 +99,67 @@ export default function useView(
     //Either way, view will be null, and we want to set it to unsplit.
     if (coordinates.data && images.data && canvasesReady && drawingData) {
       setView(() => {
-        //first draw the unsplit views on the canvas
-        drawingData.forEach(({ stage, pointGroups }) => {
-          if (stage) {
-            //clear the stage
-            stage.clear()
-            //loop through the pointGroups
-            pointGroups.forEach(({ bitMapsNoParty, coordinates }) => {
-              //add the no-party bitmaps for the current group to the stage
-              stage.addChild(...bitMapsNoParty)
-              //set the bitmaps x-s and y-s to the unsplit view coordinates
-              bitMapsNoParty.forEach((bm, bmIdx) => {
-                bm.set({
-                  x: coordinates.unsplit[bmIdx].x,
-                  y: coordinates.unsplit[bmIdx].y
-                })
+        //draw the unsplit views on the canvas
+        drawingData.forEach(({ drawingContext, canvasWidth, canvasHeight, pointGroups, ...dataAtImpVar }) => {
+          if (drawingContext && canvasWidth && canvasHeight) {
+            //set the opacities
+            dataAtImpVar.noPartyOpacity = 1;
+            dataAtImpVar.partyOpacity = 0;
+            //loop through the pointGroups to set the image coordinates
+            pointGroups.forEach(({ imagesNoParty, coordinates }) => {
+              //set the coordinates for the noParty images
+              imagesNoParty.forEach((image, idx) => {
+                image.x = coordinates.unsplit[idx].x;
+                image.y = coordinates.unsplit[idx].y;
               })
+              //don't bother with imagesNoParty, because we set partyOpacity to zero
             })
-            //update the stage
-            stage.update()
+            //draw the images
+            //TO DO: Write this as a function in transitionView.ts
+            //clear context
+            drawingContext.clearRect(0, 0, canvasWidth, canvasHeight)
+            //get the no-party image
+            const noPartyImage = dataAtImpVar.noPartyOpacity > 0 ? images.data.get("none") : null
+            //draw
+            pointGroups.forEach(({ imagesNoParty, imagesParty, pg }) => {
+              //no party images
+              if (noPartyImage) {
+                if (dataAtImpVar.noPartyOpacity >= 1) {
+                  imagesNoParty.forEach(({ x, y }) => {
+                    drawingContext.drawImage(noPartyImage, x, y)
+                  })
+                } else {
+                  drawingContext.save();
+                  drawingContext.globalAlpha = dataAtImpVar.noPartyOpacity;
+                  imagesNoParty.forEach(({ x, y }) => {
+                    drawingContext.drawImage(noPartyImage, x, y)
+                  })
+                  drawingContext.restore();
+                }
+              }
+              //party image
+              const partyImage = dataAtImpVar.partyOpacity > 0 ? images.data.get(pg.join("-")) : null
+              if (partyImage) {
+                if (dataAtImpVar.partyOpacity >= 1) {
+                  imagesParty.forEach(({ x, y }) => {
+                    drawingContext.drawImage(partyImage, x, y)
+                  })
+                } else {
+                  drawingContext.save();
+                  drawingContext.globalAlpha = dataAtImpVar.partyOpacity;
+                  imagesParty.forEach(({ x, y }) => {
+                    drawingContext.drawImage(partyImage, x, y)
+                  })
+                  drawingContext.restore();
+                }
+              }
+            })
           }
         })
         //now set the view to unsplit
-        return (["unsplit", null])
+        return ({ pending: false, view: [null, null, null] })
       })
     }
-
   }, [coordinates.data, images.data, canvasesReady])
   return view
 }
