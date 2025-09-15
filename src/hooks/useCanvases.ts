@@ -1,19 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import * as createjs from 'createjs-module'
-import type { PointsViews } from "../../build-data";
-import type { CoordinatesState } from "./useCoordinates";
-import type { ImageState } from "./use-circle-images";
-
-interface PointGroup {
-  rg: string[];
-  wave: number;
-  pg: string[];
-  coordinates: PointsViews;
-  bitMapsNoParty: createjs.Bitmap[]
-  bitMapsParty: createjs.Bitmap[]
-}
-
-
 
 export default function useCanvases() {
   /*
@@ -32,7 +17,10 @@ export default function useCanvases() {
     null |
     Map<
       string,
-      HTMLCanvasElement
+      {
+        node: HTMLCanvasElement,
+        isVisible: boolean
+      }
     >
   >(null);
   //function used by canvas nodes to get the vizRefs map so they can put themselves into the map)
@@ -52,10 +40,14 @@ export default function useCanvases() {
   //https://react.dev/learn/manipulating-the-dom-with-refs#how-to-manage-a-list-of-refs-using-a-ref-callback
   const canvasRefCallBackFactory = (impVarName: string) => (
     (node: HTMLCanvasElement) => {
+      //put ref to canvas node into the canvas map
       const canvasMap = getCanvasMap();
       canvasMap.set(
         impVarName,
-        node
+        {
+          node: node,
+          isVisible: false
+        }
       );
       return (() => {
         canvasMap.delete(impVarName)
@@ -74,6 +66,9 @@ export default function useCanvases() {
   return [canvasRefCallBackFactory, canvasesReady, canvasMap] as [
     (impVarName: string) => (node: HTMLCanvasElement) => () => void,
     boolean,
-    React.RefObject<Map<string, HTMLCanvasElement> | null>
+    React.RefObject<Map<string, {
+      node: HTMLCanvasElement,
+      isVisible: boolean
+    }> | null>
   ]
 }

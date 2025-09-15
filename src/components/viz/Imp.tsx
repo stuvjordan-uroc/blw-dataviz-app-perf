@@ -16,6 +16,7 @@ import useCanvases from "../../hooks/useCanvases";
 //components
 import Spinner from "../Spinner";
 import useView from "../../hooks/useView";
+import ImpVizArray from "./ImpVizArray";
 
 export default function Imp({
   breakPoint,
@@ -50,7 +51,7 @@ export default function Imp({
   //get a state tracking which view is being displayed, and trigger the canvases
   //to show the unsplit view once the coordinates and images are loaded and the
   //canvases are ready
-  const viewState = useView(coordinates, images, canvasesReady, canvasMap);
+  //const viewState = useView(coordinates, images, canvasesReady, canvasMap);
 
   //render
   if (coordinates.didError || images.didError) {
@@ -63,8 +64,22 @@ export default function Imp({
       dataMeta.waves.length;
   return (
     <div className="imp-viz-root">
-      <div>Controls here</div>
-      <div className="imp-viz-vizarray">
+      {canvasesReady ?? <div>Controls here</div>}
+      <ImpVizArray
+        varsAndQs={questions.prompts.map(
+          ({ variable_name, question_text }) => ({
+            varName: variable_name,
+            questionText: question_text,
+          })
+        )}
+        imagesLoading={images.isLoading}
+        coordinatesLoading={coordinates.isLoading}
+        vizWidth={layoutConfig.vizWidth}
+        vizHeight={canvasHeight}
+        canvasRefsCallBackFactory={canvasRefsCallBackFactory}
+        canvasMap={canvasMap}
+      />
+      {/* <div className="imp-viz-vizarray">
         {questions.prompts.map(({ variable_name, question_text }) => (
           <div key={variable_name} className="impvar-display-root">
             <div>{question_text}</div>
@@ -83,7 +98,7 @@ export default function Imp({
             </div>
           </div>
         ))}
-      </div>
+      </div> */}
     </div>
   );
 }
