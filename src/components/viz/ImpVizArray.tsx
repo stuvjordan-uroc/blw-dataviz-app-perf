@@ -1,7 +1,6 @@
 import "./ImpVizArray.css";
 import { useEffect, useRef } from "react";
 import Spinner from "../Spinner";
-import type { RequestedView, ViewData } from "../../hooks/useView";
 
 export default function ImpVizArray({
   varsAndQs,
@@ -29,7 +28,7 @@ export default function ImpVizArray({
       isVisible: boolean;
     }
   > | null>;
-  drawViewHandler: (impVar: string) => void;
+  drawViewHandler: (canvasNode: HTMLCanvasElement) => void;
   clearViewHandler: (impVar: string) => void;
 }) {
   const arrayContainerRef = useRef<null | HTMLDivElement>(null);
@@ -46,15 +45,12 @@ export default function ImpVizArray({
             const nodeWasVisible = nodeInfo.isVisible;
             nodeInfo.isVisible = entry.isIntersecting;
             if (!nodeWasVisible && nodeInfo.isVisible) {
-              drawViewHandler(entry.target.id);
+              drawViewHandler(nodeInfo.node);
             }
             if (nodeWasVisible && !nodeInfo.isVisible) {
               clearViewHandler(entry.target.id);
             }
           }
-        });
-        canvasMap.current?.forEach(({ isVisible }, impVar) => {
-          console.log("Canvas for", impVar, "isVisible is now: ", isVisible);
         });
       },
       {
@@ -66,15 +62,17 @@ export default function ImpVizArray({
         threshold: [0, 1],
       }
     );
-    if (canvasMap.current) {
-      canvasMap.current.forEach(({ node }) => {
-        observer.observe(node);
-      });
+    if (!coordinatesLoading && !imagesLoading) {
+      if (canvasMap.current) {
+        canvasMap.current.forEach(({ node }) => {
+          observer.observe(node);
+        });
+      }
     }
     return () => {
       observer.disconnect();
     };
-  }, []);
+  }, [coordinatesLoading, imagesLoading]);
 
   //TO DO: specify dependences for the above useEffect!!!
   return (
