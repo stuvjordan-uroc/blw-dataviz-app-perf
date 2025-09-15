@@ -16,6 +16,7 @@ import useCanvases from "../../hooks/useCanvases";
 //components
 import useView from "../../hooks/use-view";
 import ImpVizArray from "./ImpVizArray";
+import Controls from "./Controls";
 
 export default function Imp({
   breakPoint,
@@ -75,7 +76,9 @@ export default function Imp({
       dataMeta.waves.length;
   return (
     <div className="imp-viz-root">
-      {canvasesReady ?? <div>Controls here</div>}
+      {canvasesReady && coordinates.data !== null && images.data !== null && (
+        <Controls requestedView={view.requestedView} />
+      )}
       <ImpVizArray
         varsAndQs={questions.prompts.map(
           ({ variable_name, question_text }) => ({
