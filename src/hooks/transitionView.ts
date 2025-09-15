@@ -1,8 +1,8 @@
-import type { RequestedView, ViewProps } from "./useView";
+import type { RequestedView, ViewData } from "./useView";
 import type { SegmentViewsUnMapped, PointsViews } from "../../build-data";
 
 
-export function viewPropsAtRequestedView(
+export function viewDataAtRequestedView(
   requestedView: RequestedView,
   coordinateData: Map<string, {
     segments: SegmentViewsUnMapped;
@@ -13,7 +13,7 @@ export function viewPropsAtRequestedView(
       coordinates: PointsViews;
     }[];
   }>
-): ViewProps {
+): ViewData {
   return {
     noPartyOpacity: (requestedView[2] === "party") ? 0 : 1,
     partyOpacity: (requestedView[2] === "party") ? 1 : 0,

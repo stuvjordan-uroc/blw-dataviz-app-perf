@@ -4,7 +4,7 @@ import type { CoordinatesState } from "./useCoordinates";
 import { drawPoints, viewPropsAtRequestedView } from "./transitionView";
 
 
-export type ViewPropsAtImpVar = {
+export type ViewDataAtImpVar = {
   noPartyOpacity: number,
   partyOpacity: number,
   pointGroups: {
@@ -18,7 +18,7 @@ export type ViewPropsAtImpVar = {
   }[];
 }
 
-export interface ViewProps {
+export interface ViewData {
   noPartyOpacity: number,
   partyOpacity: number,
   coordinates: Map<
@@ -56,7 +56,7 @@ export default function useView(
   //https://react.dev/reference/react/useTransition
 
   //on initial render, set the actual view (a ref) to unsplit (if the data needed to calculate the view exists)
-  const viewProps = useRef<null | ViewProps>(coordinates.data === null ? null : viewPropsAtRequestedView([null, null, null], coordinates.data))
+  const viewProps = useRef<null | ViewData>(coordinates.data === null ? null : viewPropsAtRequestedView([null, null, null], coordinates.data))
   //useEffect to set the view to unsplit when canvases are ready
   useEffect(() => {
     //this runs on first render, and on ever re-render when 

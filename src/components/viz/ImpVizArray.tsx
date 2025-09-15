@@ -1,6 +1,7 @@
 import "./ImpVizArray.css";
 import { useEffect, useRef } from "react";
 import Spinner from "../Spinner";
+import type { RequestedView, ViewData } from "../../hooks/useView";
 
 export default function ImpVizArray({
   varsAndQs,
@@ -10,6 +11,8 @@ export default function ImpVizArray({
   vizHeight,
   canvasRefsCallBackFactory,
   canvasMap,
+  drawViewHandler,
+  clearViewHandler,
 }: {
   varsAndQs: { varName: string; questionText: string }[];
   imagesLoading: boolean;
@@ -26,6 +29,8 @@ export default function ImpVizArray({
       isVisible: boolean;
     }
   > | null>;
+  drawViewHandler: (impVar: string) => void;
+  clearViewHandler: (impVar: string) => void;
 }) {
   const arrayContainerRef = useRef<null | HTMLDivElement>(null);
   //useEffect to set up intersection observer
@@ -35,11 +40,17 @@ export default function ImpVizArray({
     const arrayContainerNode = arrayContainerRef.current;
     const observer = new IntersectionObserver(
       (entries) => {
-        console.log("OBSERVER CALLBACK INVOKED");
         entries.forEach((entry) => {
           const nodeInfo = canvasMap.current?.get(entry.target.id);
           if (nodeInfo) {
+            const nodeWasVisible = nodeInfo.isVisible;
             nodeInfo.isVisible = entry.isIntersecting;
+            if (!nodeWasVisible && nodeInfo.isVisible) {
+              drawViewHandler(entry.target.id);
+            }
+            if (nodeWasVisible && !nodeInfo.isVisible) {
+              clearViewHandler(entry.target.id);
+            }
           }
         });
         canvasMap.current?.forEach(({ isVisible }, impVar) => {

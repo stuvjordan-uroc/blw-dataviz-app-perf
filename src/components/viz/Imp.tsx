@@ -78,6 +78,17 @@ export default function Imp({
         vizHeight={canvasHeight}
         canvasRefsCallBackFactory={canvasRefsCallBackFactory}
         canvasMap={canvasMap}
+        drawViewHandler={(impVar: string) => {
+          console.log("draw view invoked for", impVar);
+        }}
+        clearViewHandler={(impVar: string) => {
+          if (canvasMap.current) {
+            const ctx = canvasMap.current.get(impVar)?.node.getContext("2d");
+            if (ctx) {
+              ctx.clearRect(0, 0, layoutConfig.vizWidth, canvasHeight);
+            }
+          }
+        }}
       />
       {/* <div className="imp-viz-vizarray">
         {questions.prompts.map(({ variable_name, question_text }) => (
