@@ -4,6 +4,7 @@ import computeViewData from "./computeViewData";
 import { drawPoints } from "./draw-points";
 import { patchRequestedView, type RequestedView } from "./requested-view";
 import type { ViewData } from "./computeViewData";
+import { transitionView } from "./transition-view";
 
 export type { ViewData, RequestedView };
 
@@ -43,5 +44,6 @@ export default function useView(coordinates: CoordinatesState) {
     computeViewData: computeViewData,
     drawPointsOnCanvas: drawPoints,
     patchRequestedView: patchRequestedView,
+    transitionView: transitionView,
   };
 }

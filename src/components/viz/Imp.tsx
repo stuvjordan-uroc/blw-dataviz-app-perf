@@ -65,18 +65,55 @@ export default function Imp({
     }
   }
   function updateViewHandler(newRequestedView: RequestedView) {
-    if (coordinates.data) {
+    if (coordinates.data && canvasMap.current && images.data) {
+      //previousViewData
+      const prevViewData = view.viewData.current;
+      //first we mutate the refs holding the
+      //current requested view, and the current viewData
       view.requestedView.current = newRequestedView;
       view.viewData.current = view.computeViewData(
         newRequestedView,
         coordinates.data
       );
+      //By doing so, we cause the vizes that are off screen to
+      //instantly switch to the new view.
+      // (Logic for that is in the ImpVizArray component, which uses intersectionObserver
+      // API to manage views for the out-of-frame canvases)
+
+      //having done that, we now need to run code that causes the canvases that are visible
+      //to transition to the new view
+      const prevNoPartyOpacity = prevViewData?.noPartyOpacity;
+      const newNoPartyOpacity = view.viewData.current.noPartyOpacity;
+      const visibleCanvases = canvasMap.current
+        .entries()
+        .filter(([, { isVisible }]) => isVisible)
+        .toArray();
+
+      canvasMap.current.forEach(({ node, isVisible }, impVar) => {
+        if (isVisible) {
+          //node is a canvas that is currently in-view
+          const prevCoordinatesAtImpVar = prevViewData?.coordinates.get(impVar);
+          const newCoordinatesAtImpVar =
+            view.viewData.current?.coordinates.get(impVar);
+          if (
+            prevNoPartyOpacity &&
+            newNoPartyOpacity &&
+            prevCoordinatesAtImpVar &&
+            newCoordinatesAtImpVar
+          ) {
+            view.transitionView(
+              node,
+              prevNoPartyOpacity,
+              newNoPartyOpacity,
+              prevCoordinatesAtImpVar,
+              newCoordinatesAtImpVar,
+              images.data
+            );
+          }
+        }
+      });
     }
   }
-  //check: What we expect to see is that when we click on the controls...
-  //(1) contol indicators reflecting checked/unchecked change as expected
-  //(2) values of requestedView.current and viewData.current change as expected
-  //(3) off-screen canvases reflect new view when they are scrolled into viewport
 
   //render
   if (coordinates.didError || images.didError) {
