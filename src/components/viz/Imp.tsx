@@ -17,6 +17,7 @@ import useCanvases from "../../hooks/useCanvases";
 import useView, { type RequestedView } from "../../hooks/use-view";
 import ImpVizArray from "./ImpVizArray";
 import Controls from "./Controls";
+import { transitionViews } from "../../hooks/use-view/transition-view";
 
 export default function Imp({
   breakPoint,
@@ -82,13 +83,13 @@ export default function Imp({
 
       //having done that, we now need to run code that causes the canvases that are visible
       //to transition to the new view
-      const prevNoPartyOpacity = prevViewData?.noPartyOpacity;
-      const newNoPartyOpacity = view.viewData.current.noPartyOpacity;
       const visibleCanvases = canvasMap.current
         .entries()
         .filter(([, { isVisible }]) => isVisible)
         .toArray();
-
+      if (prevViewData) {
+        transitionViews(visibleCanvases, prevViewData, view.viewData.current);
+      }
       canvasMap.current.forEach(({ node, isVisible }, impVar) => {
         if (isVisible) {
           //node is a canvas that is currently in-view
