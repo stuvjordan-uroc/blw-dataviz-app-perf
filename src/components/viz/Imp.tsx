@@ -14,7 +14,7 @@ import { useCoordinates } from "../../hooks/useCoordinates";
 import { useCircleImages } from "../../hooks/use-circle-images";
 import useCanvases from "../../hooks/useCanvases";
 //components
-import useView from "../../hooks/use-view";
+import useView, { type RequestedView } from "../../hooks/use-view";
 import ImpVizArray from "./ImpVizArray";
 import Controls from "./Controls";
 
@@ -64,6 +64,19 @@ export default function Imp({
       );
     }
   }
+  function updateViewHandler(newRequestedView: RequestedView) {
+    if (coordinates.data) {
+      view.requestedView.current = newRequestedView;
+      view.viewData.current = view.computeViewData(
+        newRequestedView,
+        coordinates.data
+      );
+    }
+  }
+  //check: What we expect to see is that when we click on the controls...
+  //(1) contol indicators reflecting checked/unchecked change as expected
+  //(2) values of requestedView.current and viewData.current change as expected
+  //(3) off-screen canvases reflect new view when they are scrolled into viewport
 
   //render
   if (coordinates.didError || images.didError) {
@@ -77,7 +90,11 @@ export default function Imp({
   return (
     <div className="imp-viz-root">
       {canvasesReady && coordinates.data !== null && images.data !== null && (
-        <Controls requestedView={view.requestedView} />
+        <Controls
+          requestedView={view.requestedView}
+          patchRequestedView={view.patchRequestedView}
+          updateViewHandler={updateViewHandler}
+        />
       )}
       <ImpVizArray
         varsAndQs={questions.prompts.map(

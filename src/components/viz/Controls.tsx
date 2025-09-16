@@ -1,66 +1,48 @@
 import { useState } from "react";
-import type { FormEventHandler } from "react";
+import type { ChangeEvent } from "react";
 import type { RequestedView } from "../../hooks/use-view";
 import "./Controls.css";
 export default function Controls({
   requestedView,
+  patchRequestedView,
+  updateViewHandler,
 }: {
   requestedView: React.RefObject<RequestedView>;
+  patchRequestedView: (
+    prevView: RequestedView,
+    viewKey: "response" | "wave" | "party",
+    value: boolean
+  ) => RequestedView;
+  updateViewHandler: (newRequestedView: RequestedView) => void;
 }) {
   const [rv, setRv] = useState(requestedView.current);
-  const rvData = rv.map((split, idx) => ({
-    splitId: idx === 0 ? "by-response" : idx === 1 ? "by-wave" : "by-party",
-    splitOnValue: idx === 0 ? "expanded" : idx === 1 ? "wave" : "party",
-    labelText:
-      idx === 0
-        ? "Split by response"
-        : idx === 1
-          ? "Split by wave"
-          : "Split by party",
-    checked: !(split === null),
-    split: split,
-    idx: idx,
-  }));
-  const handleBubbledChange = (e: FormEventHandler<HTMLFormElement>) => {
-    const inputChecked = (e.target as HTMLInputElement).checked;
-    const whichSplit = rvData.find(
-      ({ splitId }) => splitId === (e.target as HTMLInputElement).id
-    );
-    if (whichSplit) {
-      setRv((prevRv) => {
-        if (whichSplit.idx === 0 && inputChecked === false) {
-          return [null, null, null];
-        }
-        const newRv = [];
-        newRv.push(whichSplit.idx === 0 ? "expanded" : prevRv[0]);
-        newRv.push(
-          whichSplit.idx === 1
-            ? whichSplit.checked
-              ? rvData[1].splitOnValue
-              : null
-            : prevRv[1]
-        );
-        newRv.push(
-          whichSplit.idx === 2
-            ? whichSplit.checked
-              ? rvData[2].splitOnValue
-              : null
-            : prevRv[2]
-        );
-        return newRv as RequestedView;
-      });
-    }
-  };
+  function handleChange(event: ChangeEvent<HTMLInputElement>) {
+    const viewKey = event.target.id as "response" | "wave" | "party";
+    const newVal = event.target.checked;
+    setRv((prevRequestedView) => {
+      //compute the new requested view
+      const newRequestedView = patchRequestedView(
+        prevRequestedView,
+        viewKey,
+        newVal
+      );
+      //update requestedView and viewData refs
+      updateViewHandler(newRequestedView);
+      //update the local representation of the requested view
+      return newRequestedView;
+    });
+  }
   return (
-    <form onChange={handleBubbledChange}>
-      {rvData.map(({ splitId, labelText, checked }) => (
-        <label key={splitId}>
-          {labelText}
+    <form>
+      {Object.entries(rv).map(([splitKey, split], idx) => (
+        <label key={splitKey}>
+          {"Split by " + splitKey}
           <input
             type="checkbox"
-            checked={checked}
-            id={splitId}
-            disabled={splitId === "by-response" ? false : rv[0] === null}
+            checked={split}
+            id={splitKey as "response" | "wave" | "party"}
+            disabled={idx > 0 && !rv.response}
+            onChange={handleChange}
           />
         </label>
       ))}
