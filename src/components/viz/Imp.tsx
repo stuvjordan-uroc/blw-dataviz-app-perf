@@ -18,6 +18,8 @@ import useView, { type RequestedView } from "../../hooks/use-view";
 import ImpVizArray from "./ImpVizArray";
 import Controls from "./Controls";
 import { transitionViews } from "../../hooks/use-view/transition-view";
+//modules
+import gsap from "gsap";
 
 export default function Imp({
   breakPoint,
@@ -76,7 +78,7 @@ export default function Imp({
         newRequestedView,
         coordinates.data
       );
-      //By doing so, we cause the vizes that are off screen to
+      //By doing so, we cause the viz-es that are off screen to
       //instantly switch to the new view.
       // (Logic for that is in the ImpVizArray component, which uses intersectionObserver
       // API to manage views for the out-of-frame canvases)
@@ -87,32 +89,10 @@ export default function Imp({
         .entries()
         .filter(([, { isVisible }]) => isVisible)
         .toArray();
-      if (prevViewData) {
+      if (prevViewData && visibleCanvases.length > 0) {
+        //TO DO write the transitionsViews function into src/hooks/use-view/transition-views.ts
         transitionViews(visibleCanvases, prevViewData, view.viewData.current);
       }
-      canvasMap.current.forEach(({ node, isVisible }, impVar) => {
-        if (isVisible) {
-          //node is a canvas that is currently in-view
-          const prevCoordinatesAtImpVar = prevViewData?.coordinates.get(impVar);
-          const newCoordinatesAtImpVar =
-            view.viewData.current?.coordinates.get(impVar);
-          if (
-            prevNoPartyOpacity &&
-            newNoPartyOpacity &&
-            prevCoordinatesAtImpVar &&
-            newCoordinatesAtImpVar
-          ) {
-            view.transitionView(
-              node,
-              prevNoPartyOpacity,
-              newNoPartyOpacity,
-              prevCoordinatesAtImpVar,
-              newCoordinatesAtImpVar,
-              images.data
-            );
-          }
-        }
-      });
     }
   }
 
