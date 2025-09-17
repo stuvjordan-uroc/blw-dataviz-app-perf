@@ -16,6 +16,7 @@ export default function Spinner({
       style={{
         position: "absolute",
         top: (0.5 * canvasHeight).toString() + "px",
+        left: (0.5 * canvasWidth).toString() + "px",
       }}
     >
       <path

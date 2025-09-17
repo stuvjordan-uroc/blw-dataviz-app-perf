@@ -1,4 +1,4 @@
-import { max, min } from "lodash";
+
 import type { ViewData } from "./computeViewData";
 import gsap from "gsap";
 
@@ -25,7 +25,6 @@ export function transitionViews(
   //that the timeline will tween.
 
   //create an array of all the tweens and targets-to-be-tweened that we're going to add to the timeline
-  //(Note that we're punting on how to deal with the noParty vs Party image for now)
   const allTargetsAndTweens = canvases
     .map(([impVarName, canvas]) => ({ //get the starting and destination coordinates for each canvas
       startingCoordinatesAtImpVar: startingViewData.coordinates.get(impVarName),
@@ -59,24 +58,6 @@ export function transitionViews(
           }
         })
       })
-      // const targetsPlusTweens = targetsForCanvas.map((target) => {
-      //   const destinationCoordinates = destinationCoordinatesAtImpVar![target.pointGroupIdx].coordinates[target.coordinateIdx];
-      //   return ({
-      //     target: target,
-      //     tween: gsap.to(
-      //       target,
-      //       {
-      //         x: destinationCoordinates ? destinationCoordinates.x : target.x,
-      //         y: destinationCoordinates ? destinationCoordinates.y : target.y,
-      //         duration: minDuration + Math.random() * (maxDuration - minDuration), //jitter the duration between 1.5 and 2 so we have some variety in the timing
-      //         inherit: false,
-      //         ease: "power4",
-      //         paused: true, //pause, because we want to control the start using the timeline
-      //         immediateRender: false
-      //       }
-      //     )
-      //   })
-      // })
       return targetsPlusDestinations
     }).flat(1)
   //add the tweens to the timeline

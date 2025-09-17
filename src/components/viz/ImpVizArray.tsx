@@ -74,13 +74,15 @@ export default function ImpVizArray({
     };
   }, [coordinatesLoading, imagesLoading]);
 
-  //TO DO: specify dependences for the above useEffect!!!
   return (
     <div ref={arrayContainerRef} className="imp-viz-array">
       {varsAndQs.map(({ varName, questionText }) => (
         <div key={varName} className="impvar-display-root">
           <div>{questionText}</div>
-          <div className="impvar-canvas-container">
+          <div
+            className="impvar-canvas-container"
+            style={{ width: vizWidth + "px" }}
+          >
             {(imagesLoading || coordinatesLoading) && (
               <Spinner canvasWidth={vizWidth} canvasHeight={vizHeight} />
             )}

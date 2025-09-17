@@ -13,11 +13,13 @@ import dataMeta from "../../data/data-meta.json";
 import { useCoordinates } from "../../hooks/useCoordinates";
 import { useCircleImages } from "../../hooks/use-circle-images";
 import useCanvases from "../../hooks/useCanvases";
+import { useRef } from "react";
 //components
 import useView, { type RequestedView } from "../../hooks/use-view";
 import ImpVizArray from "./ImpVizArray";
 import Controls from "./Controls";
-import { transitionViews } from "../../hooks/use-view/transition-view";
+import { useLayoutEffect } from "react";
+import useCanvasOffsets from "../../hooks/use-canvas-offsets";
 //modules
 
 export default function Imp({
@@ -104,15 +106,18 @@ export default function Imp({
     }
   }
 
+  //compute total height of each canvas (needed for setting each canvas's height property)
+  const canvasHeight =
+    layoutConfig.labelHeight +
+    (layoutConfig.waveHeight + layoutConfig.labelHeight) *
+      dataMeta.waves.length;
+
   //render
   if (coordinates.didError || images.didError) {
     return <div>Something went wrong</div>;
   }
   //if we get here, coordinates and images are each either loading or ready
-  const canvasHeight =
-    layoutConfig.labelHeight +
-    (layoutConfig.waveHeight + layoutConfig.labelHeight) *
-      dataMeta.waves.length;
+
   return (
     <div className="imp-viz-root">
       {canvasesReady && coordinates.data !== null && images.data !== null && (

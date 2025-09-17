@@ -2,16 +2,3 @@
   overflow: clip;
   height: 100%;
 }
-
-.imp-viz-vizarray {
-  overflow: auto;
-  height: 100%;
-}
-
-.impvar-canvas-container {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-}
