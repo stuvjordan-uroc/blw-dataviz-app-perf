@@ -20,6 +20,7 @@ import Controls from "./Controls";
 import { transitionViews } from "../../hooks/use-view/transition-view";
 //modules
 import gsap from "gsap";
+import { string } from "zod";
 
 export default function Imp({
   breakPoint,
@@ -88,7 +89,8 @@ export default function Imp({
       const visibleCanvases = canvasMap.current
         .entries()
         .filter(([, { isVisible }]) => isVisible)
-        .toArray();
+        .map(([string, { node }]) => [string, node])
+        .toArray() as [string, HTMLCanvasElement][];
       if (prevViewData && visibleCanvases.length > 0) {
         //TO DO write the transitionsViews function into src/hooks/use-view/transition-views.ts
         transitionViews(visibleCanvases, prevViewData, view.viewData.current);
