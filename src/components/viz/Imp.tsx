@@ -98,6 +98,8 @@ export default function Imp({
           prevViewData,
           view.viewData.current,
           images.data,
+          5,
+          10,
           () => {}
         );
       }

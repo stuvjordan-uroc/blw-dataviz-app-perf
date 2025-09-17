@@ -6,6 +6,8 @@ export function transitionViews(
   startingViewData: ViewData,
   destinationViewData: ViewData,
   imageMap: Map<string, HTMLImageElement>,
+  minDuration: number,
+  maxDuration: number,
   allAnimationsCompleteCallback: () => void
 ) {
   //create a timeline through which we can control
@@ -57,9 +59,9 @@ export function transitionViews(
             {
               x: destinationCoordinates ? destinationCoordinates.x : target.x,
               y: destinationCoordinates ? destinationCoordinates.y : target.y,
-              duration: 1.5 + Math.random() * 0.5, //jitter the duration between 1.5 and 2 so we have some variety in the timing
+              duration: minDuration + Math.random() * (maxDuration - minDuration), //jitter the duration between 1.5 and 2 so we have some variety in the timing
               inherit: true, //inherit properties from any timeline we add this tween to
-              pause: true //pause, because we want to control the start using the timeline
+              paused: true //pause, because we want to control the start using the timeline
             }
           )
         })
