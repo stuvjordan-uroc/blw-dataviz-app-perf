@@ -93,7 +93,13 @@ export default function Imp({
         .toArray() as [string, HTMLCanvasElement][];
       if (prevViewData && visibleCanvases.length > 0) {
         //TO DO write the transitionsViews function into src/hooks/use-view/transition-views.ts
-        transitionViews(visibleCanvases, prevViewData, view.viewData.current);
+        transitionViews(
+          visibleCanvases,
+          prevViewData,
+          view.viewData.current,
+          images.data,
+          () => {}
+        );
       }
     }
   }
