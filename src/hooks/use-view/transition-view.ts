@@ -1,3 +1,4 @@
+import { max, min } from "lodash";
 import type { ViewData } from "./computeViewData";
 import gsap from "gsap";
 
@@ -14,11 +15,9 @@ export function transitionViews(
   //the tweens we'll apply to each point in each canvas
   const timeline = gsap.timeline({
     autoRemoveChildren: true, //kill all tweens in the timeline after the timeline completes
-    defaults: {
-      ease: "power4" //apply the power4 ease to every tween in the timeline
-    },
     onComplete: allAnimationsCompleteCallback, //invoke that passed allAnimationsCompleteCallback when the timeline completes
-    paused: true //pause immediately.  We don't want to play this timeline until all tweens are added!
+    paused: true, //pause immediately.  We don't want to play this timeline until all tweens are added!
+    defaults: { duration: maxDuration, ease: "power2" }
   })
 
   //Note that we'll need to set the timeline's update property.
@@ -42,7 +41,7 @@ export function transitionViews(
         return (
           coordinates.map(({ x, y }, coordinateIdx) => ({
             canvasContext: canvasContext,
-            image: (destinationViewData.partyOpacity >= 0) ? imageMap.get(pg.join("-")) : imageMap.get("none"),
+            image: (destinationViewData.partyOpacity > 0) ? imageMap.get(pg.join("-")) : imageMap.get("none"),
             x: x,
             y: y,
             pointGroupIdx: pointGroupIdx,
@@ -50,26 +49,51 @@ export function transitionViews(
           }))
         )
       }).flat(1)
-      const targetsPlusTweens = targetsForCanvas.map((target) => {
+      const targetsPlusDestinations = targetsForCanvas.map((target) => {
         const destinationCoordinates = destinationCoordinatesAtImpVar![target.pointGroupIdx].coordinates[target.coordinateIdx];
         return ({
           target: target,
-          tween: gsap.to(
-            target,
-            {
-              x: destinationCoordinates ? destinationCoordinates.x : target.x,
-              y: destinationCoordinates ? destinationCoordinates.y : target.y,
-              duration: minDuration + Math.random() * (maxDuration - minDuration), //jitter the duration between 1.5 and 2 so we have some variety in the timing
-              inherit: true, //inherit properties from any timeline we add this tween to
-              paused: true //pause, because we want to control the start using the timeline
-            }
-          )
+          destination: {
+            x: destinationCoordinates ? destinationCoordinates.x : target.x,
+            y: destinationCoordinates ? destinationCoordinates.y : target.y
+          }
         })
       })
-      return targetsPlusTweens
+      // const targetsPlusTweens = targetsForCanvas.map((target) => {
+      //   const destinationCoordinates = destinationCoordinatesAtImpVar![target.pointGroupIdx].coordinates[target.coordinateIdx];
+      //   return ({
+      //     target: target,
+      //     tween: gsap.to(
+      //       target,
+      //       {
+      //         x: destinationCoordinates ? destinationCoordinates.x : target.x,
+      //         y: destinationCoordinates ? destinationCoordinates.y : target.y,
+      //         duration: minDuration + Math.random() * (maxDuration - minDuration), //jitter the duration between 1.5 and 2 so we have some variety in the timing
+      //         inherit: false,
+      //         ease: "power4",
+      //         paused: true, //pause, because we want to control the start using the timeline
+      //         immediateRender: false
+      //       }
+      //     )
+      //   })
+      // })
+      return targetsPlusDestinations
     }).flat(1)
   //add the tweens to the timeline
-  allTargetsAndTweens.forEach(({ tween }) => { timeline.add(tween) })
+  allTargetsAndTweens.forEach(({ target, destination }) => {
+    timeline.to(
+      target,
+      {
+        x: destination.x,
+        y: destination.y,
+        duration: Math.ceil(minDuration + Math.random() * (maxDuration - minDuration)),
+        ease: "power1.out",
+        //paused: true
+      },
+      0
+    )
+  })
+  //allTargetsAndTweens.forEach(({ tween }) => { timeline.add(tween) })
   //set the timeline's onUpdate propoerty
   timeline.eventCallback("onUpdate", () => {
     //clear all canvases
@@ -84,61 +108,7 @@ export function transitionViews(
     })
   })
   //play the timeline
-  timeline.play()
+  console.log("here is the timeline's total duration", timeline.duration())
+  timeline.play(0)
 }
 
-export function transitionView(
-  node: HTMLCanvasElement,
-  prevNoPartyOpacity: number,
-  newNorPartyOpacity: number,
-  prevViewData: {
-    rg: string[];
-    wave: number;
-    pg: string[];
-    coordinates: { x: number; y: number }[];
-  }[],
-  newViewData: {
-    rg: string[];
-    wave: number;
-    pg: string[];
-    coordinates: { x: number; y: number }[];
-  }[],
-  imageMap: Map<string, HTMLImageElement>
-) {
-  const ctx = node.getContext("2d");
-  if (ctx) {
-    if (prevNoPartyOpacity === newNorPartyOpacity) {
-      //this is the case where all we have to do is transition the point positions
-      prevViewData.forEach((pointGroup, pointGroupIdx) => {
-        const image =
-          prevNoPartyOpacity >= 0
-            ? imageMap.get("none")
-            : imageMap.get(pointGroup.pg.join("-"));
-        if (image) {
-          pointGroup.coordinates.forEach(({ x, y }, coordinateIdx) => {
-            const destination =
-              newViewData[pointGroupIdx].coordinates[coordinateIdx];
-            const pointToTransition = {
-              x: x,
-              y: y,
-            };
-            gsap.to(pointToTransition, {
-              x: destination.x,
-              y: destination.y,
-              duration: 2,
-              ease: "power4",
-              onUpdate: (tweenedObj: { x: number; y: number }) => {
-                ctx.clearRect(0, 0, node.width, node.height);
-                ctx.drawImage(image, tweenedObj.x, tweenedObj.y);
-              },
-              onUpdateParams: [pointToTransition],
-            });
-          });
-        }
-      });
-    } else {
-      //here we need to first change the images used for the points, then
-      //transition the point positions.
-    }
-  }
-}
