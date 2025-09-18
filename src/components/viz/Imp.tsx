@@ -13,13 +13,10 @@ import dataMeta from "../../data/data-meta.json";
 import { useCoordinates } from "../../hooks/useCoordinates";
 import { useCircleImages } from "../../hooks/use-circle-images";
 import useCanvases from "../../hooks/useCanvases";
-import { useRef } from "react";
 //components
-import useView, { type RequestedView } from "../../hooks/use-view";
+import useView from "../../hooks/use-view";
 import ImpVizArray from "./ImpVizArray";
 import Controls from "./Controls";
-import { useLayoutEffect } from "react";
-import useCanvasOffsets from "../../hooks/use-canvas-offsets";
 //modules
 
 export default function Imp({
@@ -90,14 +87,8 @@ export default function Imp({
         canvasMap={canvasMap}
         drawViewHandler={view.drawView}
         viewDataReady={view.viewDataReady}
-        clearViewHandler={(impVar: string) => {
-          if (canvasMap.current) {
-            const ctx = canvasMap.current.get(impVar)?.node.getContext("2d");
-            if (ctx) {
-              ctx.clearRect(0, 0, layoutConfig.vizWidth, canvasHeight);
-            }
-          }
-        }}
+        requestedView={view.requestedView}
+        coordinates={coordinates}
       />
     </div>
   );

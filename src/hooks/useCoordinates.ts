@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import type { SegmentViewsUnMapped, PointsMapUnMapped, PointsViews } from "../../build-data";
+import type { RequestedView } from "./use-view";
+import type { SegmentCoordinates } from "../../build-data";
 export type RawCoordinates = Record<
   string,
   {
@@ -20,7 +22,15 @@ export type CoordinatesState =
   }
   | {
     data: Map<string, {
-      segments: SegmentViewsUnMapped;
+      segments: {
+        view: RequestedView,
+        groups?: {
+          response: string,
+          wave?: number,
+          party?: string
+        },
+        coordinates: SegmentCoordinates
+      }[];
       pointGroups: {
         rg: string[];
         wave: number;
@@ -46,14 +56,115 @@ function rawCoordinatesToPointGroups(rawCoordinates: RawCoordinates) {
           }))
         )
       ).flat(2)
+    const flattenedSegments = [] as {
+      view: RequestedView,
+      groups?: {
+        response: string,
+        wave?: number,
+        party?: string
+      },
+      coordinates: SegmentCoordinates
+    }[]
+    //push the unsplit segment
+    flattenedSegments.push(
+      {
+        view: {
+          response: false,
+          wave: false,
+          party: false
+        },
+        coordinates: segments.unsplit.segmentCoordinates
+      }
+    )
+    //push the byResponse segments
+    segments.expanded.byResponse.forEach(([responseGroup, segment]) => {
+      flattenedSegments.push({
+        view: {
+          response: true,
+          wave: false,
+          party: false
+        },
+        groups: {
+          response: responseGroup.join("-"),
+        },
+        coordinates: segment.segmentCoordinates
+      })
+    })
+    //push the byResponseAndWave segments
+    segments.expanded.byResponseAndWave.forEach(([responseGroup, unMapAtRG]) => {
+      unMapAtRG.forEach(([wave, segment]) => {
+        if (segment) {
+          flattenedSegments.push({
+            view: {
+              response: true,
+              wave: true,
+              party: false
+            },
+            groups: {
+              response: responseGroup.join("-"),
+              wave: wave
+            },
+            coordinates: segment.segmentCoordinates
+          })
+        }
+      })
+    })
+    //push the byResponseAndParty segments
+    segments.expanded.byResponseAndParty.forEach(([responseGroup, unMapAtRG]) => {
+      unMapAtRG.forEach(([pg, segment]) => {
+        flattenedSegments.push({
+          view: {
+            response: true,
+            wave: false,
+            party: true
+          },
+          groups: {
+            response: responseGroup.join("-"),
+            party: pg.join("-")
+          },
+          coordinates: segment.segmentCoordinates
+        })
+      })
+    })
+    //push the byResponseAndPartyAndWave segments
+    segments.expanded.byResponseAndWaveAndParty.forEach(([responseGroup, unMapAtRG]) => {
+      unMapAtRG.forEach(([wave, unMapAtWave]) => {
+        if (unMapAtWave) {
+          unMapAtWave.forEach(([pg, segment]) => {
+            flattenedSegments.push({
+              view: {
+                response: true,
+                wave: true,
+                party: true
+              },
+              groups: {
+                response: responseGroup.join("-"),
+                wave: wave,
+                party: pg.join("-")
+              },
+              coordinates: segment.segmentCoordinates
+            })
+          })
+        }
+      })
+    })
     return ([
       impVar,
       {
-        segments: segments,
+        segments: flattenedSegments,
         pointGroups: pointGroups
       }
     ] as [string, {
-      segments: SegmentViewsUnMapped, pointGroups: {
+      segments: {
+        view: RequestedView,
+        groups?: {
+          response: string,
+          wave?: number,
+          party?: string
+        },
+        coordinates: SegmentCoordinates
+      }[],
+      pointGroups: {
         rg: string[];
         wave: number;
         pg: string[];
