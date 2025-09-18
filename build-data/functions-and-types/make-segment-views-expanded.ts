@@ -36,6 +36,7 @@ export function unSplit(pAndC: PAndC, layout: Layout, numWaves: number) {
   const points = allPoints(segmentCoordinates, count, layout.pointRadius)
   return ({
     count: count,
+    proportion: 1,
     segmentCoordinates: segmentCoordinates,
     allPoints: points
   })
@@ -55,6 +56,7 @@ export function byResponse(pAndC: PAndC, layout: Layout, numWaves: number) {
       }
     ], rgIdx: number) => {
       const count = rgVal.c
+      const proportion = rgVal.p
       const widthToDistribute = layout.vizWidth //start with the total vizWidth
         - 2 * layout.pointRadius * pAndC.expanded.size //subtract the minimum width each segment
         - layout.responseGap * (pAndC.expanded.size - 1) //subtract the responseGaps
@@ -86,6 +88,7 @@ export function byResponse(pAndC: PAndC, layout: Layout, numWaves: number) {
         rg,
         {
           count: count,
+          proportion: proportion,
           segmentCoordinates: segmentCoordinates,
           allPoints: allPoints(segmentCoordinates, rgVal.c, layout.pointRadius)
         }
@@ -121,6 +124,7 @@ export function byResponseAndParty(pAndC: PAndC, layout: Layout, numWaves: numbe
             PropCount
           ], pgIdx: number) => {
             const count = pgVal.c;
+            const proportion = pgVal.p;
             const topLeftY = (
               layout.labelHeight + numWaves * (layout.waveHeight + layout.labelHeight) // height of canvas
               - layout.waveHeight * numWaves //height of segment
@@ -153,6 +157,7 @@ export function byResponseAndParty(pAndC: PAndC, layout: Layout, numWaves: numbe
               pg,
               {
                 count: count,
+                proportion: proportion,
                 segmentCoordinates: coordinates,
                 allPoints: allPoints(coordinates, pgVal.c, layout.pointRadius)
               }
@@ -213,6 +218,7 @@ export function byResponseAndWave(pAndC: PAndC, layout: Layout) {
               wave,
               {
                 count: waveVal.c,
+                proportion: waveVal.p,
                 segmentCoordinates: coordinates,
                 allPoints: allPoints(coordinates, waveVal.c, layout.pointRadius)
               }
@@ -285,6 +291,7 @@ export function byResponseAndPartyAndWave(pAndC: PAndC, layout: Layout, numParty
                     pg,
                     {
                       count: pgVal.c,
+                      proportion: pgVal.p,
                       segmentCoordinates: {
                         topLeftY: waveTopLeftY,
                         topLeftX: responseGroupTopLeftX,

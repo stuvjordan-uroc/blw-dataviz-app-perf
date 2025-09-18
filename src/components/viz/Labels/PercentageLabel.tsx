@@ -1,20 +1,12 @@
 //css
-import "./ResponseLabel.css";
+import "./PercentageLabel.css";
+//hooks
+import useLabelDimensions from "../../../hooks/useLabelDimensions";
 //types
 import type { RequestedView } from "../../../hooks/use-view";
 import type { SegmentCoordinates } from "../../../../build-data";
-import useLabelDimensions from "../../../hooks/useLabelDimensions";
 
-/*
-DESIGN:
-
-By Response View: Always visible, positioned at the top-center of each segment
-
-By Response and Wave: Only visible when user clicks or taps on a segment, and then 
-only in the row of the segment
-*/
-
-export default function ResponseLabel({
+export default function PercentageLabel({
   segment,
 }: {
   segment: {
@@ -31,12 +23,16 @@ export default function ResponseLabel({
   return (
     <div
       ref={labelRef}
-      //appearance is specified in ResponseLabel.css under className "response-label"
-      className="response-label"
+      //appearance is specified in ResponseLabel.css under className "percentage-label"
+      className="percentage-label"
       //positioning
       style={{
         position: "absolute",
-        top: (-labelDimensions.height * 0.5).toString() + "px",
+        top:
+          (
+            segment.coordinates.height * 0.5 -
+            labelDimensions.height * 0.5
+          ).toString() + "px",
         left:
           (
             segment.coordinates.width / 2 -
@@ -44,7 +40,7 @@ export default function ResponseLabel({
           ).toString() + "px",
       }}
     >
-      {segment.groups?.response.join(" or ") ?? "  "}
+      20%
     </div>
   );
 }

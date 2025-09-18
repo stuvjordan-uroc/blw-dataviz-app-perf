@@ -100,6 +100,7 @@ export interface Point {
 }
 export interface Segment {
   count: number;
+  proportion: number;
   segmentCoordinates: SegmentCoordinates;
   allPoints: Point[];
 }

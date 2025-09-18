@@ -88,6 +88,10 @@ export default function ImpVizArray({
           >
             {coordinates.data && coordinates.data.get(varName) && (
               <Labels
+                key={Object.values(requestedView).reduce(
+                  (acc: number, val: boolean, idx) => acc + +val * 2 ** idx,
+                  0
+                )}
                 requestedView={requestedView}
                 segments={filteredSegments(
                   requestedView,

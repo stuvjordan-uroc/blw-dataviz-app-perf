@@ -1,5 +1,5 @@
 import makeData from "./functions-and-types/make-data.ts";
-import type { Point, Layouts, Layout, Viz, VizConfig, SegmentViewsUnMapped, PointsMapUnMapped, PointsViews, SegmentCoordinates } from "./functions-and-types/types.ts";
+import type { PAndCUnMapped, Point, Layouts, Layout, Viz, VizConfig, SegmentViewsUnMapped, PointsMapUnMapped, PointsViews, SegmentCoordinates } from "./functions-and-types/types.ts";
 import { vizAtImp } from "./functions-and-types/viz-at-imp.ts";
 import {
   unMapPAndC
@@ -43,3 +43,4 @@ export type { SegmentViewsUnMapped };
 export type { SegmentCoordinates };
 export type { PointsViews };
 export type { Point };
+export type { PAndCUnMapped };

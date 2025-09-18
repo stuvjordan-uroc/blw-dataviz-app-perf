@@ -1,7 +1,12 @@
 import { useState, useEffect } from "react";
-import type { SegmentViewsUnMapped, PointsMapUnMapped, PointsViews } from "../../build-data";
+import type { SegmentViewsUnMapped, PointsMapUnMapped, PointsViews, PAndCUnMapped } from "../../build-data";
 import type { RequestedView } from "./use-view";
 import type { SegmentCoordinates } from "../../build-data";
+
+
+
+
+
 export type RawCoordinates = Record<
   string,
   {
@@ -29,7 +34,8 @@ export type CoordinatesState =
           wave?: number,
           party?: string[]
         },
-        coordinates: SegmentCoordinates
+        coordinates: SegmentCoordinates,
+        proportion: number
       }[];
       pointGroups: {
         rg: string[];
@@ -63,7 +69,8 @@ function rawCoordinatesToPointGroups(rawCoordinates: RawCoordinates) {
         wave?: number,
         party?: string[]
       },
-      coordinates: SegmentCoordinates
+      coordinates: SegmentCoordinates,
+      proportion: number,
     }[]
     //push the unsplit segment
     flattenedSegments.push(
@@ -73,11 +80,13 @@ function rawCoordinatesToPointGroups(rawCoordinates: RawCoordinates) {
           wave: false,
           party: false
         },
-        coordinates: segments.unsplit.segmentCoordinates
+        coordinates: segments.unsplit.segmentCoordinates,
+        proportion: 1
       }
     )
     //push the byResponse segments
     segments.expanded.byResponse.forEach(([responseGroup, segment]) => {
+      //find the proportion for this segment
       flattenedSegments.push({
         view: {
           response: true,
@@ -87,7 +96,8 @@ function rawCoordinatesToPointGroups(rawCoordinates: RawCoordinates) {
         groups: {
           response: responseGroup,
         },
-        coordinates: segment.segmentCoordinates
+        coordinates: segment.segmentCoordinates,
+        proportion: 0 //fix
       })
     })
     //push the byResponseAndWave segments
@@ -104,7 +114,8 @@ function rawCoordinatesToPointGroups(rawCoordinates: RawCoordinates) {
               response: responseGroup,
               wave: wave
             },
-            coordinates: segment.segmentCoordinates
+            coordinates: segment.segmentCoordinates,
+            proportion: 0 //fix
           })
         }
       })
@@ -122,7 +133,8 @@ function rawCoordinatesToPointGroups(rawCoordinates: RawCoordinates) {
             response: responseGroup,
             party: pg
           },
-          coordinates: segment.segmentCoordinates
+          coordinates: segment.segmentCoordinates,
+          proportion: 0 //fix
         })
       })
     })
@@ -142,7 +154,8 @@ function rawCoordinatesToPointGroups(rawCoordinates: RawCoordinates) {
                 wave: wave,
                 party: pg
               },
-              coordinates: segment.segmentCoordinates
+              coordinates: segment.segmentCoordinates,
+              proportion: 0 //fix
             })
           })
         }
