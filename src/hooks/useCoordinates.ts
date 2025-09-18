@@ -97,7 +97,7 @@ function rawCoordinatesToPointGroups(rawCoordinates: RawCoordinates) {
           response: responseGroup,
         },
         coordinates: segment.segmentCoordinates,
-        proportion: 0 //fix
+        proportion: segment.proportion
       })
     })
     //push the byResponseAndWave segments
@@ -115,7 +115,7 @@ function rawCoordinatesToPointGroups(rawCoordinates: RawCoordinates) {
               wave: wave
             },
             coordinates: segment.segmentCoordinates,
-            proportion: 0 //fix
+            proportion: segment.proportion
           })
         }
       })
@@ -134,7 +134,7 @@ function rawCoordinatesToPointGroups(rawCoordinates: RawCoordinates) {
             party: pg
           },
           coordinates: segment.segmentCoordinates,
-          proportion: 0 //fix
+          proportion: segment.proportion
         })
       })
     })
@@ -155,7 +155,7 @@ function rawCoordinatesToPointGroups(rawCoordinates: RawCoordinates) {
                 party: pg
               },
               coordinates: segment.segmentCoordinates,
-              proportion: 0 //fix
+              proportion: segment.proportion
             })
           })
         }
@@ -175,7 +175,8 @@ function rawCoordinatesToPointGroups(rawCoordinates: RawCoordinates) {
           wave?: number,
           party?: string[]
         },
-        coordinates: SegmentCoordinates
+        coordinates: SegmentCoordinates,
+        proportion: number
       }[],
       pointGroups: {
         rg: string[];
