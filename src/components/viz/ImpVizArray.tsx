@@ -68,6 +68,7 @@ export default function ImpVizArray({
         party?: string[];
       };
       coordinates: SegmentCoordinates;
+      proportion: number;
     }[]
   ) {
     return allSegments.filter(

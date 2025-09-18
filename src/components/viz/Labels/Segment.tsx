@@ -20,6 +20,7 @@ export default function Segment({
       party?: string[];
     };
     coordinates: SegmentCoordinates;
+    proportion: number;
   };
 }) {
   const [labelsAreVisible, setLabelsAreVisible] = useState(false);

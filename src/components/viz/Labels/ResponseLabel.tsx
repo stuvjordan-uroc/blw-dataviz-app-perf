@@ -25,6 +25,7 @@ export default function ResponseLabel({
       party?: string[];
     };
     coordinates: SegmentCoordinates;
+    proportion: number;
   };
 }) {
   const [labelDimensions, labelRef] = useLabelDimensions(segment);

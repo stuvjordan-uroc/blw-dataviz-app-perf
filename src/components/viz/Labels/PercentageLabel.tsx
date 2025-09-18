@@ -17,6 +17,7 @@ export default function PercentageLabel({
       party?: string[];
     };
     coordinates: SegmentCoordinates;
+    proportion: number;
   };
 }) {
   const [labelDimensions, labelRef] = useLabelDimensions(segment);
@@ -40,7 +41,7 @@ export default function PercentageLabel({
           ).toString() + "px",
       }}
     >
-      20%
+      {Math.round(segment.proportion * 100).toString() + "%"}
     </div>
   );
 }

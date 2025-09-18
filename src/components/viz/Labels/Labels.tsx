@@ -25,6 +25,7 @@ export default function Labels({
       party?: string[];
     };
     coordinates: SegmentCoordinates;
+    proportion: number;
   }[];
 }) {
   /*
