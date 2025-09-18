@@ -4,11 +4,9 @@ import "./Controls.css";
 export default function Controls({
   requestedView,
   updateViewHandler,
-  controlsActive,
 }: {
   requestedView: RequestedView;
   updateViewHandler: (viewKey: keyof RequestedView, newVal: boolean) => void;
-  controlsActive: boolean;
 }) {
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     const viewKey = event.target.id as "response" | "wave" | "party";
@@ -24,7 +22,7 @@ export default function Controls({
             type="checkbox"
             checked={split}
             id={splitKey as "response" | "wave" | "party"}
-            disabled={(idx > 0 && !requestedView.response) || !controlsActive}
+            disabled={idx > 0 && !requestedView.response}
             onChange={handleChange}
           />
         </label>

@@ -53,68 +53,7 @@ export default function Imp({
   //are refs, NOT STATE.
   //so they have to be updated and kept in sync manually in the
   //various event handlers!
-  const view = useView(coordinates);
-  function drawViewHandler(canvasNode: HTMLCanvasElement) {
-    const currentViewData = view.viewData.current;
-    const currentImageMap = images.data;
-    const canvasCoordinates = currentViewData?.coordinates.get(canvasNode.id);
-    if (currentViewData && currentImageMap && canvasCoordinates) {
-      view.drawPointsOnCanvas(
-        currentViewData.partyOpacity,
-        currentViewData.noPartyOpacity,
-        canvasCoordinates,
-        currentImageMap,
-        canvasNode
-      );
-    }
-  }
-  function updateView(viewKey: keyof RequestedView, newVal: boolean) {
-    const currentCanvasMap = canvasMap.current;
-    if (coordinates.data && currentCanvasMap && images.data) {
-      view.setRequestedView((prevRequestedView) => {
-        //compute the new requested view
-        const newRequestedView = view.patchRequestedView(
-          prevRequestedView,
-          viewKey,
-          newVal
-        );
-        //get the coordinates for the old view
-        //commented out becase we're not longer
-        //trying to animate the views
-        //const prevViewData = view.viewData.current;
-        //update the ref holding coordinates
-        //to bring it into line with the new requested view
-        view.viewData.current = view.computeViewData(
-          newRequestedView,
-          coordinates.data
-        );
-        const newViewData = view.viewData.current;
-
-        /* 
-        Changing the requested view from a ref to a state
-        broke the intersection observer code that was
-        transitioning the views for the off screen canvases
-        As a placeholder, we transition all the canvases
-        immediately here, and delet the old code
-        that was only transitioning the visible canvases
-        */
-
-        currentCanvasMap.forEach(({ node }, impVar) => {
-          const pointGroups = newViewData.coordinates.get(impVar);
-          if (pointGroups) {
-            view.drawPointsOnCanvas(
-              newViewData.partyOpacity,
-              newViewData.noPartyOpacity,
-              pointGroups,
-              images.data,
-              node
-            );
-          }
-        });
-        return newRequestedView;
-      });
-    }
-  }
+  const view = useView(coordinates, images, canvasMap);
 
   //compute total height of each canvas (needed for setting each canvas's height property)
   const canvasHeight =
@@ -133,8 +72,7 @@ export default function Imp({
       {canvasesReady && coordinates.data !== null && images.data !== null && (
         <Controls
           requestedView={view.requestedView}
-          updateViewHandler={updateView}
-          controlsActive={!view.viewTransitionPending}
+          updateViewHandler={view.updateView}
         />
       )}
       <ImpVizArray
@@ -150,7 +88,7 @@ export default function Imp({
         vizHeight={canvasHeight}
         canvasRefsCallBackFactory={canvasRefsCallBackFactory}
         canvasMap={canvasMap}
-        drawViewHandler={drawViewHandler}
+        drawViewHandler={view.drawView}
         viewDataReady={view.viewDataReady}
         clearViewHandler={(impVar: string) => {
           if (canvasMap.current) {
