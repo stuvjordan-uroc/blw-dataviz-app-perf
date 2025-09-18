@@ -40,7 +40,7 @@ export default function computeViewData(
             rg: rg,
             wave: wave,
             pg: pg,
-            coordinates: requestedView.response ? (coordinates.expanded)[viewKeyString as "byResponse" | "byResponseAndWave" | "byResponseAndParty" | "byResponseAndWaveAndParty"] : coordinates.unsplit 
+            coordinates: requestedView.response ? (coordinates.expanded)[viewKeyString as "byResponse" | "byResponseAndWave" | "byResponseAndParty" | "byResponseAndWaveAndParty"] : coordinates.unsplit
           }))
         ])
       })

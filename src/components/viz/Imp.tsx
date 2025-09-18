@@ -68,41 +68,51 @@ export default function Imp({
       );
     }
   }
-  function updateViewHandler(newRequestedView: RequestedView) {
-    if (coordinates.data && canvasMap.current && images.data) {
-      //previousViewData
-      const prevViewData = view.viewData.current;
-      //first we mutate the refs holding the
-      //current requested view, and the current viewData
-      view.requestedView.current = newRequestedView;
-      view.viewData.current = view.computeViewData(
-        newRequestedView,
-        coordinates.data
-      );
-      //By doing so, we cause the viz-es that are off screen to
-      //instantly switch to the new view.
-      // (Logic for that is in the ImpVizArray component, which uses intersectionObserver
-      // API to manage views for the out-of-frame canvases)
-
-      //having done that, we now need to run code that causes the canvases that are visible
-      //to transition to the new view
-      const visibleCanvases = canvasMap.current
-        .entries()
-        .filter(([, { isVisible }]) => isVisible)
-        .map(([string, { node }]) => [string, node])
-        .toArray() as [string, HTMLCanvasElement][];
-      if (prevViewData && visibleCanvases.length > 0) {
-        //TO DO write the transitionsViews function into src/hooks/use-view/transition-views.ts
-        view.transitionViews(
-          visibleCanvases,
-          prevViewData,
-          view.viewData.current,
-          images.data,
-          5,
-          10,
-          () => {}
+  function updateView(viewKey: keyof RequestedView, newVal: boolean) {
+    const currentCanvasMap = canvasMap.current;
+    if (coordinates.data && currentCanvasMap && images.data) {
+      view.setRequestedView((prevRequestedView) => {
+        //compute the new requested view
+        const newRequestedView = view.patchRequestedView(
+          prevRequestedView,
+          viewKey,
+          newVal
         );
-      }
+        //get the coordinates for the old view
+        //commented out becase we're not longer
+        //trying to animate the views
+        //const prevViewData = view.viewData.current;
+        //update the ref holding coordinates
+        //to bring it into line with the new requested view
+        view.viewData.current = view.computeViewData(
+          newRequestedView,
+          coordinates.data
+        );
+        const newViewData = view.viewData.current;
+
+        /* 
+        Changing the requested view from a ref to a state
+        broke the intersection observer code that was
+        transitioning the views for the off screen canvases
+        As a placeholder, we transition all the canvases
+        immediately here, and delet the old code
+        that was only transitioning the visible canvases
+        */
+
+        currentCanvasMap.forEach(({ node }, impVar) => {
+          const pointGroups = newViewData.coordinates.get(impVar);
+          if (pointGroups) {
+            view.drawPointsOnCanvas(
+              newViewData.partyOpacity,
+              newViewData.noPartyOpacity,
+              pointGroups,
+              images.data,
+              node
+            );
+          }
+        });
+        return newRequestedView;
+      });
     }
   }
 
@@ -123,8 +133,8 @@ export default function Imp({
       {canvasesReady && coordinates.data !== null && images.data !== null && (
         <Controls
           requestedView={view.requestedView}
-          patchRequestedView={view.patchRequestedView}
-          updateViewHandler={updateViewHandler}
+          updateViewHandler={updateView}
+          controlsActive={!view.viewTransitionPending}
         />
       )}
       <ImpVizArray
@@ -141,6 +151,7 @@ export default function Imp({
         canvasRefsCallBackFactory={canvasRefsCallBackFactory}
         canvasMap={canvasMap}
         drawViewHandler={drawViewHandler}
+        viewDataReady={view.viewDataReady}
         clearViewHandler={(impVar: string) => {
           if (canvasMap.current) {
             const ctx = canvasMap.current.get(impVar)?.node.getContext("2d");

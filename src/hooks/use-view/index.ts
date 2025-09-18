@@ -1,4 +1,4 @@
-import { useEffect, useRef, useTransition } from "react";
+import { useEffect, useRef, useTransition, useState } from "react";
 import type { CoordinatesState } from "../useCoordinates";
 import computeViewData from "./computeViewData";
 import { drawPoints } from "./draw-points";
@@ -9,38 +9,37 @@ import { transitionViews } from "./transition-view";
 export type { ViewData, RequestedView };
 
 export default function useView(coordinates: CoordinatesState) {
-  const [viewTransitionInProgress, startTransitionToNewView] = useTransition();
-  //wrap the calls of the function that triggers the animation startTransitionToNewView
-  //inside event handlers.  This this will cause "newViewPending" to switch to "true"
-  //when the animation commences (so we can disable the control checkboxes),
-  // and allow user interaction with other controls (e.g. the tabs) during the animation
-  //https://react.dev/reference/react/useTransition
-
   ///on initial render, set the requested view to unsplit
-  const requestedView = useRef<RequestedView>({
+  const [requestedView, setRequestedView] = useState<RequestedView>({
     response: false,
     wave: false,
     party: false,
   });
+  const [viewTransitionPending, setViewTransitionPending] = useState<boolean>(false)
+  const [viewDataReady, setViewDataReady] = useState<boolean>(false)
   ///on initial render, compute the viewData from whatever the current value of requestedView is
   const viewData = useRef<null | ViewData>(
     coordinates.data === null
       ? null
-      : computeViewData(requestedView.current, coordinates.data)
+      : computeViewData(requestedView, coordinates.data)
   );
   useEffect(() => {
     //update the viewData when coordinates are ready
     if (coordinates.data) {
       viewData.current = computeViewData(
-        requestedView.current,
+        requestedView,
         coordinates.data
       );
+      setViewDataReady(true)
     }
   }, [coordinates.data]);
   return {
     requestedView: requestedView,
+    viewTransitionPending: viewTransitionPending,
+    setViewTransitionPending: setViewTransitionPending,
+    setRequestedView: setRequestedView,
     viewData: viewData,
-    viewTransitionInProgress: viewTransitionInProgress,
+    viewDataReady: viewDataReady,
     computeViewData: computeViewData,
     drawPointsOnCanvas: drawPoints,
     patchRequestedView: patchRequestedView,
