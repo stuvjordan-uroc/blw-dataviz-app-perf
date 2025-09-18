@@ -4,7 +4,7 @@ import "./ImpVizArray.css";
 import { useEffect, useRef } from "react";
 //components
 import Spinner from "../Spinner";
-import Labels from "./Labels";
+import Labels from "./Labels/Labels";
 //types
 import type { RequestedView } from "../../hooks/use-view";
 import type { CoordinatesState } from "../../hooks/useCoordinates";
@@ -63,9 +63,9 @@ export default function ImpVizArray({
     allSegments: {
       view: RequestedView;
       groups?: {
-        response: string;
+        response: string[];
         wave?: number;
-        party?: string;
+        party?: string[];
       };
       coordinates: SegmentCoordinates;
     }[]

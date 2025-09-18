@@ -25,9 +25,9 @@ export type CoordinatesState =
       segments: {
         view: RequestedView,
         groups?: {
-          response: string,
+          response: string[],
           wave?: number,
-          party?: string
+          party?: string[]
         },
         coordinates: SegmentCoordinates
       }[];
@@ -59,9 +59,9 @@ function rawCoordinatesToPointGroups(rawCoordinates: RawCoordinates) {
     const flattenedSegments = [] as {
       view: RequestedView,
       groups?: {
-        response: string,
+        response: string[],
         wave?: number,
-        party?: string
+        party?: string[]
       },
       coordinates: SegmentCoordinates
     }[]
@@ -85,7 +85,7 @@ function rawCoordinatesToPointGroups(rawCoordinates: RawCoordinates) {
           party: false
         },
         groups: {
-          response: responseGroup.join("-"),
+          response: responseGroup,
         },
         coordinates: segment.segmentCoordinates
       })
@@ -101,7 +101,7 @@ function rawCoordinatesToPointGroups(rawCoordinates: RawCoordinates) {
               party: false
             },
             groups: {
-              response: responseGroup.join("-"),
+              response: responseGroup,
               wave: wave
             },
             coordinates: segment.segmentCoordinates
@@ -119,8 +119,8 @@ function rawCoordinatesToPointGroups(rawCoordinates: RawCoordinates) {
             party: true
           },
           groups: {
-            response: responseGroup.join("-"),
-            party: pg.join("-")
+            response: responseGroup,
+            party: pg
           },
           coordinates: segment.segmentCoordinates
         })
@@ -138,9 +138,9 @@ function rawCoordinatesToPointGroups(rawCoordinates: RawCoordinates) {
                 party: true
               },
               groups: {
-                response: responseGroup.join("-"),
+                response: responseGroup,
                 wave: wave,
-                party: pg.join("-")
+                party: pg
               },
               coordinates: segment.segmentCoordinates
             })
@@ -158,9 +158,9 @@ function rawCoordinatesToPointGroups(rawCoordinates: RawCoordinates) {
       segments: {
         view: RequestedView,
         groups?: {
-          response: string,
+          response: string[],
           wave?: number,
-          party?: string
+          party?: string[]
         },
         coordinates: SegmentCoordinates
       }[],
