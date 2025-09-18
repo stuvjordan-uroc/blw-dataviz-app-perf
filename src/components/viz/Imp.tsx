@@ -83,6 +83,8 @@ export default function Imp({
         coordinatesLoading={coordinates.isLoading}
         vizWidth={layoutConfig.vizWidth}
         vizHeight={canvasHeight}
+        waveHeight={layoutConfig.waveHeight}
+        labelHeight={layoutConfig.labelHeight}
         canvasRefsCallBackFactory={canvasRefsCallBackFactory}
         canvasMap={canvasMap}
         drawViewHandler={view.drawView}

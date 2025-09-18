@@ -1,7 +1,7 @@
 //css
 import "./PercentageLabel.css";
 //hooks
-import useLabelDimensions from "../../../hooks/useLabelDimensions";
+import { useSegmentLabelDimensions } from "../../../hooks/useLabelDimensions";
 //types
 import type { RequestedView } from "../../../hooks/use-view";
 import type { SegmentCoordinates } from "../../../../build-data";
@@ -20,7 +20,7 @@ export default function PercentageLabel({
     proportion: number;
   };
 }) {
-  const [labelDimensions, labelRef] = useLabelDimensions(segment);
+  const [labelDimensions, labelRef] = useSegmentLabelDimensions(segment);
   return (
     <div
       ref={labelRef}

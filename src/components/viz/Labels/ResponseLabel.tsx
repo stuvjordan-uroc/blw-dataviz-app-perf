@@ -3,7 +3,7 @@ import "./ResponseLabel.css";
 //types
 import type { RequestedView } from "../../../hooks/use-view";
 import type { SegmentCoordinates } from "../../../../build-data";
-import useLabelDimensions from "../../../hooks/useLabelDimensions";
+import { useSegmentLabelDimensions } from "../../../hooks/useLabelDimensions";
 
 /*
 DESIGN:
@@ -28,7 +28,7 @@ export default function ResponseLabel({
     proportion: number;
   };
 }) {
-  const [labelDimensions, labelRef] = useLabelDimensions(segment);
+  const [labelDimensions, labelRef] = useSegmentLabelDimensions(segment);
   return (
     <div
       ref={labelRef}

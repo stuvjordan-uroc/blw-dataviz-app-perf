@@ -16,6 +16,8 @@ export default function ImpVizArray({
   coordinatesLoading,
   vizWidth,
   vizHeight,
+  waveHeight,
+  labelHeight,
   canvasRefsCallBackFactory,
   canvasMap,
   drawViewHandler,
@@ -28,6 +30,8 @@ export default function ImpVizArray({
   coordinatesLoading: boolean;
   vizWidth: number;
   vizHeight: number;
+  waveHeight: number;
+  labelHeight: number;
   canvasRefsCallBackFactory: (
     impVarName: string
   ) => (node: HTMLCanvasElement) => () => void;
@@ -85,7 +89,9 @@ export default function ImpVizArray({
           <div>{questionText}</div>
           <div
             className="impvar-canvas-container"
-            style={{ width: vizWidth + "px" }}
+            style={{
+              width: vizWidth + "px",
+            }}
           >
             {coordinates.data && coordinates.data.get(varName) && (
               <Labels
@@ -98,6 +104,8 @@ export default function ImpVizArray({
                   requestedView,
                   coordinates.data.get(varName)!.segments
                 )}
+                waveHeight={waveHeight}
+                labelHeight={labelHeight}
               />
             )}
             {(imagesLoading || coordinatesLoading) && (
