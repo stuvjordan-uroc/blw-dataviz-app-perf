@@ -5,7 +5,7 @@
         0,
         768
       ],
-      "vizWidth": 360,
+      "vizWidth": 300,
       "waveHeight": 90,
       "pointRadius": 3,
       "responseGap": 10,
@@ -21,7 +21,7 @@
       "waveHeight": 90,
       "pointRadius": 4,
       "responseGap": 12,
-      "partyGap": 6.75,
+      "partyGap": 16,
       "labelHeight": 30
     },
     "large": {
@@ -31,9 +31,9 @@
       ],
       "vizWidth": 900,
       "waveHeight": 90,
-      "pointRadius": 6,
-      "responseGap": 18,
-      "partyGap": 6.75,
+      "pointRadius": 4,
+      "responseGap": 12,
+      "partyGap": 24,
       "labelHeight": 30
     },
     "xLarge": {
@@ -41,11 +41,11 @@
         1440,
         5000
       ],
-      "vizWidth": 1250,
+      "vizWidth": 900,
       "waveHeight": 90,
-      "pointRadius": 3,
+      "pointRadius": 4,
       "responseGap": 12,
-      "partyGap": 6.75,
+      "partyGap": 24,
       "labelHeight": 30
     }
   }

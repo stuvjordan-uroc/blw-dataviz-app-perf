@@ -9,6 +9,7 @@ input {
   flex: 1 1 auto;
   overflow: hidden;
   width: 100%;
+  max-width: 1200px;
   height: 100%;
   background-color: var(--blw-gray000);
   border: 2px solid var(--blw-gray900);

@@ -21,10 +21,16 @@
   top: 0;
   width: 100%;
   color: var(--blw-gray100);
-  font-size: 1.3rem;
+  font-size: 1rem;
   font-style: italic;
   font-weight: 500;
   padding-left: 1rem;
   background: hsl(188, 53, 27, 1);
   z-index: 99;
+}
+
+@media (760px <=width) {
+  .impvar-question {
+    font-size: 1.3rem;
+  }
 }

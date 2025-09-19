@@ -23,7 +23,7 @@ export default function VizTabs() {
   */
   const layout = useInnerWidth();
   return (
-    <Tabs.Root className="viztabs-root">
+    <Tabs.Root className="viztabs-root" defaultValue="imp">
       <Tabs.List className="viztabs-tablist">
         <Tabs.Trigger className="viztabs-trigger" value="imp">
           Importance

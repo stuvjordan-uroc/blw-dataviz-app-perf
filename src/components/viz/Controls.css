@@ -1,8 +1,8 @@
 input[type="checkbox"] {
   all: set;
   border: 2px solid black;
-  width: 1em;
-  height: 1em;
+  width: 0.9rem;
+  height: 0.9rem;
   color: black;
   display: inline;
 }
@@ -16,13 +16,24 @@ input[type="checkbox"]:checked {
   flex-direction: row;
   align-items: center;
   justify-content: start;
-  padding: 0.25rem 0.1rem;
+  margin-top: 0.2rem;
   margin-left: 0.5rem;
 }
 
 .controls-label {
   width: 12rem;
   margin-left: 0.5rem;
-  font-size: 1.2rem;
+  font-size: 0.8rem;
   color: var(--blw-whale900)
+}
+
+@media (760px <=width) {
+  .controls-label {
+    font-size: 1.2rem;
+  }
+
+  input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+  }
 }
