@@ -1,4 +1,13 @@
 .imp-viz-root {
   overflow: clip;
   height: 100%;
+  background: linear-gradient(0deg, var(--blw-whale) 5%, var(--color-brand) 8%, hsl(192, 7%, 40%) 10%, var(--blw-whale) 70%, hsl(194, 25%, 75%));
+}
+
+.imp-prefix {
+  padding: 0.5rem;
+  font-size: 1.25rem;
+  text-align: center;
+  font-weight: 700;
+  color: var(--blw-whale900)
 }

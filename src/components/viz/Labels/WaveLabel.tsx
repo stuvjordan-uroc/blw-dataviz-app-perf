@@ -1,7 +1,7 @@
 //css
 import "./WaveLable.css";
 //hooks
-import { useWaveLabelDimensions } from "../../../hooks/useLabelDimensions";
+import { useLabelDimensions } from "../../../hooks/useLabelDimensions";
 
 //This is janky hardcoding
 //Clean up after we're done with the sprint
@@ -23,7 +23,7 @@ export default function WaveLabel({
   labelHeight: number;
   waveHeight: number;
 }) {
-  const [labelDimensions, labelRef] = useWaveLabelDimensions();
+  const [labelDimensions, labelRef] = useLabelDimensions();
   return (
     <div
       ref={labelRef}

@@ -8,6 +8,8 @@ import Segment from "./Segment";
 //data
 import dataMeta from "../../../data/data-meta.json";
 import WaveLabel from "./WaveLabel";
+import vizConfig from "../../../config/viz-config.json";
+import PartyLabel from "./PartyLabel";
 
 /*
 DESIGN: 
@@ -20,6 +22,8 @@ export default function Labels({
   segments,
   waveHeight,
   labelHeight,
+  partyGap,
+  vizWidth,
 }: {
   requestedView: RequestedView;
   segments: {
@@ -34,6 +38,8 @@ export default function Labels({
   }[];
   waveHeight: number;
   labelHeight: number;
+  partyGap: number;
+  vizWidth: number;
 }) {
   /*
   Note that this component assumes that the segments
@@ -45,14 +51,25 @@ export default function Labels({
   if (requestedView.response === false) {
     return null;
   }
-  if (requestedView.wave === true) {
-    const waves = dataMeta.waves;
-    return (
-      <>
-        {segments.map((segment, segmentIdx) => (
-          <Segment key={segmentIdx} segment={segment} />
-        ))}
-        {waves.map((wave, waveIdx) => (
+  const waves = dataMeta.waves;
+  const partyGroups = vizConfig.partyGroups;
+  const totalVizHeight =
+    labelHeight + (waveHeight + labelHeight) * waves.length;
+  const pointsHeight = requestedView.wave
+    ? totalVizHeight - 2 * labelHeight
+    : waves.length * waveHeight;
+  const pointsBottomTop = requestedView.wave
+    ? labelHeight + pointsHeight
+    : (totalVizHeight - pointsHeight) / 2 + pointsHeight;
+  const partyGroupWidth =
+    (vizWidth - (partyGroups.length - 1) * partyGap) / partyGroups.length;
+  return (
+    <>
+      {segments.map((segment, segmentIdx) => (
+        <Segment key={segmentIdx} segment={segment} />
+      ))}
+      {requestedView.wave &&
+        waves.map((wave, waveIdx) => (
           <WaveLabel
             key={waveIdx}
             wave={wave}
@@ -61,12 +78,17 @@ export default function Labels({
             waveHeight={waveHeight}
           />
         ))}
-      </>
-    );
-  }
-  //this view is not unsplit and not by wave,
-  //so it's either byResponse or byResponseAndParty
-  return segments.map((segment, segmentIdx) => (
-    <Segment key={segmentIdx} segment={segment} />
-  ));
+      {requestedView.party &&
+        partyGroups.map((pg, pgIdx) => (
+          <PartyLabel
+            key={pgIdx}
+            partyGap={partyGap}
+            partyGroup={pg}
+            partyGroupIdx={pgIdx}
+            partyGroupWidth={partyGroupWidth}
+            pointsBottomTop={pointsBottomTop}
+          />
+        ))}
+    </>
+  );
 }

@@ -66,6 +66,9 @@ export default function Imp({
 
   return (
     <div className="imp-viz-root">
+      <div className="imp-prefix">
+        How important are these characteristics for democratic government?
+      </div>
       {canvasesReady && coordinates.data !== null && images.data !== null && (
         <Controls
           requestedView={view.requestedView}
@@ -85,6 +88,7 @@ export default function Imp({
         vizHeight={canvasHeight}
         waveHeight={layoutConfig.waveHeight}
         labelHeight={layoutConfig.labelHeight}
+        partyGap={layoutConfig.partyGap}
         canvasRefsCallBackFactory={canvasRefsCallBackFactory}
         canvasMap={canvasMap}
         drawViewHandler={view.drawView}

@@ -6,9 +6,26 @@
 .impvar-display-root {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: end;
+  padding-right: 1rem;
+  margin-left: 0rem;
+  margin-right: 0rem;
+  margin-bottom: 1rem;
 }
 
 .impvar-canvas-container {
   position: relative;
+}
+
+.impvar-question {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  color: var(--blw-gray100);
+  font-size: 1.3rem;
+  font-style: italic;
+  font-weight: 500;
+  padding-left: 1rem;
+  background: hsl(188, 53, 27, 1);
+  z-index: 99;
 }

@@ -18,6 +18,7 @@ export default function ImpVizArray({
   vizHeight,
   waveHeight,
   labelHeight,
+  partyGap,
   canvasRefsCallBackFactory,
   canvasMap,
   drawViewHandler,
@@ -32,6 +33,7 @@ export default function ImpVizArray({
   vizHeight: number;
   waveHeight: number;
   labelHeight: number;
+  partyGap: number;
   canvasRefsCallBackFactory: (
     impVarName: string
   ) => (node: HTMLCanvasElement) => () => void;
@@ -85,8 +87,16 @@ export default function ImpVizArray({
   return (
     <div ref={arrayContainerRef} className="imp-viz-array">
       {varsAndQs.map(({ varName, questionText }) => (
-        <div key={varName} className="impvar-display-root">
-          <div>{questionText}</div>
+        <div
+          key={varName}
+          className="impvar-display-root"
+          style={{
+            alignItems: requestedView.wave ? "end" : "center",
+            paddingRight: "1rem",
+            paddingLeft: requestedView.wave ? "0rem" : "1rem",
+          }}
+        >
+          <div className="impvar-question">{questionText}</div>
           <div
             className="impvar-canvas-container"
             style={{
@@ -106,6 +116,8 @@ export default function ImpVizArray({
                 )}
                 waveHeight={waveHeight}
                 labelHeight={labelHeight}
+                partyGap={partyGap}
+                vizWidth={vizWidth}
               />
             )}
             {(imagesLoading || coordinatesLoading) && (

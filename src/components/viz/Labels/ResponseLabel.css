@@ -1,9 +1,9 @@
 .response-label {
   text-wrap: nowrap;
-  background-color: hsl(194, 7%, 94%, 0.8);
+  background-color: hsl(188, 53%, 27%, 0.5);
   padding: 0.25rem 0.5rem;
-  color: var(--color-text);
+  color: var(--blw-gray200);
   font-size: 1.2rem;
   border-radius: 1rem;
-  border: 1px solid var(--color-text);
+  border: 1px solid var(--blw-gray900);
 }

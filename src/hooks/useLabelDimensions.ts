@@ -4,7 +4,7 @@ import type { SegmentCoordinates } from "../../build-data";
 //hooks
 import { useState, useRef, useLayoutEffect } from "react";
 
-export function useWaveLabelDimensions() {
+export function useLabelDimensions() {
   //state to track label dimensions so we can center the label on an absolute position
   const [labelDimensions, setLabelDimensions] = useState<{
     width: number;

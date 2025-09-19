@@ -14,18 +14,20 @@ export default function Controls({
     updateViewHandler(viewKey, newVal);
   }
   return (
-    <form>
+    <form className="controls-form">
       {Object.entries(requestedView).map(([splitKey, split], idx) => (
-        <label key={splitKey}>
-          {"Split by " + splitKey}
+        <div key={splitKey} className="controls-row">
           <input
             type="checkbox"
             checked={split}
-            id={splitKey as "response" | "wave" | "party"}
+            id={splitKey}
             disabled={idx > 0 && !requestedView.response}
             onChange={handleChange}
           />
-        </label>
+          <label htmlFor={splitKey} className="controls-label">
+            {"Split by " + splitKey}
+          </label>
+        </div>
       ))}
     </form>
   );

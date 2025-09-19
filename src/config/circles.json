@@ -8,26 +8,26 @@
       [
         "none"
       ],
-      "#72bccf"
+      "#d5c620"
     ],
     [
       [
         "Democrat"
       ],
-      "#0b03fc"
+      "#4fd4fc"
     ],
     [
       [
         "Independent",
         "Other"
       ],
-      "#c203fc"
+      "#b268fd"
     ],
     [
       [
         "Republican"
       ],
-      "#fc0303"
+      "#fd3535"
     ]
   ]
 }

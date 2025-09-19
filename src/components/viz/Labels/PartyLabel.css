@@ -1,7 +1,7 @@
-.wave-label {
+.party-label {
   padding: 0.25rem;
   color: var(--blw-gray300);
   font-size: 1rem;
-  text-align: end;
-  margin-right: 0.5rem;
+  text-align: center;
+  margin-top: 0.5rem;
 }

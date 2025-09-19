@@ -18,16 +18,23 @@ input {
   display: flex;
   flex-direction: row;
   align-items: center;
-  border-bottom: 3px solid var(--blw-gray900);
+
 }
 
 .viztabs-trigger {
-  font-size: 1rem;
+  font-size: 1.2rem;
   flex: 1 0 auto;
   text-align: center;
-  background-color: var(--blw-gray000);
+  background-color: var(--blw-gray400);
   height: 2rem;
   color: var(--color-text);
+  border: 1px solid black;
+}
+
+.viztabs-trigger[data-state="active"] {
+  font-weight: 900;
+  background-color: hsl(194, 25%, 80%);
+  border-bottom-color: hsl(194, 25%, 80%);
 }
 
 .viztabs-trigger::first-child {
