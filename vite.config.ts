@@ -10,6 +10,7 @@ import * as z from "zod";
 import fs from "node:fs";
 import type { CircleConfig } from "./build-pngs";
 import type { Layouts } from "./build-data/functions-and-types/types";
+import legacy from "@vitejs/plugin-legacy";
 
 const impDataPath = "./rawdata/dem_characteristics_importance.gz";
 const pathToPAndCFolder = "./src/data/";
@@ -20,10 +21,14 @@ const pathToIMGFolder = "./public/img/";
 export default defineConfig({
   test: {
     globals: true,
-    environment: "jsdom"
+    environment: "jsdom",
   },
   plugins: [
     react(),
+    legacy({
+      targets: ["defaults", "not IE 11", "safari >=10"],
+      additionalLegacyPolyfills: ["regenerator-runtime/runtime"],
+    }),
     {
       name: "make-imp-data",
       buildStart() {
@@ -180,10 +185,10 @@ export default defineConfig({
                     //path did not exist but now it's been created so we can write to ti
                     fs.writeFile(
                       pathToIMGFolder +
-                      screenSize +
-                      "-" +
-                      pg.join("-") +
-                      ".png",
+                        screenSize +
+                        "-" +
+                        pg.join("-") +
+                        ".png",
                       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                       buffs.pngBuff!,
                       (err: unknown) => {
