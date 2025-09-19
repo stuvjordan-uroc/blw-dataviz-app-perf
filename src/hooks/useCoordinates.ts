@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import type { SegmentViewsUnMapped, PointsMapUnMapped, PointsViews, PAndCUnMapped } from "../../build-data";
+import type { SegmentViewsUnMapped, PointsMapUnMapped, PointsViews } from "../../build-data";
 import type { RequestedView } from "./use-view";
 import type { SegmentCoordinates } from "../../build-data";
 

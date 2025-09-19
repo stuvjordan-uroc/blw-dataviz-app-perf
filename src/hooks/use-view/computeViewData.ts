@@ -1,6 +1,6 @@
 import type { RequestedView } from "./requested-view";
 import { requestedViewToString } from "./requested-view";
-import type { SegmentViewsUnMapped, PointsViews } from "../../../build-data";
+import type { SegmentCoordinates, PointsViews } from "../../../build-data";
 
 export interface ViewData {
   noPartyOpacity: number,
@@ -19,7 +19,16 @@ export interface ViewData {
 export default function computeViewData(
   requestedView: RequestedView,
   coordinateData: Map<string, {
-    segments: SegmentViewsUnMapped;
+    segments: {
+      view: RequestedView;
+      groups?: {
+        response: string[];
+        wave?: number;
+        party?: string[];
+      };
+      coordinates: SegmentCoordinates;
+      proportion: number;
+    }[];
     pointGroups: {
       rg: string[];
       wave: number;
