@@ -9,6 +9,7 @@
   align-items: center;
   margin-right: 0rem;
   margin-bottom: 1rem;
+  position: relative;
 }
 
 .impvar-canvas-container {

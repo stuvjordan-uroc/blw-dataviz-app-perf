@@ -4,6 +4,7 @@ import "./ResponseLabel.css";
 import type { RequestedView } from "../../../hooks/use-view";
 import type { SegmentCoordinates } from "../../../../build-data";
 import { useLabelDimensions } from "../../../hooks/useLabelDimensions";
+import type { MouseEvent } from "react";
 
 /*
 DESIGN:
@@ -16,6 +17,7 @@ only in the row of the segment
 
 export default function ResponseLabel({
   segment,
+  clickHandler,
 }: {
   segment: {
     view: RequestedView;
@@ -27,6 +29,7 @@ export default function ResponseLabel({
     coordinates: SegmentCoordinates;
     proportion: number;
   };
+  clickHandler: (event: MouseEvent) => void;
 }) {
   const [labelDimensions, labelRef] = useLabelDimensions();
   return (
@@ -44,6 +47,7 @@ export default function ResponseLabel({
             labelDimensions.width / 2
           ).toString() + "px",
       }}
+      onClick={clickHandler}
     >
       {segment.groups?.response.join(" or ") ?? "  "}
     </div>

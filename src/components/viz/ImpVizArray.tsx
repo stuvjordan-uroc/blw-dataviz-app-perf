@@ -50,6 +50,8 @@ export default function ImpVizArray({
   coordinates: CoordinatesState;
 }) {
   const arrayContainerRef = useRef<null | HTMLDivElement>(null);
+  //array of refs for the impvar-display root elements
+  const impVarRootRefs = useRef<null | Map<string, HTMLDivElement>>(null);
   //this is the cludge for the intersection observer not working
   //when you get it fixed, delete it
   useEffect(() => {
@@ -86,7 +88,7 @@ export default function ImpVizArray({
   }
   return (
     <div ref={arrayContainerRef} className="imp-viz-array">
-      {varsAndQs.map(({ varName, questionText }) => (
+      {varsAndQs.map(({ varName, questionText }, varIdx) => (
         <div
           key={varName}
           className="impvar-display-root"
@@ -94,6 +96,12 @@ export default function ImpVizArray({
             alignItems: requestedView.wave ? "end" : "center",
             paddingRight: "1rem",
             paddingLeft: requestedView.wave ? "0rem" : "1rem",
+          }}
+          ref={(node: HTMLDivElement) => {
+            if (!impVarRootRefs.current) {
+              impVarRootRefs.current = new Map();
+            }
+            impVarRootRefs.current.set(varName, node);
           }}
         >
           <div className="impvar-question">{questionText}</div>
@@ -118,6 +126,11 @@ export default function ImpVizArray({
                 labelHeight={labelHeight}
                 partyGap={partyGap}
                 vizWidth={vizWidth}
+                vizRootNode={
+                  (impVarRootRefs.current && impVarRootRefs.current.get(varName)
+                    ? impVarRootRefs.current.get(varName)
+                    : document.body) as HTMLElement
+                }
               />
             )}
             {(imagesLoading || coordinatesLoading) && (

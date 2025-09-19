@@ -5,9 +5,11 @@ import { useSegmentLabelDimensions } from "../../../hooks/useLabelDimensions";
 //types
 import type { RequestedView } from "../../../hooks/use-view";
 import type { SegmentCoordinates } from "../../../../build-data";
+import type { MouseEvent } from "react";
 
 export default function PercentageLabel({
   segment,
+  clickHandler,
 }: {
   segment: {
     view: RequestedView;
@@ -19,6 +21,7 @@ export default function PercentageLabel({
     coordinates: SegmentCoordinates;
     proportion: number;
   };
+  clickHandler: (event: MouseEvent) => void;
 }) {
   const [labelDimensions, labelRef] = useSegmentLabelDimensions(segment);
   return (
@@ -40,6 +43,7 @@ export default function PercentageLabel({
             labelDimensions.width / 2
           ).toString() + "px",
       }}
+      onClick={clickHandler}
     >
       {Math.round(segment.proportion * 100).toString() + "%"}
     </div>

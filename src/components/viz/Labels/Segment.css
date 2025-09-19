@@ -1,0 +1,22 @@
+.segment-details-overlay {
+  background-color: transparent;
+  position: fixed;
+  inset: 0;
+}
+
+.segment-details-dialog {
+  position: absolute;
+  top: 3rem;
+  right: 1rem;
+  background-color: var(--blw-gray200);
+  width: 15rem;
+  height: fit-content;
+  padding: 1rem;
+  border-radius: 1rem;
+}
+
+.segment-details-close-button {
+  position: absolute;
+  top: 0.2rem;
+  right: 0.2rem;
+}

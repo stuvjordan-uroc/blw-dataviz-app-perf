@@ -24,6 +24,7 @@ export default function Labels({
   labelHeight,
   partyGap,
   vizWidth,
+  vizRootNode,
 }: {
   requestedView: RequestedView;
   segments: {
@@ -40,6 +41,7 @@ export default function Labels({
   labelHeight: number;
   partyGap: number;
   vizWidth: number;
+  vizRootNode: HTMLElement;
 }) {
   /*
   Note that this component assumes that the segments
@@ -66,7 +68,7 @@ export default function Labels({
   return (
     <>
       {segments.map((segment, segmentIdx) => (
-        <Segment key={segmentIdx} segment={segment} />
+        <Segment key={segmentIdx} segment={segment} vizRootNode={vizRootNode} />
       ))}
       {requestedView.wave &&
         waves.map((wave, waveIdx) => (
