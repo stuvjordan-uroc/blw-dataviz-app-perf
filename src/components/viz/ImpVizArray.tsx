@@ -137,6 +137,9 @@ export default function ImpVizArray({
               <Spinner canvasWidth={vizWidth} canvasHeight={vizHeight} />
             )}
             <canvas
+              style={{
+                zIndex: "999",
+              }}
               width={vizWidth}
               height={vizHeight}
               ref={canvasRefsCallBackFactory(varName)}
@@ -145,6 +148,15 @@ export default function ImpVizArray({
           </div>
         </div>
       ))}
+      {/* extra div to pad the bottom of the array of canvases so the last one can be fully scrolled into view */}
+      <div
+        className="impvar-display-root"
+        style={{
+          width: "100%",
+          height:
+            (labelHeight + (labelHeight + waveHeight) * 3).toString() + "px",
+        }}
+      ></div>
     </div>
   );
 }
