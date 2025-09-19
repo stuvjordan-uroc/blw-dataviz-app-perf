@@ -8,7 +8,7 @@ import Segment from "./Segment";
 //data
 import dataMeta from "../../../data/data-meta.json";
 import WaveLabel from "./WaveLabel";
-import vizConfig from "../../../config/viz-config.json";
+import vizConfig from "../../../config/viz-config-imp.json";
 import PartyLabel from "./PartyLabel";
 
 /*

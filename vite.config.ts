@@ -3,7 +3,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import { buildData } from "./build-data";
 import layouts from "./src/config/layouts.json";
-import vizConfig from "./src/config/viz-config.json";
+import vizConfigImp from "./src/config/viz-config-imp.json";
 import circleConfig from "./src/config/circles.json";
 import buildPNGs from "./build-pngs";
 import * as z from "zod";
@@ -16,6 +16,7 @@ const impDataPath = "./rawdata/dem_characteristics_importance.gz";
 const pathToPAndCFolder = "./src/data/";
 const pathToCoordinateDataFolder = "./public/coordinates/";
 const pathToIMGFolder = "./public/img/";
+const perfDataPath = "./rawdata/dem_characteristics_perf.gz";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -29,6 +30,43 @@ export default defineConfig({
       targets: ["defaults", "not IE 11", "safari >=10"],
       additionalLegacyPolyfills: ["regenerator-runtime/runtime"],
     }),
+    {
+      name: "make-perf-data",
+      buildStart() {
+        //validate layout from layouts.json
+        const LayoutSchema = z.strictObject({
+          screenWidthRange: z.array(z.number()).length(2),
+          vizWidth: z.number(),
+          waveHeight: z.number(),
+          pointRadius: z.number(),
+          responseGap: z.number(),
+          partyGap: z.number(),
+          labelHeight: z.number(),
+        });
+        const ScreensSchema = z.strictObject({
+          small: LayoutSchema,
+          medium: LayoutSchema,
+          large: LayoutSchema,
+          xLarge: LayoutSchema,
+        });
+        const Layouts = z.object({
+          imp: ScreensSchema,
+        });
+        const perfLayouts = Layouts.safeParse(layouts);
+        if (!perfLayouts.success) {
+          console.log(
+            "WARNING: Format of layouts.json invalid.  Did not build data"
+          );
+          console.log(perfLayouts.error);
+        } else {
+          const perfVizData = buildData(
+            perfDataPath,
+            perfLayouts.data.imp,
+            vizConfigImp
+          );
+        }
+      },
+    },
     {
       name: "make-imp-data",
       buildStart() {
@@ -61,7 +99,7 @@ export default defineConfig({
           const impVizData = buildData(
             impDataPath,
             impLayouts.data.imp,
-            vizConfig
+            vizConfigImp
           );
           if (impVizData) {
             //Write a file that maps each impVar to its proportions and counts
