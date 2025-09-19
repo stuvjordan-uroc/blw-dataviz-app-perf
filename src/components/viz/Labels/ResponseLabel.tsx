@@ -40,9 +40,14 @@ export default function ResponseLabel({
       //positioning
       style={{
         position: "absolute",
-        top: (-labelDimensions.height * 0.5).toString() + "px",
+        top:
+          (
+            segment.coordinates.topLeftY -
+            labelDimensions.height * 0.5
+          ).toString() + "px",
         left:
           (
+            segment.coordinates.topLeftX +
             segment.coordinates.width / 2 -
             labelDimensions.width / 2
           ).toString() + "px",

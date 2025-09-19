@@ -34,11 +34,13 @@ export default function PercentageLabel({
         position: "absolute",
         top:
           (
+            segment.coordinates.topLeftY +
             segment.coordinates.height * 0.5 -
             labelDimensions.height * 0.5
           ).toString() + "px",
         left:
           (
+            segment.coordinates.topLeftX +
             segment.coordinates.width / 2 -
             labelDimensions.width / 2
           ).toString() + "px",

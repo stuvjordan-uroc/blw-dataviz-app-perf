@@ -9,7 +9,7 @@ import ResponseLabel from "./ResponseLabel";
 import PercentageLabel from "./PercentageLabel";
 import * as Dialog from "@radix-ui/react-dialog";
 //hooks
-import { useState } from "react";
+import { useState, useRef, useLayoutEffect } from "react";
 
 function detailsText(
   segmentGroups: {
@@ -93,26 +93,27 @@ export default function Segment({
     ? detailsText(segment.groups, segment.proportion)
     : "";
   return (
-    <div
-      //appearance is specified in the Segment.css under className "segment-rectangle"
-      className="segment-rectangle"
-      //positioning
-      style={{
-        position: "absolute",
-        top: segment.coordinates.topLeftY.toString() + "px",
-        left: segment.coordinates.topLeftX.toString() + "px",
-        width: segment.coordinates.width.toString() + "px",
-        height: segment.coordinates.height.toString() + "px",
-        border:
-          "1px solid " +
-          (detailsAreVisible ? "var(--blw-gray100)" : "transparent"),
-      }}
-      onClick={(event: MouseEvent) => {
-        event.preventDefault();
-        //tap on the segment toggles the label
-        setLabelsAreVisible((prevLabelsAreVisible) => !prevLabelsAreVisible);
-      }}
-    >
+    <>
+      <div
+        //appearance is specified in the Segment.css under className "segment-rectangle"
+        className="segment-rectangle"
+        //positioning
+        style={{
+          position: "absolute",
+          top: segment.coordinates.topLeftY.toString() + "px",
+          left: segment.coordinates.topLeftX.toString() + "px",
+          width: segment.coordinates.width.toString() + "px",
+          height: segment.coordinates.height.toString() + "px",
+          border:
+            "1px solid " +
+            (detailsAreVisible ? "var(--blw-gray100)" : "transparent"),
+        }}
+        onClick={(event: MouseEvent) => {
+          event.preventDefault();
+          //tap on the segment toggles the label
+          setLabelsAreVisible((prevLabelsAreVisible) => !prevLabelsAreVisible);
+        }}
+      ></div>
       {labelsAreVisible && (
         <ResponseLabel
           segment={segment}
@@ -191,6 +192,6 @@ export default function Segment({
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>
-    </div>
+    </>
   );
 }

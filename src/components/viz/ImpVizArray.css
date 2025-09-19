@@ -15,6 +15,7 @@
 .impvar-canvas-container {
   position: relative;
   margin: auto;
+  width: fit-content;
 }
 
 .impvar-question {
