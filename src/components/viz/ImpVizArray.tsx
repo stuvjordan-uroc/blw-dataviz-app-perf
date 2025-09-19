@@ -88,7 +88,7 @@ export default function ImpVizArray({
   }
   return (
     <div ref={arrayContainerRef} className="imp-viz-array">
-      {varsAndQs.map(({ varName, questionText }, varIdx) => (
+      {varsAndQs.map(({ varName, questionText }) => (
         <div
           key={varName}
           className="impvar-display-root"

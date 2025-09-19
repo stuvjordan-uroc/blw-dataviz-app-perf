@@ -9,7 +9,7 @@ import ResponseLabel from "./ResponseLabel";
 import PercentageLabel from "./PercentageLabel";
 import * as Dialog from "@radix-ui/react-dialog";
 //hooks
-import { useState, useRef, useLayoutEffect } from "react";
+import { useState } from "react";
 
 function detailsText(
   segmentGroups: {
