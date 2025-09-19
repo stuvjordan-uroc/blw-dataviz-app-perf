@@ -18,14 +18,14 @@
   width: 100vw;
 }
 
-@media (900px < width <=1200px) {
+/* @media (760px <=width < 1030px) {
   .app {
-    width: 899px;
+    width: 100%;
   }
 }
 
-@media (1200px < width) {
+@media (1030px <=width) {
   .app {
     width: 1150px;
   }
-}
+} */

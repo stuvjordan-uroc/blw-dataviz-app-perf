@@ -6,15 +6,14 @@
 .impvar-display-root {
   display: flex;
   flex-direction: column;
-  align-items: end;
-  padding-right: 1rem;
-  margin-left: 0rem;
+  align-items: center;
   margin-right: 0rem;
   margin-bottom: 1rem;
 }
 
 .impvar-canvas-container {
   position: relative;
+  margin: auto;
 }
 
 .impvar-question {

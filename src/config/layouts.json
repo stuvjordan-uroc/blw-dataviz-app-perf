@@ -8,16 +8,16 @@
       "vizWidth": 360,
       "waveHeight": 90,
       "pointRadius": 3,
-      "responseGap": 12,
-      "partyGap": 6.75,
+      "responseGap": 10,
+      "partyGap": 14,
       "labelHeight": 30
     },
     "medium": {
       "screenWidthRange": [
-        768,
-        1024
+        760,
+        1030
       ],
-      "vizWidth": 760,
+      "vizWidth": 660,
       "waveHeight": 90,
       "pointRadius": 4,
       "responseGap": 12,

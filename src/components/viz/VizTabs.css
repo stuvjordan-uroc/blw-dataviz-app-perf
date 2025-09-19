@@ -33,8 +33,8 @@ input {
 
 .viztabs-trigger[data-state="active"] {
   font-weight: 900;
-  background-color: hsl(194, 25%, 80%);
-  border-bottom-color: hsl(194, 25%, 80%);
+  background-color: hsl(194, 25%, 75%);
+  border-bottom-color: hsl(194, 25%, 75%);
 }
 
 .viztabs-trigger::first-child {
@@ -43,6 +43,7 @@ input {
 
 .viztabs-trigger::first-child {
   border-right: 2px solid var(--blw-gray900);
+  border-left: 0px solid hsl(194, 25%, 75%);
 }
 
 .viztabs-trigger::last-child {
