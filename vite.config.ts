@@ -4,6 +4,7 @@ import react from "@vitejs/plugin-react-swc";
 import { buildData } from "./build-data";
 import layouts from "./src/config/layouts.json";
 import vizConfigImp from "./src/config/viz-config-imp.json";
+import vizConfigPerf from "./src/config/viz-config-perf.json";
 import circleConfig from "./src/config/circles.json";
 import buildPNGs from "./build-pngs";
 import * as z from "zod";
@@ -14,7 +15,8 @@ import legacy from "@vitejs/plugin-legacy";
 
 const impDataPath = "./rawdata/dem_characteristics_importance.gz";
 const pathToPAndCFolder = "./src/data/";
-const pathToCoordinateDataFolder = "./public/coordinates/";
+const pathToCoordinateDataFolderImp = "./public/coordinates/imp";
+const pathToCoordinateDataFolderPerf = "./public/coordinates/perf";
 const pathToIMGFolder = "./public/img/";
 const perfDataPath = "./rawdata/dem_characteristics_perf.gz";
 
@@ -62,8 +64,114 @@ export default defineConfig({
           const perfVizData = buildData(
             perfDataPath,
             perfLayouts.data.imp,
-            vizConfigImp
+            vizConfigPerf,
+            "perf"
           );
+          if (perfVizData) {
+            //Write a file that maps each characteristics to its proportions and counts
+            fs.mkdir(pathToPAndCFolder, { recursive: true }, (err) => {
+              if (err) {
+                if (err.code !== "EEXIST") {
+                  throw new Error(
+                    `One or more of the directories in the path ${pathToPAndCFolder} does not exist, but call to fs.mkdir failed.`
+                  );
+                } else {
+                  //path already exists, so we can write to it
+                  fs.writeFile(
+                    pathToPAndCFolder + "p-and-c-perf.json",
+                    JSON.stringify(perfVizData.pAndC),
+                    (err: unknown) => {
+                      if (err) {
+                        console.error(
+                          "failed to write p-and-c-perf.json to src-data folder",
+                          err
+                        );
+                      }
+                    }
+                  );
+                }
+              } else {
+                //path didn't exist but now it's been created, so we can write to it
+                fs.writeFile(
+                  pathToPAndCFolder + "p-and-c-perf.json",
+                  JSON.stringify(perfVizData.pAndC),
+                  (err: unknown) => {
+                    if (err) {
+                      console.error(
+                        "failed to write p-and-c-imp.json to src-data folder",
+                        err
+                      );
+                    }
+                  }
+                );
+              }
+            });
+            //write the metadata to the same folder
+            fs.writeFile(
+              pathToPAndCFolder + "data-meta-perf.json",
+              JSON.stringify(perfVizData.dataMeta),
+              (err: unknown) => {
+                if (err) {
+                  console.error(
+                    "failed to write data-meta-perf.json to src-data folder",
+                    err
+                  );
+                }
+              }
+            );
+            //For each screen size, write ONE file that maps each impVar to the segments and points for that impVar at that screensize
+            fs.mkdir(
+              pathToCoordinateDataFolderPerf,
+              { recursive: true },
+              (err) => {
+                if (err) {
+                  if (err.code !== "EEXIST") {
+                    throw new Error(
+                      `One or more of the directories in the path ${pathToCoordinateDataFolderPerf} does not exist, but call to fs.mkdir failed.`
+                    );
+                  } else {
+                    //path already exists, so we can write to it
+                    Object.entries(perfVizData.viz).forEach(
+                      ([screenSize, viz]) => {
+                        fs.writeFile(
+                          pathToCoordinateDataFolderPerf +
+                            `viz-${screenSize}.json`,
+                          JSON.stringify(viz),
+                          (err: unknown) => {
+                            if (err) {
+                              console.error(
+                                `failed to write viz-${screenSize}.json to imp coordinates folder`,
+                                err
+                              );
+                            }
+                          }
+                        );
+                      }
+                    );
+                  }
+                } else {
+                  //path did not exist, but now it's been created, so we can write to it.
+                  Object.entries(perfVizData.viz).forEach(
+                    ([screenSize, viz]) => {
+                      fs.writeFile(
+                        pathToCoordinateDataFolderPerf +
+                          `viz-${screenSize}.json`,
+                        JSON.stringify(viz),
+                        (err: unknown) => {
+                          if (err) {
+                            console.error(
+                              `failed to write viz-${screenSize}.json to imp coordinates folder`,
+                              err
+                            );
+                          }
+                        }
+                      );
+                    }
+                  );
+                }
+              }
+            );
+          }
         }
       },
     },
@@ -99,7 +207,8 @@ export default defineConfig({
           const impVizData = buildData(
             impDataPath,
             impLayouts.data.imp,
-            vizConfigImp
+            vizConfigImp,
+            "perf"
           );
           if (impVizData) {
             //Write a file that maps each impVar to its proportions and counts
@@ -112,12 +221,12 @@ export default defineConfig({
                 } else {
                   //path already exists, so we can write to it
                   fs.writeFile(
-                    pathToPAndCFolder + "p-and-c.json",
+                    pathToPAndCFolder + "p-and-c-imp.json",
                     JSON.stringify(impVizData.pAndC),
                     (err: unknown) => {
                       if (err) {
                         console.error(
-                          "failed to write pAndC.json to src-data folder",
+                          "failed to write p-and-c-imp.json to src-data folder",
                           err
                         );
                       }
@@ -127,12 +236,12 @@ export default defineConfig({
               } else {
                 //path didn't exist but now it's been created, so we can write to it
                 fs.writeFile(
-                  pathToPAndCFolder + "p-and-c.json",
+                  pathToPAndCFolder + "p-and-c-imp.json",
                   JSON.stringify(impVizData.pAndC),
                   (err: unknown) => {
                     if (err) {
                       console.error(
-                        "failed to write pAndC.json to src-data folder",
+                        "failed to write p-and-c-imp.json to src-data folder",
                         err
                       );
                     }
@@ -142,35 +251,59 @@ export default defineConfig({
             });
             //write the metadata to the same folder
             fs.writeFile(
-              pathToPAndCFolder + "data-meta.json",
+              pathToPAndCFolder + "data-meta-imp.json",
               JSON.stringify(impVizData.dataMeta),
               (err: unknown) => {
                 if (err) {
                   console.error(
-                    "failed to write data-meta.json to src-data folder",
+                    "failed to write data-meta-imp.json to src-data folder",
                     err
                   );
                 }
               }
             );
             //For each screen size, write ONE file that maps each impVar to the segments and points for that impVar at that screensize
-            fs.mkdir(pathToCoordinateDataFolder, { recursive: true }, (err) => {
-              if (err) {
-                if (err.code !== "EEXIST") {
-                  throw new Error(
-                    `One or more of the directories in the path ${pathToPAndCFolder} does not exist, but call to fs.mkdir failed.`
-                  );
+            fs.mkdir(
+              pathToCoordinateDataFolderImp,
+              { recursive: true },
+              (err) => {
+                if (err) {
+                  if (err.code !== "EEXIST") {
+                    throw new Error(
+                      `One or more of the directories in the path ${pathToCoordinateDataFolderImp} does not exist, but call to fs.mkdir failed.`
+                    );
+                  } else {
+                    //path already exists, so we can write to it
+                    Object.entries(impVizData.viz).forEach(
+                      ([screenSize, viz]) => {
+                        fs.writeFile(
+                          pathToCoordinateDataFolderImp +
+                            `viz-${screenSize}.json`,
+                          JSON.stringify(viz),
+                          (err: unknown) => {
+                            if (err) {
+                              console.error(
+                                `failed to write viz-${screenSize}.json to imp coordinates folder`,
+                                err
+                              );
+                            }
+                          }
+                        );
+                      }
+                    );
+                  }
                 } else {
-                  //path already exists, so we can write to it
+                  //path did not exist, but now it's been created, so we can write to it.
                   Object.entries(impVizData.viz).forEach(
                     ([screenSize, viz]) => {
                       fs.writeFile(
-                        pathToCoordinateDataFolder + `viz-${screenSize}.json`,
+                        pathToCoordinateDataFolderImp +
+                          `viz-${screenSize}.json`,
                         JSON.stringify(viz),
                         (err: unknown) => {
                           if (err) {
                             console.error(
-                              `failed to write viz-${screenSize}.json to coordinates folder`,
+                              `failed to write viz-${screenSize}.json to imp coordinates folder`,
                               err
                             );
                           }
@@ -179,24 +312,8 @@ export default defineConfig({
                     }
                   );
                 }
-              } else {
-                //path did not exist, but now it's been created, so we can write to it.
-                Object.entries(impVizData.viz).forEach(([screenSize, viz]) => {
-                  fs.writeFile(
-                    pathToCoordinateDataFolder + `viz-${screenSize}.json`,
-                    JSON.stringify(viz),
-                    (err: unknown) => {
-                      if (err) {
-                        console.error(
-                          `failed to write viz-${screenSize}.json to coordinates folder`,
-                          err
-                        );
-                      }
-                    }
-                  );
-                });
               }
-            });
+            );
           }
         }
       },

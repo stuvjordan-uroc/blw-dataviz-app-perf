@@ -4,7 +4,7 @@ import type {
   Layout,
   SegmentViews,
   SegmentViewsUnMapped,
-  PointsMapUnMapped
+  PointsMapUnMapped,
 } from "./types.ts";
 import proportionsAndCounts from "./proportions-and-counts.ts";
 import makePointsMap from "./points-map/make-points-map.ts";
@@ -15,21 +15,22 @@ import {
 import { unMapSegmentViews, unMapPointsMap } from "./unmap.ts";
 
 export function vizAtImp(
-  impVar: string,
+  char: string,
+  q: "imp" | "perf",
   data: Data,
   vizConfig: VizConfig,
   layout: Layout
 ): {
-  segments: SegmentViewsUnMapped,
-  points: PointsMapUnMapped
+  segments: SegmentViewsUnMapped;
+  points: PointsMapUnMapped;
 } {
-  const pAndC = proportionsAndCounts(impVar, data, vizConfig)
+  const pAndC = proportionsAndCounts(char, q, data, vizConfig);
   const segments: SegmentViews = {
-    unsplit: unSplit(pAndC, layout, data.waves.imp.length),
+    unsplit: unSplit(pAndC, layout, data.waves[q].length),
     expanded: makeSegmentViewsExpanded(
       pAndC,
       layout,
-      data.waves.imp.length,
+      data.waves[q].length,
       vizConfig.partyGroups.length
     ),
     collapsed: {
@@ -39,9 +40,8 @@ export function vizAtImp(
       byResponseAndWaveAndParty: new Map(),
     },
   };
-  return ({
-    segments: unMapSegmentViews(segments),//transform maps to arrays of tuples
-    points: unMapPointsMap(makePointsMap(segments)) //transform maps to arrays of tuples here
-  })
+  return {
+    segments: unMapSegmentViews(segments), //transform maps to arrays of tuples
+    points: unMapPointsMap(makePointsMap(segments)), //transform maps to arrays of tuples here
+  };
 }
-

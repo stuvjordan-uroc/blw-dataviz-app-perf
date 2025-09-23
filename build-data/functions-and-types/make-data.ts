@@ -74,10 +74,6 @@ export default function makeData(rawDataPathString: string) {
         colName: col.colName.replace(/^imp_/, ""),
         colIdx: col.colIdx,
       }));
-    //if (impCols.length < 25) {
-    //  console.log(`WARNING: Could not enough imp columns in raw data at ${rawDataPathString}`)
-    //  return undefined;
-    //}
     const perfCols = rawData.columns
       .map((col, colIdx) => ({
         colName: col,
@@ -88,10 +84,6 @@ export default function makeData(rawDataPathString: string) {
         colName: col.colName.replace(/^perf_/, ""),
         colIdx: col.colIdx,
       }));
-    //if (perfCols.length < 25) {
-    //  console.log(`WARNING: Could not find enough perf columns in raw data at ${rawDataPathString}`)
-    //  return undefined;
-    //}
     const outData = rawData.data.map((row) => ({
       weight: coerceToNumberOrNull(row[weightColumnIndex]),
       pid3: coerceToStringOrNull(row[pid3ColumnIndex]),
@@ -142,15 +134,15 @@ export default function makeData(rawDataPathString: string) {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         perf: [...setOfWavesWithPerf].sort((a, b) => a! - b!),
       },
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       impResponses: new Set(
         impCols
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           .map((impCol) => outData.map((row) => row.imp[impCol.colIdx]!))
           .flat(Infinity) as string[]
       ),
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       perfResponses: new Set(
         perfCols
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           .map((perfCol) => outData.map((row) => row.perf[perfCol.colIdx]!))
           .flat(Infinity) as string[]
       ),

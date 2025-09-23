@@ -2,26 +2,26 @@
   "responseGroups": {
     "collapsed": [
       [
-        "Not relevant",
-        "Beneficial"
+        "Does not meet",
+        "Partly meets"
       ],
       [
-        "Important",
-        "Essential"
+        "Mostly meets",
+        "Fully meets"
       ]
     ],
     "expanded": [
       [
-        "Not relevant"
+        "Does not meet"
       ],
       [
-        "Beneficial"
+        "Partly meets"
       ],
       [
-        "Important"
+        "Mostly meets"
       ],
       [
-        "Essential"
+        "Fully meets"
       ]
     ]
   },
